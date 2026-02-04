@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UnterGrund – Explorer</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      color: #e5e7eb;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      width: 100%;
+      max-width: 480px;
+      padding: 16px 16px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      backdrop-filter: blur(10px);
+    }
+    .logo-text {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+    }
+    .pill-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #22c55e;
+      color: #022c22;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 22px;
+      padding: 22px 18px 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.75);
+      border: 1px solid #1f2937;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .card-sub {
+      font-size: 0.82rem;
+      color: #9ca3af;
+      margin-top: 0;
+      margin-bottom: 12px;
+    }
+    .artist-name {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    .embed-wrapper {
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      background: #020617;
+    }
+    iframe {
+      border: none;
+      width: 100%;
+      height: 152px;
+    }
+    .status-text {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      min-height: 1.2em;
+      margin-bottom: 8px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.9);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+    .modal {
+      background: #020617;
+      border-radius: 18px;
+      border: 1px solid #1f2937;
+      padding: 20px 18px 16px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.8);
+    }
+    .modal h2 {
+      font-size: 1.1rem;
+      margin: 0 0 6px;
+    }
+    .modal p {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      margin: 0 0 12px;
+    }
+    label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      margin-bottom: 12px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid #374151;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 0.9rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px #22c55e33;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .modal-btn {
+      flex: 1;
+      border-radius: 999px;
+      border: none;
+      padding: 9px 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .modal-btn.cancel {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #374151;
+    }
+    .modal-btn.submit {
+      background: #22c55e;
+      color: #022c22;
+    }
+    .modal-status {
+      font-size: 0.78rem;
+      margin-top: 6px;
+      min-height: 1.2em;
+    }
+    .modal-status.err { color: #f97373; }
+    .modal-status.ok { color: #4ade80; }
+
+    @media (min-height: 800px) {
+      .app { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo-text">UnterGrund</div>
+      <button class="pill-btn" onclick="openSubmit()">
+        ➕ Artist vorschlagen
+      </button>
+    </header>
+
+    <div class="card">
+      <div class="card-title">UnterGrund Explorer</div>
+      <p class="card-sub">Deutsche Artists entdecken, die noch unter dem Radar fliegen. Tippe dich durch zufällige Vorschläge.</p>
+
+      <div id="artist-name" class="artist-name">Lade Artist…</div>
+      <div id="embed-wrapper" class="embed-wrapper"></div>
+      <div id="status-text" class="status-text"></div>
+
+      <button class="pill-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="loadNextArtist()">
+        🔁 Nächster Artist
+      </button>
+    </div>
+  </div>
+
+  <div id="submit-modal" class="modal-backdrop">
+    <div class="modal">
+      <h2>Artist vorschlagen</h2>
+      <p>Trage einen deutschen Artist ein, den man entdecken sollte.</p>
+
+      <label for="artist-input">Artist‑Name</label>
+      <input id="artist-input" placeholder="z.B. Doktor Eule" />
+
+      <label for="spotify-input">Spotify‑Artist‑URL</label>
+      <input id="spotify-input" placeholder="https://open.spotify.com/artist/…" />
+
+      <div class="modal-actions">
+        <button class="modal-btn cancel" onclick="closeSubmit()">Abbrechen</button>
+        <button class="modal-btn submit" onclick="submitArtist()">Speichern</button>
+      </div>
+
+      <div id="submit-status" class="modal-status"></div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const ARTISTS_TABLE = "artists";
+
+    let allArtists = [];
+    let seenArtistIds = new Set();
+    let loading = false;
+
+    function randomArtistId() {
+      return "art_" + Math.random().toString(36).substring(2, 10);
+    }
+
+    function spotifyUrlToEmbed(url) {
+      if (!url) return null;
+      let clean = url.split("?")[0];
+      clean = clean.replace("open.spotify.com/intl-de/", "open.spotify.com/");
+      if (!clean.includes("open.spotify.com/artist")) return null;
+      return clean.replace("open.spotify.com/artist", "open.spotify.com/embed/artist");
+    }
+
+    async function loadAllArtists() {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?select=*`,
+        {
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        }
+      );
+
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Artists Load Fehler:", res.status, txt);
+        throw new Error("Supabase Load Fehler: " + res.status);
+      }
+
+      allArtists = await res.json();
+    }
+
+    function pickRandomUnseenArtist() {
+      const unseen = allArtists.filter(a => !seenArtistIds.has(a.id));
+      if (unseen.length === 0) return null;
+      const idx = Math.floor(Math.random() * unseen.length);
+      return unseen[idx];
+    }
+
+    async function loadNextArtist() {
+      if (loading) return;
+      loading = true;
+
+      const nameEl = document.getElementById("artist-name");
+      const statusEl = document.getElementById("status-text");
+      const embedWrapper = document.getElementById("embed-wrapper");
+
+      nameEl.textContent = "Suche nächsten Artist…";
+      statusEl.textContent = "";
+      embedWrapper.innerHTML = "";
+
+      try {
+        if (!allArtists || allArtists.length === 0) {
+          await loadAllArtists();
+        }
+
+        let artist = pickRandomUnseenArtist();
+
+        if (!artist) {
+          await loadAllArtists();
+          seenArtistIds = new Set();
+          artist = pickRandomUnseenArtist();
+        }
+
+        if (!artist) {
+          nameEl.textContent = "Noch keine Artists gespeichert.";
+          return;
+        }
+
+        seenArtistIds.add(artist.id);
+
+        nameEl.textContent = ""|| "";
+        statusEl.textContent = "Tippe auf den Spotify‑Player, um mehr zu hören.";
+
+        const embedUrl = spotifyUrlToEmbed(artist.spotify_url);
+        if (embedUrl) {
+          embedWrapper.innerHTML = `<iframe src="${embedUrl}" allow="encrypted-media"></iframe>`;
+        } else {
+          embedWrapper.innerHTML = `<div style="font-size:0.85rem;color:#f97373;padding:12px;">
+            Kein gültiger Spotify‑Link gespeichert.
+          </div>`;
+        }
+      } catch (err) {
+        console.error("loadNextArtist Fehler:", err);
+        nameEl.textContent = "Fehler beim Laden.";
+        statusEl.textContent = "Bitte später erneut versuchen.";
+      } finally {
+        loading = false;
+      }
+    }
+
+    function openSubmit() {
+      document.getElementById("submit-modal").style.display = "flex";
+      document.getElementById("submit-status").textContent = "";
+      document.getElementById("artist-input").focus();
+    }
+
+    function closeSubmit() {
+      document.getElementById("submit-modal").style.display = "none";
+    }
+
+    async function submitArtist() {
+      const nameInput = document.getElementById("artist-input");
+      const spotifyInput = document.getElementById("spotify-input");
+      const statusEl = document.getElementById("submit-status");
+
+      const manualName = nameInput.value.trim();
+      const spotifyUrl = spotifyInput.value.trim(); // exakt wie eingegeben
+
+      if (!manualName) {
+        statusEl.textContent = "Bitte den Artist‑Namen eingeben.";
+        statusEl.className = "modal-status err";
+        return;
+      }
+
+      if (!spotifyUrl) {
+        statusEl.textContent = "Bitte eine Spotify‑Artist‑URL eingeben.";
+        statusEl.className = "modal-status err";
+        return;
+      }
+
+      statusEl.textContent = "Prüfe, ob der Artist schon existiert…";
+      statusEl.className = "modal-status";
+
+      try {
+        // 1) Erster Schritt: DB abfragen, ob URL schon existiert
+        const checkRes = await fetch(
+          `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?spotify_url=eq.${encodeURIComponent(spotifyUrl)}&select=id`,
+          {
+            headers: {
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!checkRes.ok) {
+          const txt = await checkRes.text();
+          console.error("Check Fehler:", checkRes.status, txt);
+          throw new Error("Supabase Check Fehler: " + checkRes.status);
+        }
+
+        const existing = await checkRes.json();
+        console.log("Existing for", spotifyUrl, existing);
+
+        if (existing.length > 0) {
+          statusEl.textContent = "Dieser Artist ist schon im UnterGrund gespeichert.";
+          statusEl.className = "modal-status err";
+          return;
+        }
+
+        // 2) Nur wenn nichts gefunden → Insert
+        statusEl.textContent = "Speichere Artist…";
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({
+            name: manualName,
+            spotify_url: spotifyUrl
+          })
+        });
+
+        if (!res.ok) {
+          const txt = await res.text();
+          console.error("Insert Fehler:", res.status, txt);
+          if (res.status === 409) {
+            statusEl.textContent = "Dieser Artist existiert bereits (DB‑Constraint).";
+            statusEl.className = "modal-status err";
+            return;
+          }
+          throw new Error("Supabase Insert Fehler: " + res.status);
+        }
+
+        nameInput.value = "";
+        spotifyInput.value = "";
+        statusEl.textContent = "✅ Artist gespeichert! Er erscheint im Explorer.";
+        statusEl.className = "modal-status ok";
+
+        await loadAllArtists();
+      } catch (err) {
+        console.error("submitArtist Fehler:", err);
+        statusEl.textContent = "❌ Fehler: " + (err?.message || "Unbekannter Fehler");
+        statusEl.className = "modal-status err";
+      }
+    }
+
+    window.addEventListener("load", () => {
+      loadNextArtist();
+    });
+  </script>
+</body>
+</html>
