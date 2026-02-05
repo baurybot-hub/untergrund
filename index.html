@@ -203,15 +203,6 @@
       </button>
     </div>
   </div>
-
-<div style="margin-top:16px;font-size:0.7rem;color:#6b7280;text-align:center;">
-  <button onclick="openLegal('impressum')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;margin-right:12px;">
-    Impressum
-  </button>
-  <button onclick="openLegal('datenschutz')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;">
-    Datenschutzhinweise
-  </button>
-</div>
   
   <div id="submit-modal" class="modal-backdrop">
     <div class="modal">
@@ -242,6 +233,16 @@
     <div id="legal-modal-content" style="color:#9ca3af;line-height:1.4;"></div>
   </div>
 </div>
+
+<!-- Footer ganz unten -->
+  <footer style="margin:24px 0 8px;font-size:0.7rem;color:#6b7280;text-align:center;">
+    <button onclick="openLegal('impressum')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;margin-right:12px;">
+      Impressum
+    </button>
+    <button onclick="openLegal('datenschutz')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;">
+      Datenschutzhinweise
+    </button>
+  </footer>
   
   <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
