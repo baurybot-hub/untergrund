@@ -281,11 +281,7 @@ footer {
       return clean.replace("open.spotify.com/artist", "open.spotify.com/embed/artist");
     }
 
-    function isValidSpotifyArtistUrl(url) {
-  if (!url) return false;
-  const clean = url.split("?")[0].trim();
-  return clean.startsWith("https://open.spotify.com/artist/");
-    }
+    
 
     
     async function loadAllArtists() {
