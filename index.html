@@ -204,6 +204,15 @@
     </div>
   </div>
 
+<div style="margin-top:16px;font-size:0.7rem;color:#6b7280;text-align:center;">
+  <button onclick="openLegal('impressum')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;margin-right:12px;">
+    Impressum
+  </button>
+  <button onclick="openLegal('datenschutz')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;">
+    Datenschutzhinweise
+  </button>
+</div>
+  
   <div id="submit-modal" class="modal-backdrop">
     <div class="modal">
       <h2>Artist vorschlagen</h2>
@@ -224,6 +233,16 @@
     </div>
   </div>
 
+<div id="legal-modal-backdrop" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.9);z-index:80;">
+  <div id="legal-modal" style="width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:#020617;border-radius:18px;border:1px solid #1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.78rem;color:#e5e7eb;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+      <h2 id="legal-modal-title" style="font-size:0.9rem;margin:0;">Rechtliches</h2>
+      <button onclick="closeLegal()" style="background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">&times;</button>
+    </div>
+    <div id="legal-modal-content" style="color:#9ca3af;line-height:1.4;"></div>
+  </div>
+</div>
+  
   <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
@@ -425,6 +444,53 @@
       }
     }
 
+const LEGAL_TEXT = {
+  impressum: `
+    <p>Verantwortlich für den Inhalt dieser Seite:</p>
+    <p>
+      [Dein Vor- und Nachname]<br>
+      [Straße, Hausnummer]<br>
+      [PLZ, Ort]<br>
+      Deutschland
+    </p>
+    <p>E-Mail: [deine@email.de]</p>
+  `,
+  datenschutz: `
+    <p>Diese Seite wird über GitHub Pages und Supabase bereitgestellt.
+    Beim Aufruf werden technisch notwendige Daten (z.B. IP-Adresse,
+    Datum und Uhrzeit des Abrufs, aufgerufene URL, User-Agent) verarbeitet.</p>
+
+    <p>Beim Vorschlagen von Artists werden die eingegebenen Daten
+    (Artist-Name, Spotify-URL) in einer Supabase-Datenbank gespeichert und
+    im „UnterGrund Explorer“ angezeigt. Auf Anfrage per E-Mail werden Einträge
+    gelöscht und von weiteren Vorschlägen ausgeschlossen.</p>
+
+    <p>Auf dieser Seite sind Spotify-Player eingebunden. Anbieter ist Spotify AB.
+    Beim Laden eines Spotify-Embeds kann Spotify personenbezogene Daten
+    verarbeiten. Weitere Informationen enthält die Datenschutzerklärung von Spotify.</p>
+  `
+};
+
+function openLegal(type) {
+  const backdrop = document.getElementById("legal-modal-backdrop");
+  const titleEl = document.getElementById("legal-modal-title");
+  const contentEl = document.getElementById("legal-modal-content");
+
+  if (type === "impressum") {
+    titleEl.textContent = "Impressum";
+    contentEl.innerHTML = LEGAL_TEXT.impressum;
+  } else {
+    titleEl.textContent = "Datenschutzhinweise";
+    contentEl.innerHTML = LEGAL_TEXT.datenschutz;
+  }
+
+  backdrop.style.display = "flex";
+}
+
+function closeLegal() {
+  document.getElementById("legal-modal-backdrop").style.display = "none";
+}
+    
     window.addEventListener("load", () => {
       loadNextArtist();
     });
