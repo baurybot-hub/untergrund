@@ -280,7 +280,13 @@ footer {
       if (!clean.includes("open.spotify.com/artist")) return null;
       return clean.replace("open.spotify.com/artist", "open.spotify.com/embed/artist");
     }
+function isValidSpotifyArtistUrl(url) {
+  if (!url) return false;
+  const clean = url.split("?")[0].trim();
+  return /^https://open.spotify.com/artist/[A-Za-z0-9]+$/.test(clean);
+}
 
+    
     async function loadAllArtists() {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?select=*`,
@@ -389,7 +395,12 @@ footer {
         statusEl.className = "modal-status err";
         return;
       }
-
+      
+if (!isValidSpotifyArtistUrl(spotifyUrl)) {
+  statusEl.textContent = "Bitte einen gültigen Spotify‑Artist‑Link eingeben (https://open.spotify.com/artist/…).";
+  statusEl.className = "modal-status err";
+  return;
+}
       statusEl.textContent = "Prüfe, ob der Artist schon existiert…";
       statusEl.className = "modal-status";
 
