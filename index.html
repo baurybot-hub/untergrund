@@ -6,33 +6,33 @@
   <title>UnterGrund – Explorer</title>
   <style>
 
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+  color: #e5e7eb;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;  /* stapelt: Header/App/Foot */
+}
+
+.app {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;          /* zentriert die App horizontal */
+  padding: 16px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;                 /* füllt den verfügbaren Platz → Footer rutscht nach unten */
+}
+
 footer {
-  margin-top: auto;
   font-size: 0.7rem;
   color: #6b7280;
   text-align: center;
+  margin: 24px 0 8px;
 }
-
-  
-    :root { color-scheme: dark; }
-    * { box-sizing: border-box; }
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
-      color: #e5e7eb;
-      margin: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
-    .app {
-      width: 100%;
-      max-width: 480px;
-      padding: 16px 16px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
 
     
     header {
