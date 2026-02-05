@@ -280,11 +280,12 @@ footer {
       if (!clean.includes("open.spotify.com/artist")) return null;
       return clean.replace("open.spotify.com/artist", "open.spotify.com/embed/artist");
     }
-function isValidSpotifyArtistUrl(url) {
+
+    function isValidSpotifyArtistUrl(url) {
   if (!url) return false;
   const clean = url.split("?")[0].trim();
-  return /^https://open.spotify.com/artist/[A-Za-z0-9]+$/.test(clean);
-}
+  return clean.startsWith("https://open.spotify.com/artist/");
+    }
 
     
     async function loadAllArtists() {
