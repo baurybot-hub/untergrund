@@ -13,18 +13,18 @@ body {
   margin: 0;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;  /* stapelt: Header/App/Foot */
+  flex-direction: column;   /* NEU: statt justify-content:center */
 }
 
 .app {
   width: 100%;
   max-width: 480px;
-  margin: 0 auto;          /* zentriert die App horizontal */
+  margin: 0 auto;           /* NEU: zentriert nur die App */
   padding: 16px 16px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  flex: 1;                 /* füllt den verfügbaren Platz → Footer rutscht nach unten */
+  flex: 1;                  /* NEU: drückt Footer nach unten */
 }
 
 footer {
