@@ -265,11 +265,7 @@ input:focus {
     let seenArtistIds = new Set();
     let loading = false;
 
-    function randomArtistId() {
-      return "art_" + Math.random().toString(36).substring(2, 10);
-    }
-
-    // zentrale Normalisierung (für Validierung, Check, Insert, Embed)
+    // zentrale Normalisierung
     function normalizeSpotifyArtistUrl(url) {
       if (!url) return null;
       let clean = url.split("?")[0].trim();
@@ -429,7 +425,6 @@ input:focus {
         }
 
         const existing = await checkRes.json();
-        console.log("Existing for", cleanUrl, existing);
 
         if (existing.length > 0) {
           statusEl.textContent = "Dieser Artist ist schon im UnterGrund gespeichert.";
@@ -495,7 +490,7 @@ input:focus {
 
         <p>Beim Vorschlagen von Artists werden die eingegebenen Daten
         (Artist-Name, Spotify-URL) in einer Supabase-Datenbank gespeichert und
-        im „UnterGrund Explorer“ angezeigt. Auf Anfrage per E-Mail werden Einträge
+        im „UnterGrund Explorer" angezeigt. Auf Anfrage per E-Mail werden Einträge
         gelöscht und von weiteren Vorschlägen ausgeschlossen.</p>
 
         <p>Auf dieser Seite sind Spotify-Player eingebunden. Anbieter ist Spotify AB.
