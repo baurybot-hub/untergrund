@@ -228,7 +228,7 @@ input:focus {
 </head>
 <body>
 
-<video id="ug-bg" autoplay muted loop playsinline
+<video id="ug-bg" autoplay muted playsinline
   style="
     position: fixed;
     inset: 0;
@@ -239,7 +239,7 @@ input:focus {
   ">
   <source src="untergrund-bg.mp4" type="video/mp4">
 </video>
-  
+
   <div class="app">
     <header>
       <div class="logo-text">UnterGrund</div>
@@ -328,6 +328,9 @@ input:focus {
     const MAX_JUMP_POINTS = 3;
     const MAX_FOLLOW_POINTS = 1;
 
+    const MAX_FOCUS_SCORE = 1000;
+    const VIDEO_DURATION = 15; // Länge deines Videos in Sekunden (ggf. anpassen)
+
     let allArtists = [];
     let seenArtistIds = new Set();
     let loading = false;
@@ -337,6 +340,25 @@ input:focus {
     let cheatTapCount = 0;
     let lastCheatTapTime = 0;
     let cheatUsedForArtist = null;
+
+    function updateFocusBackground() {
+      const video = document.getElementById("ug-bg");
+      if (!video || !currentArtist) return;
+
+      const score = currentArtist.focus_score || 0;
+      const clamped = Math.max(0, Math.min(MAX_FOCUS_SCORE, score));
+      const targetTime = (clamped / MAX_FOCUS_SCORE) * VIDEO_DURATION;
+
+      if (isNaN(video.duration) || video.duration === 0) {
+        video.addEventListener(
+          "canplay",
+          () => { video.currentTime = targetTime; },
+          { once: true }
+        );
+      } else {
+        video.currentTime = targetTime;
+      }
+    }
 
     // Client-ID pro Browser
     function getClientId() {
@@ -440,7 +462,6 @@ input:focus {
         return { ok: false, reason: "unknown-type" };
       }
 
-      // focus_events updaten
       const resEvent = await fetch(
         `${SUPABASE_URL}/rest/v1/focus_events?id=eq.${row.id}`,
         {
@@ -459,7 +480,6 @@ input:focus {
         return { ok: false, reason: "event-update" };
       }
 
-      // focus_score am Artist erhöhen
       const newScore = (artist.focus_score || 0) + 1;
       const resArtist = await fetch(
         `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${artist.id}`,
@@ -480,6 +500,10 @@ input:focus {
       }
 
       artist.focus_score = newScore;
+      if (artist === currentArtist) {
+        updateFocusBackground();
+      }
+
       return { ok: true, newScore };
     }
 
@@ -495,15 +519,13 @@ input:focus {
         (row.jump_count || 0) +
         (row.follow_used ? 1 : 0);
 
-      // Cheat nur, wenn genau 4 Punkte vergeben wurden
       if (normalPoints !== 4) return;
 
       if ((row.jump_count || 0) >= MAX_JUMP_POINTS) return;
 
       const remainingJump = MAX_JUMP_POINTS - (row.jump_count || 0);
-      const boost = remainingJump; // i.d.R. 3
+      const boost = remainingJump;
 
-      // focus_events.jump_count auf max setzen
       const resEvent = await fetch(
         `${SUPABASE_URL}/rest/v1/focus_events?id=eq.${row.id}`,
         {
@@ -522,7 +544,6 @@ input:focus {
         return;
       }
 
-      // focus_score +boost
       const newScore = (currentArtist.focus_score || 0) + boost;
       const resArtist = await fetch(
         `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${currentArtist.id}`,
@@ -545,61 +566,59 @@ input:focus {
       currentArtist.focus_score = newScore;
       cheatUsedForArtist = currentArtist.id;
 
+      updateFocusBackground();
+
       alert(`UnterGrund‑Boost! +${boost} Focus für ${currentArtist.name || "den Artist"}.`);
 
       await updateFocusUI();
     }
 
     async function updateFocusUI() {
-  const infoEl = document.getElementById("focus-info");
-  const btnPlay = document.getElementById("focus-play");
-  const btnFollow = document.getElementById("focus-follow");
+      const infoEl = document.getElementById("focus-info");
+      const btnPlay = document.getElementById("focus-play");
+      const btnFollow = document.getElementById("focus-follow");
 
-  if (!currentArtist) {
-    btnPlay.disabled = true;
-    btnFollow.disabled = true;
-    infoEl.textContent = "";
-    return;
-  }
+      if (!currentArtist) {
+        btnPlay.disabled = true;
+        btnFollow.disabled = true;
+        infoEl.textContent = "";
+        return;
+      }
 
-  const row = await getFocusRow(currentArtist.id) || {
-    play_count: 0,
-    jump_count: 0,
-    follow_used: false
-  };
+      const row = await getFocusRow(currentArtist.id) || {
+        play_count: 0,
+        jump_count: 0,
+        follow_used: false
+      };
 
-  const playLeft = Math.max(0, MAX_PLAY_POINTS - (row.play_count || 0));
-  const jumpLeft = Math.max(0, MAX_JUMP_POINTS - (row.jump_count || 0));
-  const followLeft = row.follow_used ? 0 : MAX_FOLLOW_POINTS;
+      const playLeft = Math.max(0, MAX_PLAY_POINTS - (row.play_count || 0));
+      const jumpLeft = Math.max(0, MAX_JUMP_POINTS - (row.jump_count || 0));
+      const followLeft = row.follow_used ? 0 : MAX_FOLLOW_POINTS;
 
-  const totalLeft = playLeft + jumpLeft + followLeft;
-  const maxTotal = MAX_PLAY_POINTS + MAX_JUMP_POINTS + MAX_FOLLOW_POINTS;
+      const totalLeft = playLeft + jumpLeft + followLeft;
+      const maxTotal = MAX_PLAY_POINTS + MAX_JUMP_POINTS + MAX_FOLLOW_POINTS;
 
-  btnPlay.disabled = playLeft <= 0;
-  btnFollow.disabled = followLeft <= 0;
+      btnPlay.disabled = playLeft <= 0;
+      btnFollow.disabled = followLeft <= 0;
 
-  const normalPoints =
-    (row.play_count || 0) +
-    (row.jump_count || 0) +
-    (row.follow_used ? 1 : 0);
+      const normalPoints =
+        (row.play_count || 0) +
+        (row.jump_count || 0) +
+        (row.follow_used ? 1 : 0);
 
-  if (normalPoints === 4) {
-    // 3x Play + 1x Follow (oder andere Kombi) erreicht
-    infoEl.textContent =
-      `Du hast ${currentArtist.name || "diesen Artist"} voll gepusht. ` +
-      "Manche entdecken hier noch einen versteckten UnterGrund‑Boost.";
-  } else if (totalLeft > 0) {
-    infoEl.textContent =
-      `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen ` +
-      `(max. ${maxTotal} Punkte pro Browser).`;
-  } else {
-    infoEl.textContent =
-      `Du hast ${currentArtist.name || "diesen Artist"} maximal gepusht. Danke!`;
-  }
-}
-
-
-    // Button-Handler
+      if (normalPoints === 4) {
+        infoEl.textContent =
+          `Du hast ${currentArtist.name || "diesen Artist"} voll gepusht. ` +
+          "Manche entdecken hier noch einen versteckten UnterGrund‑Boost.";
+      } else if (totalLeft > 0) {
+        infoEl.textContent =
+          `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen ` +
+          `(max. ${maxTotal} Punkte pro Browser).`;
+      } else {
+        infoEl.textContent =
+          `Du hast ${currentArtist.name || "diesen Artist"} maximal gepusht. Danke!`;
+      }
+    }
 
     async function handleFocusPlay() {
       if (!currentArtist) return;
@@ -683,7 +702,6 @@ input:focus {
       btnFollow.disabled = true;
       infoEl.textContent = "";
 
-      // Cheat-State beim Artist-Wechsel zurücksetzen
       cheatTapCount = 0;
       lastCheatTapTime = 0;
       cheatUsedForArtist = null;
@@ -709,6 +727,8 @@ input:focus {
         seenArtistIds.add(artist.id);
         currentArtist = artist;
 
+        updateFocusBackground();
+
         nameEl.textContent = artist.name || "";
         statusEl.textContent = "Pushe diesen Artist mit den Buttons – jeder Sprung zu Spotify erhöht seinen Focus.";
 
@@ -733,7 +753,7 @@ input:focus {
     }
 
     // =========================
-    // Submit + Legal (unverändert)
+    // Submit + Legal
     // =========================
 
     function openSubmit() {
@@ -898,7 +918,6 @@ input:focus {
 
       titleEl.addEventListener("click", () => {
         const now = Date.now();
-        // Reset, wenn der letzte Tap länger als 1,5s her ist
         if (now - lastCheatTapTime > 1500) {
           cheatTapCount = 0;
         }
