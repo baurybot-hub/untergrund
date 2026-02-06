@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>UnterGrund – Explorer</title>
   <style>
-
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
@@ -13,18 +12,18 @@ body {
   margin: 0;
   min-height: 100vh;
   display: flex;
-  flex-direction: column;   /* NEU: statt justify-content:center */
+  flex-direction: column;
 }
 
 .app {
   width: 100%;
   max-width: 480px;
-  margin: 0 auto;           /* NEU: zentriert nur die App */
+  margin: 0 auto;
   padding: 16px 16px 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  flex: 1;                  /* NEU: drückt Footer nach unten */
+  flex: 1;
 }
 
 footer {
@@ -34,165 +33,162 @@ footer {
   margin: 24px 0 8px;
 }
 
-    
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(55, 65, 81, 0.8);
-      backdrop-filter: blur(10px);
-    }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(55, 65, 81, 0.8);
+  backdrop-filter: blur(10px);
+}
 
-    
-    
-    .logo-text {
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-size: 0.8rem;
-    }
-    .pill-btn {
-      border-radius: 999px;
-      border: none;
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #22c55e;
-      color: #022c22;
-    }
+.logo-text {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+}
+.pill-btn {
+  border-radius: 999px;
+  border: none;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #22c55e;
+  color: #022c22;
+}
 
-    .card {
-      background: rgba(15, 23, 42, 0.98);
-      border-radius: 22px;
-      padding: 22px 18px 18px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.75);
-      border: 1px solid #1f2937;
-    }
-    .card-title {
-      font-size: 1.2rem;
-      font-weight: 600;
-      margin-bottom: 2px;
-    }
-    .card-sub {
-      font-size: 0.82rem;
-      color: #9ca3af;
-      margin-top: 0;
-      margin-bottom: 12px;
-    }
-    .artist-name {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    .embed-wrapper {
-      border-radius: 16px;
-      overflow: hidden;
-      margin-bottom: 10px;
-      background: #020617;
-    }
-    iframe {
-      border: none;
-      width: 100%;
-      height: 152px;
-    }
-    .status-text {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      min-height: 1.2em;
-      margin-bottom: 8px;
-    }
+.card {
+  background: rgba(15, 23, 42, 0.98);
+  border-radius: 22px;
+  padding: 22px 18px 18px;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.75);
+  border: 1px solid #1f2937;
+}
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.card-sub {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+.artist-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.embed-wrapper {
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #020617;
+}
+iframe {
+  border: none;
+  width: 100%;
+  height: 152px;
+}
+.status-text {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  min-height: 1.2em;
+  margin-bottom: 8px;
+}
 
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.9);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
-    }
-    .modal {
-      background: #020617;
-      border-radius: 18px;
-      border: 1px solid #1f2937;
-      padding: 20px 18px 16px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 24px 70px rgba(0,0,0,0.8);
-    }
-    .modal h2 {
-      font-size: 1.1rem;
-      margin: 0 0 6px;
-    }
-    .modal p {
-      font-size: 0.8rem;
-      color: #9ca3af;
-      margin: 0 0 12px;
-    }
-    label {
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #6b7280;
-      display: block;
-      margin-bottom: 4px;
-    }
-    input {
-      width: 100%;
-      margin-bottom: 12px;
-      padding: 9px 11px;
-      border-radius: 10px;
-      border: 1px solid #374151;
-      background: #020617;
-      color: #e5e7eb;
-      font-size: 0.9rem;
-    }
-    input:focus {
-      outline: none;
-      border-color: #22c55e;
-      box-shadow: 0 0 0 1px #22c55e33;
-    }
-    .modal-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 4px;
-    }
-    .modal-btn {
-      flex: 1;
-      border-radius: 999px;
-      border: none;
-      padding: 9px 12px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .modal-btn.cancel {
-      background: #111827;
-      color: #e5e7eb;
-      border: 1px solid #374151;
-    }
-    .modal-btn.submit {
-      background: #22c55e;
-      color: #022c22;
-    }
-    .modal-status {
-      font-size: 0.78rem;
-      margin-top: 6px;
-      min-height: 1.2em;
-    }
-    .modal-status.err { color: #f97373; }
-    .modal-status.ok { color: #4ade80; }
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.9);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal {
+  background: #020617;
+  border-radius: 18px;
+  border: 1px solid #1f2937;
+  padding: 20px 18px 16px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.8);
+}
+.modal h2 {
+  font-size: 1.1rem;
+  margin: 0 0 6px;
+}
+.modal p {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0 0 12px;
+}
+label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6b7280;
+  display: block;
+  margin-bottom: 4px;
+}
+input {
+  width: 100%;
+  margin-bottom: 12px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1px solid #374151;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 0.9rem;
+}
+input:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 1px #22c55e33;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
+}
+.modal-btn {
+  flex: 1;
+  border-radius: 999px;
+  border: none;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-btn.cancel {
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid #374151;
+}
+.modal-btn.submit {
+  background: #22c55e;
+  color: #022c22;
+}
+.modal-status {
+  font-size: 0.78rem;
+  margin-top: 6px;
+  min-height: 1.2em;
+}
+.modal-status.err { color: #f97373; }
+.modal-status.ok { color: #4ade80; }
 
-    @media (min-height: 800px) {
-      .app { gap: 20px; }
-    }
+@media (min-height: 800px) {
+  .app { gap: 20px; }
+}
   </style>
 </head>
 <body>
@@ -221,10 +217,11 @@ footer {
   <div id="submit-modal" class="modal-backdrop">
     <div class="modal">
       <h2>Artist vorschlagen</h2>
-<p>Trage einen deutschen Artist ein, den man entdecken sollte.</p>
-<p style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">
-  Du hilfst, echte Untergrund‑Acts sichtbar zu machen.
-</p>
+      <p>Trage einen deutschen Artist ein, den man entdecken sollte.</p>
+      <p style="font-size:0.78rem;color:#9ca3af;margin-top:4px;">
+        Du hilfst, echte Untergrund‑Acts sichtbar zu machen.
+      </p>
+
       <label for="artist-input">Artist‑Name</label>
       <input id="artist-input" placeholder="z.B. Doktor Eule" />
 
@@ -240,18 +237,17 @@ footer {
     </div>
   </div>
 
-<div id="legal-modal-backdrop" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.9);z-index:80;">
-  <div id="legal-modal" style="width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:#020617;border-radius:18px;border:1px solid #1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.78rem;color:#e5e7eb;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-      <h2 id="legal-modal-title" style="font-size:0.9rem;margin:0;">Rechtliches</h2>
-      <button onclick="closeLegal()" style="background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">&times;</button>
+  <div id="legal-modal-backdrop" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.9);z-index:80;">
+    <div id="legal-modal" style="width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:#020617;border-radius:18px;border:1px solid #1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.78rem;color:#e5e7eb;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <h2 id="legal-modal-title" style="font-size:0.9rem;margin:0;">Rechtliches</h2>
+        <button onclick="closeLegal()" style="background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">&times;</button>
+      </div>
+      <div id="legal-modal-content" style="color:#9ca3af;line-height:1.4;"></div>
     </div>
-    <div id="legal-modal-content" style="color:#9ca3af;line-height:1.4;"></div>
   </div>
-</div>
 
-<!-- Footer ganz unten -->
-  <footer style="margin:24px 0 8px;font-size:0.7rem;color:#6b7280;text-align:center;">
+  <footer>
     <button onclick="openLegal('impressum')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;margin-right:12px;">
       Impressum
     </button>
@@ -273,23 +269,27 @@ footer {
       return "art_" + Math.random().toString(36).substring(2, 10);
     }
 
-    function spotifyUrlToEmbed(url) {
+    // gemeinsame Normalisierung für alles (Check + Speichern + Embed)
+    function normalizeSpotifyArtistUrl(url) {
       if (!url) return null;
-      let clean = url.split("?")[0];
+      let clean = url.split("?")[0].trim();
       clean = clean.replace("open.spotify.com/intl-de/", "open.spotify.com/");
+      return clean;
+    }
+
+    function spotifyUrlToEmbed(url) {
+      const clean = normalizeSpotifyArtistUrl(url);
+      if (!clean) return null;
       if (!clean.includes("open.spotify.com/artist")) return null;
       return clean.replace("open.spotify.com/artist", "open.spotify.com/embed/artist");
     }
 
-  
+    function isValidSpotifyArtistUrl(url) {
+      if (!url) return false;
+      const clean = normalizeSpotifyArtistUrl(url);
+      return clean.startsWith("https://open.spotify.com/artist/");
+    }
 
-function isValidSpotifyArtistUrl(url) {
-  if (!url) return false;
-  const clean = url.split("?")[0].trim();
-  return clean.startsWith("https://open.spotify.com/artist/");
-}
-
-    
     async function loadAllArtists() {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?select=*`,
@@ -349,7 +349,7 @@ function isValidSpotifyArtistUrl(url) {
 
         seenArtistIds.add(artist.id);
 
-        nameEl.textContent = ""|| "";
+        nameEl.textContent = artist.name || "";
         statusEl.textContent = "Tippe auf den Spotify‑Player, um mehr zu hören.";
 
         const embedUrl = spotifyUrlToEmbed(artist.spotify_url);
@@ -385,7 +385,7 @@ function isValidSpotifyArtistUrl(url) {
       const statusEl = document.getElementById("submit-status");
 
       const manualName = nameInput.value.trim();
-      const spotifyUrl = spotifyInput.value.trim(); // exakt wie eingegeben
+      const rawUrl = spotifyInput.value.trim();
 
       if (!manualName) {
         statusEl.textContent = "Bitte den Artist‑Namen eingeben.";
@@ -393,24 +393,26 @@ function isValidSpotifyArtistUrl(url) {
         return;
       }
 
-      if (!spotifyUrl) {
+      if (!rawUrl) {
         statusEl.textContent = "Bitte eine Spotify‑Artist‑URL eingeben.";
         statusEl.className = "modal-status err";
         return;
       }
-      
-if (!isValidSpotifyArtistUrl(spotifyUrl)) {
-  statusEl.textContent = "Bitte einen gültigen Spotify‑Artist‑Link eingeben (https://open.spotify.com/artist/…).";
-  statusEl.className = "modal-status err";
-  return;
-}
+
+      if (!isValidSpotifyArtistUrl(rawUrl)) {
+        statusEl.textContent = "Bitte einen gültigen Spotify‑Artist‑Link eingeben (https://open.spotify.com/artist/…).";
+        statusEl.className = "modal-status err";
+        return;
+      }
+
+      const cleanUrl = normalizeSpotifyArtistUrl(rawUrl);
+
       statusEl.textContent = "Prüfe, ob der Artist schon existiert…";
       statusEl.className = "modal-status";
 
       try {
-        // 1) Erster Schritt: DB abfragen, ob URL schon existiert
         const checkRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?spotify_url=eq.${encodeURIComponent(spotifyUrl)}&select=id`,
+          `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?spotify_url=eq.${encodeURIComponent(cleanUrl)}&select=id`,
           {
             headers: {
               "apikey": SUPABASE_ANON_KEY,
@@ -426,7 +428,7 @@ if (!isValidSpotifyArtistUrl(spotifyUrl)) {
         }
 
         const existing = await checkRes.json();
-        console.log("Existing for", spotifyUrl, existing);
+        console.log("Existing for", cleanUrl, existing);
 
         if (existing.length > 0) {
           statusEl.textContent = "Dieser Artist ist schon im UnterGrund gespeichert.";
@@ -434,7 +436,6 @@ if (!isValidSpotifyArtistUrl(spotifyUrl)) {
           return;
         }
 
-        // 2) Nur wenn nichts gefunden → Insert
         statusEl.textContent = "Speichere Artist…";
 
         const res = await fetch(`${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}`, {
@@ -447,7 +448,7 @@ if (!isValidSpotifyArtistUrl(spotifyUrl)) {
           },
           body: JSON.stringify({
             name: manualName,
-            spotify_url: spotifyUrl
+            spotify_url: cleanUrl
           })
         });
 
@@ -475,56 +476,56 @@ if (!isValidSpotifyArtistUrl(spotifyUrl)) {
       }
     }
 
-const LEGAL_TEXT = {
-  impressum: `
-    <p>Verantwortlich für den Inhalt dieser Seite:</p>
-    <p>
-      [Dein Vor- und Nachname]<br>
-      [Straße, Hausnummer]<br>
-      [PLZ, Ort]<br>
-      Deutschland
-    </p>
-    <p>E-Mail: [deine@email.de]</p>
-  `,
-  datenschutz: `
-    <p>Diese Seite wird über GitHub Pages und Supabase bereitgestellt.
-    Beim Aufruf werden technisch notwendige Daten (z.B. IP-Adresse,
-    Datum und Uhrzeit des Abrufs, aufgerufene URL, User-Agent) verarbeitet.</p>
+    const LEGAL_TEXT = {
+      impressum: `
+        <p>Verantwortlich für den Inhalt dieser Seite:</p>
+        <p>
+          [Dein Vor- und Nachname]<br>
+          [Straße, Hausnummer]<br>
+          [PLZ, Ort]<br>
+          Deutschland
+        </p>
+        <p>E-Mail: [deine@email.de]</p>
+      `,
+      datenschutz: `
+        <p>Diese Seite wird über GitHub Pages und Supabase bereitgestellt.
+        Beim Aufruf werden technisch notwendige Daten (z.B. IP-Adresse,
+        Datum und Uhrzeit des Abrufs, aufgerufene URL, User-Agent) verarbeitet.</p>
 
-    <p>Beim Vorschlagen von Artists werden die eingegebenen Daten
-    (Artist-Name, Spotify-URL) in einer Supabase-Datenbank gespeichert und
-    im „UnterGrund Explorer“ angezeigt. Auf Anfrage per E-Mail werden Einträge
-    gelöscht und von weiteren Vorschlägen ausgeschlossen.</p>
+        <p>Beim Vorschlagen von Artists werden die eingegebenen Daten
+        (Artist-Name, Spotify-URL) in einer Supabase-Datenbank gespeichert und
+        im „UnterGrund Explorer“ angezeigt. Auf Anfrage per E-Mail werden Einträge
+        gelöscht und von weiteren Vorschlägen ausgeschlossen.</p>
 
-    <p>Auf dieser Seite sind Spotify-Player eingebunden. Anbieter ist Spotify AB.
-    Beim Laden eines Spotify-Embeds kann Spotify personenbezogene Daten
-    verarbeiten. Weitere Informationen enthält die Datenschutzerklärung von Spotify.</p>
-  `
-};
+        <p>Auf dieser Seite sind Spotify-Player eingebunden. Anbieter ist Spotify AB.
+        Beim Laden eines Spotify-Embeds kann Spotify personenbezogene Daten
+        verarbeiten. Weitere Informationen enthält die Datenschutzerklärung von Spotify.</p>
+      `
+    };
 
-function openLegal(type) {
-  const backdrop = document.getElementById("legal-modal-backdrop");
-  const titleEl = document.getElementById("legal-modal-title");
-  const contentEl = document.getElementById("legal-modal-content");
+    function openLegal(type) {
+      const backdrop = document.getElementById("legal-modal-backdrop");
+      const titleEl = document.getElementById("legal-modal-title");
+      const contentEl = document.getElementById("legal-modal-content");
 
-  if (type === "impressum") {
-    titleEl.textContent = "Impressum";
-    contentEl.innerHTML = LEGAL_TEXT.impressum;
-  } else {
-    titleEl.textContent = "Datenschutzhinweise";
-    contentEl.innerHTML = LEGAL_TEXT.datenschutz;
-  }
+      if (type === "impressum") {
+        titleEl.textContent = "Impressum";
+        contentEl.innerHTML = LEGAL_TEXT.impressum;
+      } else {
+        titleEl.textContent = "Datenschutzhinweise";
+        contentEl.innerHTML = LEGAL_TEXT.datenschutz;
+      }
 
-  backdrop.style.display = "flex";
-}
+      backdrop.style.display = "flex";
+    }
 
-function closeLegal() {
-  document.getElementById("legal-modal-backdrop").style.display = "none";
-}
+    function closeLegal() {
+      document.getElementById("legal-modal-backdrop").style.display = "none";
+    }
     
     window.addEventListener("load", () => {
       loadNextArtist();
     });
   </script>
 </body>
-</html>
+  </html>
