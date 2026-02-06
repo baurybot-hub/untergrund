@@ -236,7 +236,7 @@ input:focus {
     </header>
 
     <div class="card">
-      <div class="card-title">UnterGrund Explorer</div>
+      <div class="card-title" id="card-title">UnterGrund Explorer</div>
       <p class="card-sub">
         Deutsche Artists entdecken, die noch unter dem Radar fliegen.
         Pushe deine Favoriten nach oben – jeder Klick zählt.
@@ -312,13 +312,18 @@ input:focus {
     const ARTISTS_TABLE = "artists";
 
     const MAX_PLAY_POINTS = 3;
-    const MAX_JUMP_POINTS = 3; // reserviert, falls du später noch einen „Jump“-Button willst
+    const MAX_JUMP_POINTS = 3;
     const MAX_FOLLOW_POINTS = 1;
 
     let allArtists = [];
     let seenArtistIds = new Set();
     let loading = false;
     let currentArtist = null;
+
+    // Cheat-Code State
+    let cheatTapCount = 0;
+    let lastCheatTapTime = 0;
+    let cheatUsedForArtist = null;
 
     // Client-ID pro Browser
     function getClientId() {
@@ -465,6 +470,73 @@ input:focus {
       return { ok: true, newScore };
     }
 
+    async function triggerCheatBoost() {
+      if (!currentArtist) return;
+      if (cheatUsedForArtist === currentArtist.id) return;
+
+      const row = await ensureFocusRow(currentArtist.id);
+      if (!row) return;
+
+      const normalPoints =
+        (row.play_count || 0) +
+        (row.jump_count || 0) +
+        (row.follow_used ? 1 : 0);
+
+      // Cheat nur, wenn genau 4 Punkte vergeben wurden
+      if (normalPoints !== 4) return;
+
+      if ((row.jump_count || 0) >= MAX_JUMP_POINTS) return;
+
+      const remainingJump = MAX_JUMP_POINTS - (row.jump_count || 0);
+      const boost = remainingJump; // i.d.R. 3
+
+      // focus_events.jump_count auf max setzen
+      const resEvent = await fetch(
+        `${SUPABASE_URL}/rest/v1/focus_events?id=eq.${row.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({ jump_count: (row.jump_count || 0) + boost })
+        }
+      );
+      if (!resEvent.ok) {
+        console.error("Cheat-Boost event Fehler:", await resEvent.text());
+        return;
+      }
+
+      // focus_score +boost
+      const newScore = (currentArtist.focus_score || 0) + boost;
+      const resArtist = await fetch(
+        `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${currentArtist.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({ focus_score: newScore })
+        }
+      );
+      if (!resArtist.ok) {
+        console.error("Cheat-Boost artist Fehler:", await resArtist.text());
+        return;
+      }
+
+      currentArtist.focus_score = newScore;
+      cheatUsedForArtist = currentArtist.id;
+
+      alert(`UnterGrund‑Boost! +${boost} Focus für ${currentArtist.name || "den Artist"}.`);
+
+      await updateFocusUI();
+    }
+
     async function updateFocusUI() {
       const infoEl = document.getElementById("focus-info");
       const btnPlay = document.getElementById("focus-play");
@@ -496,7 +568,16 @@ input:focus {
       if (totalLeft > 0) {
         infoEl.textContent = `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen (max. ${maxTotal} Punkte pro Browser).`;
       } else {
-        infoEl.textContent = `Du hast ${currentArtist.name || "diesen Artist"} maximal gepusht. Danke!`;
+        infoEl.textContent = `Du hast ${currentArtist.name || "diesen Artist"} voll gepusht.`;
+        const normalPoints =
+          (row.play_count || 0) +
+          (row.jump_count || 0) +
+          (row.follow_used ? 1 : 0);
+        if (normalPoints === 4) {
+          infoEl.textContent += " Manche entdecken hier noch einen versteckten UnterGrund‑Boost.";
+        } else {
+          infoEl.textContent += " Danke!";
+        }
       }
     }
 
@@ -583,6 +664,11 @@ input:focus {
       btnPlay.disabled = true;
       btnFollow.disabled = true;
       infoEl.textContent = "";
+
+      // Cheat-State beim Artist-Wechsel zurücksetzen
+      cheatTapCount = 0;
+      lastCheatTapTime = 0;
+      cheatUsedForArtist = null;
 
       try {
         if (!allArtists || allArtists.length === 0) {
@@ -787,8 +873,29 @@ input:focus {
     function closeLegal() {
       document.getElementById("legal-modal-backdrop").style.display = "none";
     }
+
+    function setupCheatListener() {
+      const titleEl = document.getElementById("card-title");
+      if (!titleEl) return;
+
+      titleEl.addEventListener("click", () => {
+        const now = Date.now();
+        // Reset, wenn der letzte Tap länger als 1,5s her ist
+        if (now - lastCheatTapTime > 1500) {
+          cheatTapCount = 0;
+        }
+        lastCheatTapTime = now;
+        cheatTapCount += 1;
+
+        if (cheatTapCount >= 5) {
+          cheatTapCount = 0;
+          triggerCheatBoost();
+        }
+      });
+    }
     
     window.addEventListener("load", () => {
+      setupCheatListener();
       loadNextArtist();
     });
   </script>
