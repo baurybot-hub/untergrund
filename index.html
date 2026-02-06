@@ -269,19 +269,20 @@ input:focus {
       return "art_" + Math.random().toString(36).substring(2, 10);
     }
 
-    // gemeinsame Normalisierung für alles (Check + Speichern + Embed)
+    // zentrale Normalisierung (für Validierung, Check, Insert, Embed)
     function normalizeSpotifyArtistUrl(url) {
       if (!url) return null;
       let clean = url.split("?")[0].trim();
       clean = clean.replace("open.spotify.com/intl-de/", "open.spotify.com/");
+      if (clean.endsWith("/")) clean = clean.slice(0, -1);
       return clean;
     }
 
     function spotifyUrlToEmbed(url) {
       const clean = normalizeSpotifyArtistUrl(url);
       if (!clean) return null;
-      if (!clean.includes("open.spotify.com/artist")) return null;
-      return clean.replace("open.spotify.com/artist", "open.spotify.com/embed/artist");
+      if (!clean.includes("open.spotify.com/artist/")) return null;
+      return clean.replace("open.spotify.com/artist/", "open.spotify.com/embed/artist/");
     }
 
     function isValidSpotifyArtistUrl(url) {
@@ -528,4 +529,4 @@ input:focus {
     });
   </script>
 </body>
-  </html>
+</html>
