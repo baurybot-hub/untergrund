@@ -538,48 +538,53 @@ input:focus {
     }
 
     async function updateFocusUI() {
-      const infoEl = document.getElementById("focus-info");
-      const btnPlay = document.getElementById("focus-play");
-      const btnFollow = document.getElementById("focus-follow");
+  const infoEl = document.getElementById("focus-info");
+  const btnPlay = document.getElementById("focus-play");
+  const btnFollow = document.getElementById("focus-follow");
 
-      if (!currentArtist) {
-        btnPlay.disabled = true;
-        btnFollow.disabled = true;
-        infoEl.textContent = "";
-        return;
-      }
+  if (!currentArtist) {
+    btnPlay.disabled = true;
+    btnFollow.disabled = true;
+    infoEl.textContent = "";
+    return;
+  }
 
-      const row = await getFocusRow(currentArtist.id) || {
-        play_count: 0,
-        jump_count: 0,
-        follow_used: false
-      };
+  const row = await getFocusRow(currentArtist.id) || {
+    play_count: 0,
+    jump_count: 0,
+    follow_used: false
+  };
 
-      const playLeft = Math.max(0, MAX_PLAY_POINTS - (row.play_count || 0));
-      const jumpLeft = Math.max(0, MAX_JUMP_POINTS - (row.jump_count || 0));
-      const followLeft = row.follow_used ? 0 : MAX_FOLLOW_POINTS;
+  const playLeft = Math.max(0, MAX_PLAY_POINTS - (row.play_count || 0));
+  const jumpLeft = Math.max(0, MAX_JUMP_POINTS - (row.jump_count || 0));
+  const followLeft = row.follow_used ? 0 : MAX_FOLLOW_POINTS;
 
-      const totalLeft = playLeft + jumpLeft + followLeft;
-      const maxTotal = MAX_PLAY_POINTS + MAX_JUMP_POINTS + MAX_FOLLOW_POINTS;
+  const totalLeft = playLeft + jumpLeft + followLeft;
+  const maxTotal = MAX_PLAY_POINTS + MAX_JUMP_POINTS + MAX_FOLLOW_POINTS;
 
-      btnPlay.disabled = playLeft <= 0;
-      btnFollow.disabled = followLeft <= 0;
+  btnPlay.disabled = playLeft <= 0;
+  btnFollow.disabled = followLeft <= 0;
 
-      if (totalLeft > 0) {
-        infoEl.textContent = `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen (max. ${maxTotal} Punkte pro Browser).`;
-      } else {
-        infoEl.textContent = `Du hast ${currentArtist.name || "diesen Artist"} voll gepusht.`;
-        const normalPoints =
-          (row.play_count || 0) +
-          (row.jump_count || 0) +
-          (row.follow_used ? 1 : 0);
-        if (normalPoints === 4) {
-          infoEl.textContent += " Manche entdecken hier noch einen versteckten UnterGrund‑Boost.";
-        } else {
-          infoEl.textContent += " Danke!";
-        }
-      }
-    }
+  const normalPoints =
+    (row.play_count || 0) +
+    (row.jump_count || 0) +
+    (row.follow_used ? 1 : 0);
+
+  if (normalPoints === 4) {
+    // 3x Play + 1x Follow (oder andere Kombi) erreicht
+    infoEl.textContent =
+      `Du hast ${currentArtist.name || "diesen Artist"} voll gepusht. ` +
+      "Manche entdecken hier noch einen versteckten UnterGrund‑Boost.";
+  } else if (totalLeft > 0) {
+    infoEl.textContent =
+      `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen ` +
+      `(max. ${maxTotal} Punkte pro Browser).`;
+  } else {
+    infoEl.textContent =
+      `Du hast ${currentArtist.name || "diesen Artist"} maximal gepusht. Danke!`;
+  }
+}
+
 
     // Button-Handler
 
