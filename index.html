@@ -64,6 +64,7 @@ header {
   color: #022c22;
 }
 
+/* Karte */
 .card {
   background: rgba(15, 23, 42, 0.98);
   border-radius: 22px;
@@ -105,6 +106,40 @@ iframe {
   margin-bottom: 8px;
 }
 
+/* Focus: Buttons + Info */
+.focus-buttons {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.focus-btn {
+  flex: 1;
+  border-radius: 999px;
+  border: 1px solid #374151;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(34, 197, 94, 0.08);
+  color: #bbf7d0;
+}
+.focus-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.focus-info {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  margin-bottom: 6px;
+  min-height: 1.1em;
+}
+
+/* Modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -202,10 +237,25 @@ input:focus {
 
     <div class="card">
       <div class="card-title">UnterGrund Explorer</div>
-      <p class="card-sub">Deutsche Artists entdecken, die noch unter dem Radar fliegen. Tippe dich durch zufällige Vorschläge.</p>
+      <p class="card-sub">
+        Deutsche Artists entdecken, die noch unter dem Radar fliegen.
+        Pushe deine Favoriten nach oben – jeder Klick zählt.
+      </p>
 
       <div id="artist-name" class="artist-name">Lade Artist…</div>
       <div id="embed-wrapper" class="embed-wrapper"></div>
+
+      <!-- Focus-Bereich -->
+      <div class="focus-buttons">
+        <button id="focus-play" class="focus-btn" onclick="handleFocusPlay()" disabled>
+          🎵 Play on Spotify
+        </button>
+        <button id="focus-follow" class="focus-btn" onclick="handleFocusFollow()" disabled>
+          💚 Follow
+        </button>
+      </div>
+      <div id="focus-info" class="focus-info"></div>
+
       <div id="status-text" class="status-text"></div>
 
       <button class="pill-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="loadNextArtist()">
@@ -261,9 +311,25 @@ input:focus {
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const ARTISTS_TABLE = "artists";
 
+    const MAX_PLAY_POINTS = 3;
+    const MAX_JUMP_POINTS = 3; // reserviert, falls du später noch einen „Jump“-Button willst
+    const MAX_FOLLOW_POINTS = 1;
+
     let allArtists = [];
     let seenArtistIds = new Set();
     let loading = false;
+    let currentArtist = null;
+
+    // Client-ID pro Browser
+    function getClientId() {
+      const KEY = "ug_client_id";
+      let id = localStorage.getItem(KEY);
+      if (!id) {
+        id = "cli_" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+        localStorage.setItem(KEY, id);
+      }
+      return id;
+    }
 
     // zentrale Normalisierung
     function normalizeSpotifyArtistUrl(url) {
@@ -286,6 +352,189 @@ input:focus {
       const clean = normalizeSpotifyArtistUrl(url);
       return clean.startsWith("https://open.spotify.com/artist/");
     }
+
+    // =========================
+    // Focus-Backend
+    // =========================
+
+    async function getFocusRow(artistId) {
+      const clientId = getClientId();
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/focus_events?artist_id=eq.${artistId}&client_id=eq.${encodeURIComponent(clientId)}&select=*`,
+        {
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+          }
+        }
+      );
+      if (!res.ok) {
+        console.error("focus_events GET Fehler:", await res.text());
+        return null;
+      }
+      const rows = await res.json();
+      return rows[0] || null;
+    }
+
+    async function ensureFocusRow(artistId) {
+      let row = await getFocusRow(artistId);
+      if (row) return row;
+
+      const clientId = getClientId();
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/focus_events`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify({
+          artist_id: artistId,
+          client_id: clientId
+        })
+      });
+      if (!res.ok) {
+        console.error("focus_events INIT Fehler:", await res.text());
+        return null;
+      }
+      const created = await res.json();
+      return created[0];
+    }
+
+    async function addFocus(artist, type) {
+      if (!artist) return { ok: false, reason: "no-artist" };
+
+      let row = await ensureFocusRow(artist.id);
+      if (!row) return { ok: false, reason: "no-row" };
+
+      let update = {};
+      if (type === "play") {
+        if (row.play_count >= MAX_PLAY_POINTS) return { ok: false, reason: "limit-play" };
+        update.play_count = row.play_count + 1;
+      } else if (type === "jump") {
+        if (row.jump_count >= MAX_JUMP_POINTS) return { ok: false, reason: "limit-jump" };
+        update.jump_count = row.jump_count + 1;
+      } else if (type === "follow") {
+        if (row.follow_used) return { ok: false, reason: "limit-follow" };
+        update.follow_used = true;
+      } else {
+        return { ok: false, reason: "unknown-type" };
+      }
+
+      // focus_events updaten
+      const resEvent = await fetch(
+        `${SUPABASE_URL}/rest/v1/focus_events?id=eq.${row.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify(update)
+        }
+      );
+      if (!resEvent.ok) {
+        console.error("focus_events UPDATE Fehler:", await resEvent.text());
+        return { ok: false, reason: "event-update" };
+      }
+
+      // focus_score am Artist erhöhen
+      const newScore = (artist.focus_score || 0) + 1;
+      const resArtist = await fetch(
+        `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${artist.id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "apikey": SUPABASE_ANON_KEY,
+            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({ focus_score: newScore })
+        }
+      );
+      if (!resArtist.ok) {
+        console.error("artists focus_score UPDATE Fehler:", await resArtist.text());
+        return { ok: false, reason: "artist-update" };
+      }
+
+      artist.focus_score = newScore;
+      return { ok: true, newScore };
+    }
+
+    async function updateFocusUI() {
+      const infoEl = document.getElementById("focus-info");
+      const btnPlay = document.getElementById("focus-play");
+      const btnFollow = document.getElementById("focus-follow");
+
+      if (!currentArtist) {
+        btnPlay.disabled = true;
+        btnFollow.disabled = true;
+        infoEl.textContent = "";
+        return;
+      }
+
+      const row = await getFocusRow(currentArtist.id) || {
+        play_count: 0,
+        jump_count: 0,
+        follow_used: false
+      };
+
+      const playLeft = Math.max(0, MAX_PLAY_POINTS - (row.play_count || 0));
+      const jumpLeft = Math.max(0, MAX_JUMP_POINTS - (row.jump_count || 0));
+      const followLeft = row.follow_used ? 0 : MAX_FOLLOW_POINTS;
+
+      const totalLeft = playLeft + jumpLeft + followLeft;
+      const maxTotal = MAX_PLAY_POINTS + MAX_JUMP_POINTS + MAX_FOLLOW_POINTS;
+
+      btnPlay.disabled = playLeft <= 0;
+      btnFollow.disabled = followLeft <= 0;
+
+      if (totalLeft > 0) {
+        infoEl.textContent = `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen (max. ${maxTotal} Punkte pro Browser).`;
+      } else {
+        infoEl.textContent = `Du hast ${currentArtist.name || "diesen Artist"} maximal gepusht. Danke!`;
+      }
+    }
+
+    // Button-Handler
+
+    async function handleFocusPlay() {
+      if (!currentArtist) return;
+      const res = await addFocus(currentArtist, "play");
+
+      if (res.ok) {
+        alert(`Focus +1 – du hast ${currentArtist.name || "den Artist"} gepusht.`);
+      } else if (res.reason && res.reason.startsWith("limit")) {
+        alert("Limit erreicht – du kannst diesen Artist nicht weiter pushen.");
+      }
+      await updateFocusUI();
+
+      const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
+      if (url) window.open(url, "_blank");
+    }
+
+    async function handleFocusFollow() {
+      if (!currentArtist) return;
+      const res = await addFocus(currentArtist, "follow");
+
+      if (res.ok) {
+        alert(`Focus +1 – du folgst ${currentArtist.name || "dem Artist"} (auf Spotify öffnen).`);
+      } else if (res.reason && res.reason.startsWith("limit")) {
+        alert("Follow-Limit erreicht – du kannst diesen Artist nur einmal follow-pushen.");
+      }
+      await updateFocusUI();
+
+      const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
+      if (url) window.open(url, "_blank");
+    }
+
+    // =========================
+    // Artists laden
+    // =========================
 
     async function loadAllArtists() {
       const res = await fetch(
@@ -322,9 +571,18 @@ input:focus {
       const statusEl = document.getElementById("status-text");
       const embedWrapper = document.getElementById("embed-wrapper");
 
+      const btnPlay = document.getElementById("focus-play");
+      const btnFollow = document.getElementById("focus-follow");
+      const infoEl = document.getElementById("focus-info");
+
       nameEl.textContent = "Suche nächsten Artist…";
       statusEl.textContent = "";
       embedWrapper.innerHTML = "";
+      currentArtist = null;
+
+      btnPlay.disabled = true;
+      btnFollow.disabled = true;
+      infoEl.textContent = "";
 
       try {
         if (!allArtists || allArtists.length === 0) {
@@ -345,9 +603,10 @@ input:focus {
         }
 
         seenArtistIds.add(artist.id);
+        currentArtist = artist;
 
         nameEl.textContent = artist.name || "";
-        statusEl.textContent = "Tippe auf den Spotify‑Player, um mehr zu hören.";
+        statusEl.textContent = "Pushe diesen Artist mit den Buttons – jeder Sprung zu Spotify erhöht seinen Focus.";
 
         const embedUrl = spotifyUrlToEmbed(artist.spotify_url);
         if (embedUrl) {
@@ -357,6 +616,9 @@ input:focus {
             Kein gültiger Spotify‑Link gespeichert.
           </div>`;
         }
+
+        await updateFocusUI();
+
       } catch (err) {
         console.error("loadNextArtist Fehler:", err);
         nameEl.textContent = "Fehler beim Laden.";
@@ -365,6 +627,10 @@ input:focus {
         loading = false;
       }
     }
+
+    // =========================
+    // Submit + Legal (unverändert)
+    // =========================
 
     function openSubmit() {
       document.getElementById("submit-modal").style.display = "flex";
@@ -496,6 +762,9 @@ input:focus {
         <p>Auf dieser Seite sind Spotify-Player eingebunden. Anbieter ist Spotify AB.
         Beim Laden eines Spotify-Embeds kann Spotify personenbezogene Daten
         verarbeiten. Weitere Informationen enthält die Datenschutzerklärung von Spotify.</p>
+
+        <p>Diese Seite speichert eine anonyme Client-ID im localStorage, um zu begrenzen,
+        wie oft ein Browser einen Artist pushen kann.</p>
       `
     };
 
