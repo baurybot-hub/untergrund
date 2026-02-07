@@ -290,6 +290,13 @@ input:focus {
 
       <div id="status-text" class="status-text"></div>
 
+      <!-- Teilen-Button -->
+      <button class="pill-btn"
+              style="width:100%;justify-content:center;margin-top:4px;background:#0b1120;color:#e5e7eb;"
+              onclick="shareCurrentArtist()">
+        📤 Diesen Artist aus dem UnterGrund pushen
+      </button>
+
       <button class="pill-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="loadNextArtist()">
         🔁 Nächster Artist
       </button>
@@ -320,7 +327,7 @@ input:focus {
   </div>
 
   <div id="legal-modal-backdrop" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.9);z-index:80;">
-    <div id="legal-modal" style="width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:#020617;border-radius:18px;border:1px solid #1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.78rem;color:#e5e7eb;">
+    <div id="legal-modal" style="width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:#020617;border-radius:18px;border:1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.78rem;color:#e5e7eb;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <h2 id="legal-modal-title" style="font-size:0.9rem;margin:0;">Rechtliches</h2>
         <button onclick="closeLegal()" style="background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">&times;</button>
@@ -370,19 +377,17 @@ input:focus {
     const MAX_FOLLOW_POINTS = 1;
 
     const MAX_FOCUS_SCORE = 1000;
-    const VIDEO_DURATION = 15; // Länge deines Videos in Sekunden
+    const VIDEO_DURATION = 15;
 
     let allArtists = [];
     let seenArtistIds = new Set();
     let loading = false;
     let currentArtist = null;
 
-    // Cheat-Code State
     let cheatTapCount = 0;
     let lastCheatTapTime = 0;
     let cheatUsedForArtist = null;
 
-    // ob für einen vollen Artist schon abgespielt wurde
     let bgVideoPlayedForMax = false;
 
     function updateFocusBackground() {
@@ -396,7 +401,6 @@ input:focus {
       const setTimeAndMaybePlay = () => {
         video.currentTime = targetTime;
 
-        // Nur wenn dieser Artist wirklich volle Punktzahl hat → einmalig abspielen
         if (score >= MAX_FOCUS_SCORE && !bgVideoPlayedForMax) {
           video.play().catch(() => {});
           bgVideoPlayedForMax = true;
@@ -442,10 +446,6 @@ input:focus {
       const clean = normalizeSpotifyArtistUrl(url);
       return clean.startsWith("https://open.spotify.com/artist/");
     }
-
-    // =========================
-    // Focus-Backend
-    // =========================
 
     async function getFocusRow(artistId) {
       const clientId = getClientId();
@@ -616,7 +616,6 @@ input:focus {
       cheatUsedForArtist = currentArtist.id;
 
       updateFocusBackground();
-
       alert(`UnterGrund‑Boost! +${boost} Focus für ${currentArtist.name || "den Artist"}.`);
 
       await updateFocusUI();
@@ -724,9 +723,30 @@ input:focus {
       if (url) window.open(url, "_blank");
     }
 
-    // =========================
-    // Artists laden
-    // =========================
+    async function shareCurrentArtist() {
+      if (!currentArtist) return;
+
+      const url = window.location.origin + window.location.pathname + "?artist=" + encodeURIComponent(currentArtist.id);
+      const text = `Diesen Artist aus dem UnterGrund pushen: ${currentArtist.name || "Unbekannter Artist"}`;
+
+      try {
+        if (navigator.share) {
+          await navigator.share({
+            title: "UnterGrund Explorer",
+            text,
+            url
+          });
+        } else if (navigator.clipboard) {
+          await navigator.clipboard.writeText(`${text} ${url}`);
+          alert("Link zum UnterGrund‑Artist kopiert.");
+        } else {
+          const fallback = prompt("Link kopieren:", `${text} ${url}`);
+          if (!fallback) return;
+        }
+      } catch (err) {
+        console.error("Share abgebrochen/Fehler:", err);
+      }
+    }
 
     async function loadAllArtists() {
       const res = await fetch(
@@ -753,6 +773,55 @@ input:focus {
       if (unseen.length === 0) return null;
       const idx = Math.floor(Math.random() * unseen.length);
       return unseen[idx];
+    }
+
+    async function loadArtistById(id) {
+      const nameEl = document.getElementById("artist-name");
+      const statusEl = document.getElementById("status-text");
+      const embedWrapper = document.getElementById("embed-wrapper");
+
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${encodeURIComponent(id)}&select=*`,
+          {
+            headers: {
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+        if (!res.ok) {
+          console.error("loadArtistById Fehler:", await res.text());
+          return false;
+        }
+        const rows = await res.json();
+        if (!rows || rows.length === 0) return false;
+
+        const artist = rows[0];
+        currentArtist = artist;
+        bgVideoPlayedForMax = false;
+        seenArtistIds.add(artist.id);
+
+        updateFocusBackground();
+
+        nameEl.textContent = artist.name || "";
+        statusEl.textContent = "Pushe diesen Artist mit den Buttons – jeder Sprung zu Spotify erhöht seinen Focus.";
+
+        const embedUrl = spotifyUrlToEmbed(artist.spotify_url);
+        if (embedUrl) {
+          embedWrapper.innerHTML = `<iframe src="${embedUrl}" allow="encrypted-media"></iframe>`;
+        } else {
+          embedWrapper.innerHTML = `<div style="font-size:0.85rem;color:#f97373;padding:12px;">
+            Kein gültiger Spotify‑Link gespeichert.
+          </div>`;
+        }
+
+        await updateFocusUI();
+        return true;
+      } catch (err) {
+        console.error("loadArtistById Fehler:", err);
+        return false;
+      }
     }
 
     async function loadNextArtist() {
@@ -832,10 +901,6 @@ input:focus {
         loading = false;
       }
     }
-
-    // =========================
-    // Submit + Legal + Info
-    // =========================
 
     function openSubmit() {
       document.getElementById("submit-modal").style.display = "flex";
@@ -1026,10 +1091,25 @@ input:focus {
         infoBtn.addEventListener("click", openInfoModal);
       }
     }
+
+    async function initApp() {
+      setupCheatListener();
+
+      const params = new URLSearchParams(window.location.search);
+      const artistIdFromUrl = params.get("artist");
+
+      if (artistIdFromUrl) {
+        const ok = await loadArtistById(artistIdFromUrl);
+        if (!ok) {
+          await loadNextArtist();
+        }
+      } else {
+        await loadNextArtist();
+      }
+    }
     
     window.addEventListener("load", () => {
-      setupCheatListener();
-      loadNextArtist();
+      initApp();
     });
   </script>
 </body>
