@@ -227,7 +227,8 @@ input:focus {
 </head>
 <body>
 
-<video id="ug-bg" autoplay muted playsinline
+<!-- autoplay entfernt -->
+<video id="ug-bg" muted playsinline
   style="
     position: fixed;
     inset: 0;
@@ -382,6 +383,9 @@ input:focus {
     let lastCheatTapTime = 0;
     let cheatUsedForArtist = null;
 
+    // einmaliges Abspielen bei 100 %
+    let bgVideoPlayedForMax = false;
+
     function updateFocusBackground() {
       const video = document.getElementById("ug-bg");
       if (!video || !currentArtist) return;
@@ -390,14 +394,21 @@ input:focus {
       const clamped = Math.max(0, Math.min(MAX_FOCUS_SCORE, score));
       const targetTime = (clamped / MAX_FOCUS_SCORE) * VIDEO_DURATION;
 
-      if (isNaN(video.duration) || video.duration === 0) {
-        video.addEventListener(
-          "canplay",
-          () => { video.currentTime = targetTime; },
-          { once: true }
-        );
-      } else {
+      const setTimeAndMaybePlay = () => {
         video.currentTime = targetTime;
+
+        if (clamped >= MAX_FOCUS_SCORE && !bgVideoPlayedForMax) {
+          video.play().catch(() => {});
+          bgVideoPlayedForMax = true;
+        } else {
+          video.pause();
+        }
+      };
+
+      if (isNaN(video.duration) || video.duration === 0) {
+        video.addEventListener("canplay", setTimeAndMaybePlay, { once: true });
+      } else {
+        setTimeAndMaybePlay();
       }
     }
 
