@@ -75,12 +75,11 @@ header {
 .card-title {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 2px;
 }
 .card-sub {
   font-size: 0.82rem;
   color: #9ca3af;
-  margin-top: 0;
+  margin-top: 4px;
   margin-bottom: 12px;
 }
 .artist-name {
@@ -135,7 +134,7 @@ iframe {
   font-size: 0.75rem;
   color: #6b7280;
   text-align: center;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   min-height: 1.1em;
 }
 
@@ -249,7 +248,13 @@ input:focus {
     </header>
 
     <div class="card">
-      <div class="card-title" id="card-title">UnterGrund Explorer</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+        <div class="card-title" id="card-title">UnterGrund Explorer</div>
+        <button id="info-btn"
+                style="background:none;border:none;padding:0;font-size:0.85rem;color:#9ca3af;cursor:pointer;">
+          ⓘ
+        </button>
+      </div>
       <p class="card-sub">
         Deutsche Artists entdecken, die noch unter dem Radar fliegen.
         Pushe deine Favoriten nach oben – jeder Klick zählt.
@@ -267,7 +272,21 @@ input:focus {
           💚 Follow
         </button>
       </div>
+
       <div id="focus-info" class="focus-info"></div>
+
+      <!-- kompakter Fortschrittsbalken -->
+      <div id="focus-progress" style="margin:2px 4px 4px;">
+        <div style="display:flex;align-items:center;gap:4px;">
+          <span style="font-size:0.7rem;line-height:1;">🎵</span>
+          <div style="flex:1;height:4px;border-radius:999px;background:#020617;overflow:hidden;">
+            <div id="focus-progress-bar"
+                 style="height:100%;width:0%;background:linear-gradient(90deg,#22c55e,#a855f7);transition:width 0.25s ease-out;">
+            </div>
+          </div>
+          <span id="focus-progress-label" style="font-size:0.7rem;color:#9ca3af;min-width:2.4em;text-align:right;">0%</span>
+        </div>
+      </div>
 
       <div id="status-text" class="status-text"></div>
 
@@ -310,6 +329,28 @@ input:focus {
     </div>
   </div>
 
+  <!-- Info-Modal für Focus-Score -->
+  <div id="info-modal-backdrop" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.9);z-index:70;">
+    <div style="width:100%;max-width:420px;background:#020617;border-radius:18px;border:1px solid #1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.8rem;color:#e5e7eb;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <h2 style="font-size:0.9rem;margin:0;">Was ist der Focus‑Score?</h2>
+        <button onclick="closeInfoModal()" style="background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">&times;</button>
+      </div>
+      <p style="color:#9ca3af;line-height:1.45;margin:0 0 8px;">
+        Jeder Klick auf „Play on Spotify“ oder „Follow“ gibt diesem Artist Focus‑Punkte
+        (maximal 7 pro Browser). Dein Support entscheidet, wer aus dem UnterGrund hochkommt.
+      </p>
+      <p style="color:#9ca3af;line-height:1.45;margin:0 0 8px;">
+        Der grüne Focus‑Balken zeigt, wie weit ein Artist ist – von 0&nbsp;% bis 100&nbsp;%.
+        Je höher der Score, desto heftiger reagiert der UnterGrund im Hintergrund‑Video.
+      </p>
+      <p style="color:#9ca3af;line-height:1.45;margin:0;">
+        Erreicht ein Artist 100&nbsp;%, bekommt er die Stage: wir nehmen Kontakt auf und
+        helfen ihm, sein Profil weiter auszubauen.
+      </p>
+    </div>
+  </div>
+
   <footer>
     <button onclick="openLegal('impressum')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;margin-right:12px;">
       Impressum
@@ -329,7 +370,7 @@ input:focus {
     const MAX_FOLLOW_POINTS = 1;
 
     const MAX_FOCUS_SCORE = 1000;
-    const VIDEO_DURATION = 15; // Länge deines Videos in Sekunden (ggf. anpassen)
+    const VIDEO_DURATION = 15; // Länge deines Videos in Sekunden
 
     let allArtists = [];
     let seenArtistIds = new Set();
@@ -360,7 +401,6 @@ input:focus {
       }
     }
 
-    // Client-ID pro Browser
     function getClientId() {
       const KEY = "ug_client_id";
       let id = localStorage.getItem(KEY);
@@ -371,7 +411,6 @@ input:focus {
       return id;
     }
 
-    // zentrale Normalisierung
     function normalizeSpotifyArtistUrl(url) {
       if (!url) return null;
       let clean = url.split("?")[0].trim();
@@ -520,7 +559,6 @@ input:focus {
         (row.follow_used ? 1 : 0);
 
       if (normalPoints !== 4) return;
-
       if ((row.jump_count || 0) >= MAX_JUMP_POINTS) return;
 
       const remainingJump = MAX_JUMP_POINTS - (row.jump_count || 0);
@@ -577,11 +615,17 @@ input:focus {
       const infoEl = document.getElementById("focus-info");
       const btnPlay = document.getElementById("focus-play");
       const btnFollow = document.getElementById("focus-follow");
+      const bar = document.getElementById("focus-progress-bar");
+      const label = document.getElementById("focus-progress-label");
 
       if (!currentArtist) {
         btnPlay.disabled = true;
         btnFollow.disabled = true;
         infoEl.textContent = "";
+        if (bar && label) {
+          bar.style.width = "0%";
+          label.textContent = "0%";
+        }
         return;
       }
 
@@ -606,17 +650,29 @@ input:focus {
         (row.jump_count || 0) +
         (row.follow_used ? 1 : 0);
 
-      if (normalPoints === 4) {
+      const score = currentArtist.focus_score || 0;
+      const pct = Math.max(0, Math.min(100, Math.round((score / MAX_FOCUS_SCORE) * 100)));
+
+      if (score >= MAX_FOCUS_SCORE) {
+        infoEl.textContent =
+          `${currentArtist.name || "Dieser Artist"} hat die Stage erreicht – wir nehmen Kontakt auf.`;
+      } else if (normalPoints === 4) {
         infoEl.textContent =
           `Du hast ${currentArtist.name || "diesen Artist"} voll gepusht. ` +
           "Manche entdecken hier noch einen versteckten UnterGrund‑Boost.";
       } else if (totalLeft > 0) {
         infoEl.textContent =
+          `Jeder Push erhöht den Focus‑Score (0–100 %). ` +
           `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen ` +
           `(max. ${maxTotal} Punkte pro Browser).`;
       } else {
         infoEl.textContent =
           `Du hast ${currentArtist.name || "diesen Artist"} maximal gepusht. Danke!`;
+      }
+
+      if (bar && label) {
+        bar.style.width = pct + "%";
+        label.textContent = pct + "%";
       }
     }
 
@@ -692,6 +748,8 @@ input:focus {
       const btnPlay = document.getElementById("focus-play");
       const btnFollow = document.getElementById("focus-follow");
       const infoEl = document.getElementById("focus-info");
+      const bar = document.getElementById("focus-progress-bar");
+      const label = document.getElementById("focus-progress-label");
 
       nameEl.textContent = "Suche nächsten Artist…";
       statusEl.textContent = "";
@@ -701,6 +759,10 @@ input:focus {
       btnPlay.disabled = true;
       btnFollow.disabled = true;
       infoEl.textContent = "";
+      if (bar && label) {
+        bar.style.width = "0%";
+        label.textContent = "0%";
+      }
 
       cheatTapCount = 0;
       lastCheatTapTime = 0;
@@ -753,7 +815,7 @@ input:focus {
     }
 
     // =========================
-    // Submit + Legal
+    // Submit + Legal + Info
     // =========================
 
     function openSubmit() {
@@ -764,6 +826,16 @@ input:focus {
 
     function closeSubmit() {
       document.getElementById("submit-modal").style.display = "none";
+    }
+
+    function openInfoModal() {
+      const backdrop = document.getElementById("info-modal-backdrop");
+      if (backdrop) backdrop.style.display = "flex";
+    }
+
+    function closeInfoModal() {
+      const backdrop = document.getElementById("info-modal-backdrop");
+      if (backdrop) backdrop.style.display = "none";
     }
 
     async function submitArtist() {
@@ -914,21 +986,26 @@ input:focus {
 
     function setupCheatListener() {
       const titleEl = document.getElementById("card-title");
-      if (!titleEl) return;
+      if (titleEl) {
+        titleEl.addEventListener("click", () => {
+          const now = Date.now();
+          if (now - lastCheatTapTime > 1500) {
+            cheatTapCount = 0;
+          }
+          lastCheatTapTime = now;
+          cheatTapCount += 1;
 
-      titleEl.addEventListener("click", () => {
-        const now = Date.now();
-        if (now - lastCheatTapTime > 1500) {
-          cheatTapCount = 0;
-        }
-        lastCheatTapTime = now;
-        cheatTapCount += 1;
+          if (cheatTapCount >= 5) {
+            cheatTapCount = 0;
+            triggerCheatBoost();
+          }
+        });
+      }
 
-        if (cheatTapCount >= 5) {
-          cheatTapCount = 0;
-          triggerCheatBoost();
-        }
-      });
+      const infoBtn = document.getElementById("info-btn");
+      if (infoBtn) {
+        infoBtn.addEventListener("click", openInfoModal);
+      }
     }
     
     window.addEventListener("load", () => {
