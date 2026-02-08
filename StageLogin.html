@@ -1,1 +1,213 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>UnterGrund Stage Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+    }
+    .login-container {
+      background: rgba(0, 0, 0, 0.82);
+      border: 1px solid rgba(28, 255, 136, 0.35);
+      box-shadow: 0 0 25px rgba(28, 255, 136, 0.25);
+      border-radius: 18px;
+      padding: 28px 24px 24px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .logo {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #9effc7;
+      margin-bottom: 6px;
+    }
+    h1 {
+      margin: 0 0 6px;
+      font-size: 22px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #c4c4c4;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(15, 15, 15, 0.9);
+      color: #f5f5f5;
+      font-size: 14px;
+      outline: none;
+    }
+    input:focus {
+      border-color: #1cff88;
+      box-shadow: 0 0 0 1px rgba(28, 255, 136, 0.45);
+    }
+    .field {
+      margin-bottom: 14px;
+    }
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 11px 14px;
+      margin-top: 4px;
+      background: linear-gradient(90deg, #1cff88, #00b35c);
+      color: #020202;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(28, 255, 136, 0.45);
+      filter: brightness(1.05);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+    .status {
+      margin-top: 10px;
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .status.error {
+      color: #ff6b6b;
+    }
+    .status.success {
+      color: #9effc7;
+    }
+    .hint {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #a0a0a0;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">UnterGrund Explorer</div>
+    <h1>Stage Login</h1>
+    <div class="subtitle">
+      Artist‑Name und Einladungspasswort eingeben, um deine Stage zu bearbeiten.
+    </div>
 
+    <div class="field">
+      <label for="artistName">Artist Name</label>
+      <input id="artistName" type="text" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label for="password">Einladungspasswort</label>
+      <input id="password" type="password" autocomplete="off" />
+    </div>
+
+    <button id="loginButton">Stage betreten</button>
+    <div id="status" class="status"></div>
+    <div class="hint">
+      Du hast eine Einladung bekommen, aber es klappt nicht?<br />
+      Prüfe Schreibweise deines Artist‑Namens genau so, wie er auf deiner Einladung steht.
+    </div>
+  </div>
+
+  <!-- Supabase JS (ersetze ggf. Version/URL, falls du schon ein anderes Script nutzt) -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+  <script>
+    // TODO: Deine Supabase Daten einsetzen
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const artistInput = document.getElementById("artistName");
+    const passwordInput = document.getElementById("password");
+    const loginButton = document.getElementById("loginButton");
+    const statusEl = document.getElementById("status");
+
+    function setStatus(message, type = "") {
+      statusEl.textContent = message;
+      statusEl.className = "status " + type;
+    }
+
+    loginButton.addEventListener("click", async () => {
+      const artistName = artistInput.value.trim();
+      const password = passwordInput.value.trim();
+
+      if (!artistName || !password) {
+        setStatus("Bitte Artist‑Name und Einladungspasswort eingeben.", "error");
+        return;
+      }
+
+      loginButton.disabled = true;
+      setStatus("Prüfe Zugang …");
+
+      try {
+        const { data, error } = await client
+          .from("artists")
+          .select("id, stage_unlocked, stage_password")
+          .eq("name", artistName)
+          .limit(1)
+          .single();
+
+        if (error || !data) {
+          setStatus("Artist nicht gefunden oder noch nicht für die Stage freigeschaltet.", "error");
+          loginButton.disabled = false;
+          return;
+        }
+
+        if (!data.stage_unlocked) {
+          setStatus("Dieser Artist wurde noch nicht für die Stage freigegeben.", "error");
+          loginButton.disabled = false;
+          return;
+        }
+
+        if (!data.stage_password || data.stage_password !== password) {
+          setStatus("Einladungspasswort stimmt nicht.", "error");
+          loginButton.disabled = false;
+          return;
+        }
+
+        setStatus("Zugang erfolgreich. Weiterleitung …", "success");
+
+        // Weiterleitung zu StageFormular.html mit artist_id
+        const targetUrl = `StageFormular.html?artist_id=${encodeURIComponent(data.id)}`;
+        window.location.href = targetUrl;
+      } catch (e) {
+        console.error(e);
+        setStatus("Unerwarteter Fehler beim Login.", "error");
+        loginButton.disabled = false;
+      }
+    });
+
+    // Enter‑Key Support
+    [artistInput, passwordInput].forEach((el) => {
+      el.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+          loginButton.click();
+        }
+      });
+    });
+  </script>
+</body>
+</html>
