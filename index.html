@@ -288,7 +288,7 @@ input:focus {
         </div>
       </div>
 
-      <div id="status-text" class="status-text"></div>
+            <div id="status-text" class="status-text"></div>
 
       <!-- Teilen-Button -->
       <button class="pill-btn"
@@ -297,9 +297,20 @@ input:focus {
         📤 Diesen Artist aus dem UnterGrund pushen
       </button>
 
+      <!-- STAGE: Button + Hinweis -->
+      <button id="stage-button"
+              class="pill-btn"
+              style="width:100%;justify-content:center;margin-top:8px;display:none;background:#22c55e;color:#022c22;"
+              onclick="openStageForCurrentArtist()">
+        🚀 Stage ansehen
+      </button>
+      <div id="stage-hint" class="focus-info" style="margin-top:2px;"></div>
+      <!-- /STAGE -->
+
       <button class="pill-btn" style="width:100%;justify-content:center;margin-top:8px;" onclick="loadNextArtist()">
         🔁 Nächster Artist
       </button>
+
     </div>
   </div>
   
@@ -621,12 +632,21 @@ input:focus {
       await updateFocusUI();
     }
 
-    async function updateFocusUI() {
+    // STAGE: öffentlicher Stage-Link
+    function openStageForCurrentArtist() {
+      if (!currentArtist) return;
+      window.location.href = `Stage.html?artist_id=${encodeURIComponent(currentArtist.id)}`;
+    }
+
+    
+     async function updateFocusUI() {
       const infoEl = document.getElementById("focus-info");
       const btnPlay = document.getElementById("focus-play");
       const btnFollow = document.getElementById("focus-follow");
       const bar = document.getElementById("focus-progress-bar");
       const label = document.getElementById("focus-progress-label");
+      const stageBtn = document.getElementById("stage-button");   // STAGE
+      const stageHint = document.getElementById("stage-hint");    // STAGE
 
       if (!currentArtist) {
         btnPlay.disabled = true;
@@ -636,6 +656,8 @@ input:focus {
           bar.style.width = "0%";
           label.textContent = "0%";
         }
+        if (stageBtn) stageBtn.style.display = "none";            // STAGE
+        if (stageHint) stageHint.textContent = "";                // STAGE
         return;
       }
 
@@ -691,7 +713,22 @@ input:focus {
         bar.style.width = pct + "%";
         label.textContent = pct + "%";
       }
+
+      // STAGE: Button und Hinweis steuern
+      const reachedStage = score >= MAX_FOCUS_SCORE;
+      if (stageBtn) {
+        stageBtn.style.display = reachedStage ? "block" : "none";
+      }
+      if (stageHint) {
+        if (reachedStage) {
+          stageHint.textContent =
+            "Dieser Artist hat die Stage erreicht. Sobald er seine Stage füllt, kannst du hier sehen, was er der Community zurückgibt.";
+        } else {
+          stageHint.textContent = "";
+        }
+      }
     }
+
 
     async function handleFocusPlay() {
       if (!currentArtist) return;
@@ -824,7 +861,7 @@ input:focus {
       }
     }
 
-    async function loadNextArtist() {
+        async function loadNextArtist() {
       if (loading) return;
       loading = true;
 
@@ -837,6 +874,8 @@ input:focus {
       const infoEl = document.getElementById("focus-info");
       const bar = document.getElementById("focus-progress-bar");
       const label = document.getElementById("focus-progress-label");
+      const stageBtn = document.getElementById("stage-button"); // STAGE
+      const stageHint = document.getElementById("stage-hint"); // STAGE
 
       nameEl.textContent = "Suche nächsten Artist…";
       statusEl.textContent = "";
@@ -850,6 +889,8 @@ input:focus {
         bar.style.width = "0%";
         label.textContent = "0%";
       }
+      if (stageBtn) stageBtn.style.display = "none";   // STAGE
+      if (stageHint) stageHint.textContent = "";       // STAGE
 
       cheatTapCount = 0;
       lastCheatTapTime = 0;
