@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <title>UnterGrund Stage</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Stage-Artist-Font -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Russo+One&display=swap"
+    rel="stylesheet"
+  />
+
   <style>
     * { box-sizing: border-box; }
     body {
@@ -14,17 +21,19 @@
       overflow: hidden;
       background: #000;
     }
+
     .bg-video {
       position: fixed;
       inset: 0;
       overflow: hidden;
-      z-index: -1;
+      z-index: -2;
     }
     .bg-video video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      filter: brightness(0.28) saturate(1.2);
+      object-position: center 20%;
+      filter: brightness(0.32) saturate(1.25);
     }
     .overlay {
       position: fixed;
@@ -32,6 +41,7 @@
       background: radial-gradient(circle at top, rgba(28,255,136,0.25) 0, rgba(0,0,0,0.9) 45%, #000 100%);
       z-index: -1;
     }
+
     .stage-wrap {
       position: relative;
       min-height: 100vh;
@@ -40,17 +50,20 @@
       justify-content: center;
       align-items: center;
     }
+
     .stage-card {
       width: 100%;
-      max-width: 960px;
+      max-width: 1040px;
       max-height: 92vh;
       overflow-y: auto;
       background: rgba(0,0,0,0.86);
       border-radius: 22px;
       border: 1px solid rgba(28,255,136,0.4);
       box-shadow: 0 0 40px rgba(28,255,136,0.35);
-      padding: 20px 20px 18px;
+      padding: 24px 26px 20px;
+      position: relative;
     }
+
     .top-row {
       display: flex;
       gap: 18px;
@@ -64,10 +77,17 @@
       text-transform: uppercase;
       color: #9effc7;
     }
+
+    /* Artist-Name in Stage-Font */
     .artist-name {
-      font-size: 22px;
-      font-weight: 600;
+      font-family: "Russo One", system-ui, sans-serif;
+      font-size: 26px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #f9fafb;
+      text-shadow: 0 0 10px rgba(0,0,0,0.9), 0 0 18px rgba(28,255,136,0.5);
     }
+
     .badge {
       font-size: 11px;
       text-transform: uppercase;
@@ -78,6 +98,28 @@
       color: #9effc7;
       background: rgba(10,40,25,0.9);
     }
+
+    /* Zurück-Button oben rechts */
+    .close-btn {
+      position: absolute;
+      top: 16px;
+      right: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.95);
+      color: #e5e7eb;
+      padding: 6px 12px;
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .close-btn:hover {
+      border-color: #1cff88;
+      box-shadow: 0 0 12px rgba(28,255,136,0.35);
+      color: #bbf7d0;
+    }
+
     .profile-section {
       display: flex;
       gap: 18px;
@@ -85,8 +127,8 @@
       margin-bottom: 12px;
     }
     .photo-wrap {
-      flex: 0 0 160px;
-      max-width: 180px;
+      flex: 0 0 170px;
+      max-width: 190px;
       border-radius: 18px;
       overflow: hidden;
       border: 1px solid rgba(255,255,255,0.12);
@@ -107,11 +149,13 @@
       padding: 20px 10px;
       color: #d0ffd9;
     }
+
     .bio {
       flex: 1 1 220px;
       font-size: 14px;
       color: #dcdcdc;
     }
+
     .section-title {
       font-size: 12px;
       text-transform: uppercase;
@@ -126,19 +170,7 @@
       color: #f0f0f0;
       white-space: pre-wrap;
     }
-    .pill-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 4px;
-    }
-    .pill {
-      padding: 5px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.15);
-    }
+
     .contact-link a {
       color: #1cff88;
       text-decoration: none;
@@ -147,22 +179,51 @@
     .contact-link a:hover {
       text-decoration: underline;
     }
+
     .status {
       font-size: 13px;
       margin-top: 6px;
       color: #ff8a8a;
+      min-height: 1.2em;
+    }
+
+    @media (max-width: 600px) {
+      .stage-wrap {
+        padding: 14px 8px 18px;
+        align-items: flex-start;
+      }
+      .stage-card {
+        border-radius: 18px;
+        padding: 18px 14px 16px;
+      }
+      .profile-section {
+        flex-direction: column;
+      }
+      .photo-wrap {
+        flex: 0 0 auto;
+        max-width: 100%;
+        max-height: 260px;
+      }
+      .artist-name {
+        font-size: 22px;
+      }
+      .close-btn {
+        top: 10px;
+        right: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Video-Hintergrund -->
   <div class="bg-video">
-    <video src="Stage.mp4" autoplay muted loop playsinline></video>
+    <video src="untergrund-stage.mp4" autoplay muted loop playsinline></video>
   </div>
   <div class="overlay"></div>
 
   <div class="stage-wrap">
     <div class="stage-card">
+      <button id="backButton" class="close-btn">Zurück</button>
+
       <div class="top-row">
         <div>
           <div class="logo">UnterGrund Explorer</div>
@@ -199,10 +260,9 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
-    // Gleiche Werte wie in den anderen Dateien einsetzen
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
-    const STORAGE_BUCKET = "stage-photos"; // Bucket-Name
+    const STORAGE_BUCKET = "stage-photos";
 
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -213,6 +273,7 @@
     const contactEl = document.getElementById("contact");
     const statusEl = document.getElementById("status");
     const photoWrap = document.getElementById("photoWrap");
+    const backButton = document.getElementById("backButton");
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
@@ -223,12 +284,24 @@
       return params.get("artist_id");
     }
 
+    function goBackToExplorer(artistId) {
+      // zurück zur Karte dieses Artists im Explorer
+      if (artistId) {
+        window.location.href = `index.html?artist=${encodeURIComponent(artistId)}`;
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
     async function loadStage() {
       const artistId = getArtistIdFromUrl();
       if (!artistId) {
         setStatus("Keine artist_id in der URL gefunden.");
         return;
       }
+
+      // Back-Button an Artist koppeln
+      backButton.addEventListener("click", () => goBackToExplorer(artistId));
 
       setStatus("Stage wird geladen …");
 
@@ -245,12 +318,13 @@
         return;
       }
 
+      artistNameEl.textContent = data.name || "Artist";
+
       if (!data.stage_unlocked) {
         setStatus("Dieser Artist wurde noch nicht offiziell auf die Stage eingeladen.");
-        return;
+      } else {
+        setStatus("");
       }
-
-      artistNameEl.textContent = data.name || "Artist";
 
       musicConnectionEl.textContent = data.stage_music_connection || "Noch nichts eingetragen.";
       ugMessageEl.textContent = data.stage_ug_message || "Noch keine Botschaft an die Community.";
@@ -281,8 +355,6 @@
           photoWrap.appendChild(img);
         }
       }
-
-      setStatus("");
     }
 
     loadStage();
