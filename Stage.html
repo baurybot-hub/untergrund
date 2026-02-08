@@ -21,7 +21,7 @@
       overflow: hidden;
     }
 
-    /* ── Video-Hintergrund ───────────────────────────────────────── */
+    /* ── Video-Hintergrund ───────────────────────────────────── */
 
     .bg-video {
       position: fixed;
@@ -31,7 +31,7 @@
       background: #000;
     }
 
-    /* Desktop: komplette 16:9 Bühne sichtbar (Letterbox, kein Crop) */
+    /* Desktop: komplette 16:9 Bühne sichtbar (Letterbox) */
     .bg-video video {
       width: 100%;
       height: 100%;
@@ -41,7 +41,7 @@
       background: #000;
     }
 
-    /* Mobile: Video soll fullscreen wirken (darf croppen) */
+    /* Mobile: Video darf fullscreen wirken */
     @media (max-width: 600px) {
       .bg-video video {
         width: 100%;
@@ -64,31 +64,21 @@
       pointer-events: none;
     }
 
-    /* ── Stage-Layout: Card unten wie ein Control-Panel ─────────── */
+    /* ── Stage-Photo-Orb ────────────────────────────────────── */
 
-    .stage-wrap {
-      position: relative;
-      min-height: 100vh;
-      padding: 0 14px 22px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-    }
-
-    /* Orb optional (kannst du später wieder einbauen) */
     .stage-photo-orb {
       position: fixed;
       top: 13vh;
       left: 50%;
       transform: translateX(-50%);
-      width: 180px;
-      height: 180px;
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
       overflow: hidden;
       border: 2px solid rgba(28,255,136,0.9);
       box-shadow:
-        0 0 24px rgba(28,255,136,0.6),
-        0 0 60px rgba(0,0,0,0.9);
+        0 0 28px rgba(28,255,136,0.7),
+        0 0 80px rgba(0,0,0,0.95);
       background: radial-gradient(circle, #000 0, #020617 60%);
       z-index: 0;
     }
@@ -112,194 +102,321 @@
       padding: 10px;
     }
 
-    /* ── Neue Stage-Card im Control-Panel-Stil ───────────────────── */
-
-    .stage-card {
-      width: 100%;
-      max-width: 780px;
-      background: radial-gradient(circle at top left,
-                  rgba(15,23,42,0.96) 0,
-                  rgba(3,7,18,0.98) 40%,
-                  rgba(3,7,18,1) 100%);
-      border-radius: 26px;
-      border: 1px solid rgba(31,41,55,0.9);
-      box-shadow:
-        0 26px 70px rgba(0,0,0,0.9),
-        0 0 26px rgba(34,197,94,0.35);
-      padding: 18px 20px 16px;
-      position: relative;
-      display: grid;
-      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
-      column-gap: 20px;
-      row-gap: 10px;
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+    @media (max-width: 600px) {
+      .stage-photo-orb {
+        top: 16vh;
+        width: 180px;
+        height: 180px;
+      }
     }
 
-    /* Header-Zeile über die gesamte Card */
-    .stage-card-header {
-      grid-column: 1 / -1;
+    /* ── Wrapper ────────────────────────────────────────────── */
+
+    .stage-wrap {
+      position: relative;
+      min-height: 100vh;
+      padding: 0 14px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    /* ── Backstage-Pass-Card ───────────────────────────────── */
+
+    .stage-pass {
+      width: 100%;
+      max-width: 820px;
+      background: radial-gradient(circle at top left,
+                  rgba(15,23,42,0.96) 0,
+                  rgba(2,6,23,0.98) 45%,
+                  rgba(0,0,0,0.98) 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(55,65,81,0.95);
+      box-shadow:
+        0 30px 80px rgba(0,0,0,0.95),
+        0 0 30px rgba(34,197,94,0.45);
+      padding: 16px 18px 14px;
+      position: relative;
+      color: #e5e7eb;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    /* Lasche oben (Backstage-Pass-Anmutung) */
+    .stage-pass::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.6);
+      background: radial-gradient(circle at top,
+                  rgba(15,23,42,0.96) 0,
+                  rgba(15,23,42,0.9) 55%,
+                  rgba(15,23,42,0) 100%);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.9);
+    }
+    .stage-pass::after {
+      content: "";
+      position: absolute;
+      top: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 22px;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(15,23,42,1);
+      border: 1px solid rgba(75,85,99,0.95);
+    }
+
+    /* Header */
+    .stage-pass-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 4px;
+      gap: 10px;
+      margin-bottom: 10px;
     }
 
-    .stage-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .stage-subtitle {
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #6ee7b7;
-    }
-
-    .artist-name {
-      font-family: "Russo One", system-ui, sans-serif;
-      font-size: 22px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #f9fafb;
-    }
-
-    .stage-pill-row {
-      display: flex;
+    .stage-pass-badge {
+      display: inline-flex;
       align-items: center;
       gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(34,197,94,0.8);
+      box-shadow: 0 0 14px rgba(34,197,94,0.45);
     }
-
-    .badge {
+    .pass-label {
       font-size: 10px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      padding: 3px 9px;
-      border-radius: 999px;
-      border: 1px solid rgba(34,197,94,0.9);
       color: #bbf7d0;
-      background: radial-gradient(circle,
-                  rgba(21,128,61,0.9) 0,
-                  rgba(6,78,59,0.95) 40%,
-                  rgba(2,6,23,1) 100%);
+    }
+    .pass-tier {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: linear-gradient(90deg,#22c55e,#06b6d4);
+      color: #022c22;
     }
 
-    .close-btn {
+    .pass-close {
       border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.7);
-      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(148,163,184,0.75);
+      background: rgba(15,23,42,0.95);
       color: #e5e7eb;
       padding: 6px 12px;
       font-size: 10px;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
     }
-    .close-btn:hover {
+    .pass-close:hover {
       border-color: #22c55e;
       box-shadow: 0 0 12px rgba(34,197,94,0.35);
-      color: #bbf7d0;
     }
 
-    /* Linke Spalte: Story */
-    .stage-col-left {
+    /* Main: ID-Spalte + Meta-Spalte */
+    .stage-pass-main {
+      display: grid;
+      grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
+      gap: 18px;
+      margin-bottom: 12px;
+    }
+
+    /* ID-Spalte */
+    .pass-id-column {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
 
-    .section-title {
+    .pass-chip-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(75,85,99,0.9);
+      font-size: 11px;
+    }
+    .chip {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      background: linear-gradient(135deg,#22c55e,#0ea5e9);
+      box-shadow: 0 0 12px rgba(34,197,94,0.6);
+    }
+    .chip-text {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+    }
+    .chip-id {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #e5e7eb;
+    }
+
+    .pass-name-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #9ca3af;
+      margin-bottom: 2px;
+    }
+    .pass-name-value {
+      font-family: "Russo One", system-ui, sans-serif;
+      font-size: 24px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #f9fafb;
+      text-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+
+    .pass-tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pass-tag {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.9);
+    }
+    .pass-tag-stage {
+      border-color: rgba(34,197,94,0.9);
+      color: #bbf7d0;
+    }
+    .pass-tag-status {
+      color: #e5e7eb;
+    }
+
+    /* Meta-Spalte */
+    .pass-meta-column {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pass-meta-block {
+      padding: 8px 9px;
+      border-radius: 14px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(51,65,85,0.95);
+    }
+    .pass-meta-label {
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      color: #a7f3d0;
+      color: #7dd3fc;
       margin-bottom: 2px;
     }
-
-    .text-block {
+    .pass-meta-text {
       font-size: 13px;
       line-height: 1.5;
       color: #e5e7eb;
       white-space: pre-wrap;
     }
 
-    /* Rechte Spalte: Collab + Kontakt als Block */
-    .stage-col-right {
-      align-self: stretch;
+    /* Body: 2 Textbereiche */
+    .stage-pass-body {
+      display: grid;
+      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+      gap: 16px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(31,41,55,0.9);
+    }
+    .pass-section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9effc7;
+      margin-bottom: 4px;
+    }
+    .pass-section-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #e5e7eb;
+      white-space: pre-wrap;
+    }
+
+    /* Footer */
+    .stage-pass-footer {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 10px 12px;
-      border-radius: 18px;
-      background: radial-gradient(circle at top,
-                  rgba(15,23,42,0.95) 0,
-                  rgba(15,23,42,0.98) 45%,
-                  rgba(2,6,23,1) 100%);
-      border: 1px solid rgba(51,65,85,0.9);
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(55,65,81,0.9);
+    }
+    .pass-status-line {
+      font-size: 12px;
+      color: #fca5a5;
+      min-height: 1.2em;
+    }
+    .pass-footer-code {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #9ca3af;
+    }
+    .code-label {
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #6ee7b7;
     }
 
-    .stage-col-right .section-title {
-      color: #7dd3fc;
-    }
-
+    /* Links */
     .contact-link a {
       color: #22c55e;
       text-decoration: none;
-      font-size: 13px;
       word-break: break-all;
     }
     .contact-link a:hover {
       text-decoration: underline;
     }
 
-    .status {
-      grid-column: 1 / -1;
-      font-size: 12px;
-      margin-top: 4px;
-      color: #fca5a5;
-      min-height: 1.2em;
-    }
-
-    /* ── Mobile: einspaltig, Panel bleibt stylisch ──────────────── */
-
+    /* Mobile */
     @media (max-width: 600px) {
       .stage-wrap {
         padding: 0 10px 16px;
-        align-items: flex-end;
       }
 
-      .stage-photo-orb {
-        top: 12vh;
-        width: 160px;
-        height: 160px;
-      }
-
-      .stage-card {
-        grid-template-columns: minmax(0, 1fr);
-        row-gap: 12px;
-        padding: 16px 14px 14px;
+      .stage-pass {
+        padding: 14px 12px 12px;
         border-radius: 20px;
-        max-width: 100%;
       }
 
-      .stage-card-header {
-        align-items: flex-start;
+      .stage-pass-main {
+        grid-template-columns: minmax(0,1fr);
+        gap: 12px;
       }
 
-      .artist-name { font-size: 20px; }
-      .section-title { font-size: 11px; }
-      .text-block { font-size: 13px; }
-
-      .stage-col-right {
-        padding: 10px 10px;
+      .stage-pass-body {
+        grid-template-columns: minmax(0,1fr);
+        gap: 12px;
       }
 
-      .close-btn {
+      .pass-name-value {
+        font-size: 20px;
+      }
+
+      .pass-close {
         padding: 5px 10px;
-        font-size: 9px;
       }
     }
   </style>
@@ -311,7 +428,7 @@
   </div>
   <div class="overlay"></div>
 
-  <!-- optionaler Orb in der Bühne -->
+  <!-- Stage-Foto-Orb -->
   <div class="stage-photo-orb" id="stageOrb">
     <div class="orb-placeholder" id="orbPlaceholder">
       Exklusives Stage‑Foto<br />
@@ -321,45 +438,66 @@
     </div>
   </div>
 
-  <!-- Stage-Control-Panel -->
+  <!-- Backstage-Pass-Card -->
   <div class="stage-wrap">
-    <div class="stage-card">
-      <div class="stage-card-header">
-        <div class="stage-meta">
-          <div class="stage-subtitle">UnterGrund Stage</div>
-          <div id="artistName" class="artist-name">Artist</div>
-          <div class="stage-pill-row">
-            <span class="badge">Stage</span>
+    <div class="stage-pass">
+      <div class="stage-pass-header">
+        <div class="stage-pass-badge">
+          <span class="pass-label">UNDERGROUND → STAGE</span>
+          <span class="pass-tier">PUSHED</span>
+        </div>
+        <button id="backButton" class="pass-close">Zurück</button>
+      </div>
+
+      <div class="stage-pass-main">
+        <div class="pass-id-column">
+          <div class="pass-chip-row">
+            <span class="chip"></span>
+            <span class="chip-text">Stage‑ID</span>
+            <span id="artistIdDisplay" class="chip-id">#0000</span>
+          </div>
+
+          <div class="pass-name">
+            <div class="pass-name-label">Artist</div>
+            <div id="artistName" class="pass-name-value">Artist Name</div>
+          </div>
+
+          <div class="pass-tag-row">
+            <span class="pass-tag pass-tag-stage">Stage</span>
+            <span class="pass-tag pass-tag-status" id="passStatusTag">pending</span>
           </div>
         </div>
-        <button id="backButton" class="close-btn">Zurück</button>
-      </div>
 
-      <!-- Linke Spalte -->
-      <div class="stage-col-left">
-        <div>
-          <div class="section-title">Was verbindet ihn/sie mit Musik?</div>
-          <div id="musicConnection" class="text-block"></div>
-        </div>
-        <div>
-          <div class="section-title">Botschaft an die UnterGrund‑Community</div>
-          <div id="ugMessage" class="text-block"></div>
-        </div>
-      </div>
-
-      <!-- Rechte Spalte -->
-      <div class="stage-col-right">
-        <div>
-          <div class="section-title">Collab‑Wunsch</div>
-          <div id="collabNote" class="text-block"></div>
-        </div>
-        <div>
-          <div class="section-title">Kontakt</div>
-          <div id="contact" class="text-block contact-link"></div>
+        <div class="pass-meta-column">
+          <div class="pass-meta-block">
+            <div class="pass-meta-label">Collab‑Wunsch</div>
+            <div id="collabNote" class="pass-meta-text"></div>
+          </div>
+          <div class="pass-meta-block">
+            <div class="pass-meta-label">Kontakt</div>
+            <div id="contact" class="pass-meta-text contact-link"></div>
+          </div>
         </div>
       </div>
 
-      <div id="status" class="status"></div>
+      <div class="stage-pass-body">
+        <div class="pass-section">
+          <div class="pass-section-label">Verbindung zu Musik</div>
+          <div id="musicConnection" class="pass-section-text"></div>
+        </div>
+        <div class="pass-section">
+          <div class="pass-section-label">Botschaft an die UnterGrund‑Community</div>
+          <div id="ugMessage" class="pass-section-text"></div>
+        </div>
+      </div>
+
+      <div class="stage-pass-footer">
+        <div id="status" class="pass-status-line"></div>
+        <div class="pass-footer-code">
+          <span class="code-label">UG‑Route</span>
+          <span class="code-value">EXPLORER › COMMUNITY › STAGE</span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -380,6 +518,8 @@
     const backButton = document.getElementById("backButton");
     const orb = document.getElementById("stageOrb");
     const orbPlaceholder = document.getElementById("orbPlaceholder");
+    const artistIdDisplay = document.getElementById("artistIdDisplay");
+    const passStatusTag = document.getElementById("passStatusTag");
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
@@ -410,7 +550,7 @@
 
       const { data, error } = await client
         .from("artists")
-        .select("name, stage_unlocked, stage_music_connection, stage_ug_message, stage_photo_path, stage_collab_note, stage_contact")
+        .select("id, name, stage_unlocked, stage_music_connection, stage_ug_message, stage_photo_path, stage_collab_note, stage_contact")
         .eq("id", artistId)
         .limit(1)
         .single();
@@ -422,11 +562,18 @@
       }
 
       artistNameEl.textContent = data.name || "Artist";
+      artistIdDisplay.textContent = data.id ? "#" + String(data.id).padStart(4,"0") : "#0000";
 
       if (!data.stage_unlocked) {
         setStatus("Dieser Artist wurde noch nicht offiziell auf die Stage eingeladen.");
+        passStatusTag.textContent = "pending";
+        passStatusTag.style.borderColor = "rgba(248,113,113,0.9)";
+        passStatusTag.style.color = "#fecaca";
       } else {
         setStatus("");
+        passStatusTag.textContent = "live";
+        passStatusTag.style.borderColor = "rgba(34,197,94,0.9)";
+        passStatusTag.style.color = "#bbf7d0";
       }
 
       musicConnectionEl.textContent = data.stage_music_connection || "Noch nichts eingetragen.";
