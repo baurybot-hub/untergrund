@@ -18,52 +18,71 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #f5f5f5;
       background: #020617;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── Hero / Bühne ── */
-    .stage-hero {
-      position: relative;
-      width: 100%;
-      height: 46vh;
-      max-height: 460px;
       overflow: hidden;
     }
+
+    /* ── Video-Hintergrund ───────────────────────────────────────── */
 
     .bg-video {
-      position: absolute;
+      position: fixed;
       inset: 0;
       overflow: hidden;
-      z-index: -1;
+      z-index: -2;
+      background: #000;
     }
+
+    /* Desktop: komplette 16:9 Bühne sichtbar (Letterbox, kein Crop) */
     .bg-video video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
-      object-position: center top;
+      object-fit: contain;
+      object-position: center center;
       filter: brightness(0.6) saturate(1.2);
+      background: #000;
     }
 
-    .hero-overlay {
-      position: absolute;
+    /* Mobile: Video soll fullscreen wirken (darf croppen) */
+    @media (max-width: 600px) {
+      .bg-video video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        background: #000;
+      }
+    }
+
+    .overlay {
+      position: fixed;
       inset: 0;
       background:
         radial-gradient(ellipse at top center,
-          rgba(28,255,136,0.16) 0%,
-          rgba(0,0,0,0.35) 40%,
-          rgba(0,0,0,0.9) 100%);
+          rgba(28,255,136,0.18) 0%,
+          rgba(0,0,0,0.3) 40%,
+          rgba(0,0,0,0.85) 100%);
+      z-index: -1;
       pointer-events: none;
     }
 
-    /* Orb in der Bühne */
+    /* ── Stage-Layout: Card unten wie ein Control-Panel ─────────── */
+
+    .stage-wrap {
+      position: relative;
+      min-height: 100vh;
+      padding: 0 14px 22px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+    }
+
+    /* Orb optional (kannst du später wieder einbauen) */
     .stage-photo-orb {
-      position: absolute;
-      top: 52%;
+      position: fixed;
+      top: 13vh;
       left: 50%;
-      transform: translate(-50%, -50%);
-      width: 200px;
-      height: 200px;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
       overflow: hidden;
       border: 2px solid rgba(28,255,136,0.9);
@@ -71,7 +90,7 @@
         0 0 24px rgba(28,255,136,0.6),
         0 0 60px rgba(0,0,0,0.9);
       background: radial-gradient(circle, #000 0, #020617 60%);
-      z-index: 1;
+      z-index: 0;
     }
     .stage-photo-orb img {
       width: 100%;
@@ -93,111 +112,143 @@
       padding: 10px;
     }
 
-    /* ── Content-Bereich ── */
-    .stage-shell {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      padding: 0 12px 20px;
-      background: radial-gradient(circle at top, #020617 0, #020617 55%, #000 100%);
-    }
+    /* ── Neue Stage-Card im Control-Panel-Stil ───────────────────── */
 
     .stage-card {
       width: 100%;
-      max-width: 760px;
-      margin-top: -70px;  /* Card überlappt die Bühne leicht */
-      background: rgba(15,23,42,0.96);
-      border-radius: 24px;
-      border: 1px solid rgba(28,255,136,0.5);
+      max-width: 780px;
+      background: radial-gradient(circle at top left,
+                  rgba(15,23,42,0.96) 0,
+                  rgba(3,7,18,0.98) 40%,
+                  rgba(3,7,18,1) 100%);
+      border-radius: 26px;
+      border: 1px solid rgba(31,41,55,0.9);
       box-shadow:
-        0 26px 60px rgba(0,0,0,0.8),
-        0 0 32px rgba(28,255,136,0.38);
-      padding: 22px 22px 18px;
+        0 26px 70px rgba(0,0,0,0.9),
+        0 0 26px rgba(34,197,94,0.35);
+      padding: 18px 20px 16px;
       position: relative;
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+      column-gap: 20px;
+      row-gap: 10px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
-    .top-row {
+    /* Header-Zeile über die gesamte Card */
+    .stage-card-header {
+      grid-column: 1 / -1;
       display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
       align-items: center;
-      margin-bottom: 12px;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
     }
-    .logo {
-      font-size: 12px;
+
+    .stage-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stage-subtitle {
+      font-size: 11px;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #9effc7;
+      color: #6ee7b7;
     }
+
     .artist-name {
       font-family: "Russo One", system-ui, sans-serif;
-      font-size: 26px;
+      font-size: 22px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #f9fafb;
     }
+
+    .stage-pill-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .badge {
-      font-size: 11px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      padding: 4px 10px;
+      padding: 3px 9px;
       border-radius: 999px;
-      border: 1px solid rgba(28,255,136,0.7);
-      color: #9effc7;
-      background: rgba(10,40,25,0.9);
+      border: 1px solid rgba(34,197,94,0.9);
+      color: #bbf7d0;
+      background: radial-gradient(circle,
+                  rgba(21,128,61,0.9) 0,
+                  rgba(6,78,59,0.95) 40%,
+                  rgba(2,6,23,1) 100%);
     }
 
     .close-btn {
-      position: absolute;
-      top: 16px;
-      right: 18px;
       border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.6);
-      background: rgba(15,23,42,0.95);
+      border: 1px solid rgba(148,163,184,0.7);
+      background: rgba(15,23,42,0.96);
       color: #e5e7eb;
       padding: 6px 12px;
-      font-size: 11px;
+      font-size: 10px;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       cursor: pointer;
     }
     .close-btn:hover {
-      border-color: #1cff88;
-      box-shadow: 0 0 12px rgba(28,255,136,0.35);
+      border-color: #22c55e;
+      box-shadow: 0 0 12px rgba(34,197,94,0.35);
       color: #bbf7d0;
     }
 
-    .profile-section {
+    /* Linke Spalte: Story */
+    .stage-col-left {
       display: flex;
-      gap: 18px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .bio {
-      flex: 1 1 220px;
-      font-size: 14px;
-      color: #dcdcdc;
+      flex-direction: column;
+      gap: 10px;
     }
 
     .section-title {
-      font-size: 12px;
+      font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      color: #9effc7;
-      margin-top: 10px;
-      margin-bottom: 4px;
+      color: #a7f3d0;
+      margin-bottom: 2px;
     }
+
     .text-block {
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.5;
-      color: #f0f0f0;
+      color: #e5e7eb;
       white-space: pre-wrap;
     }
 
+    /* Rechte Spalte: Collab + Kontakt als Block */
+    .stage-col-right {
+      align-self: stretch;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      background: radial-gradient(circle at top,
+                  rgba(15,23,42,0.95) 0,
+                  rgba(15,23,42,0.98) 45%,
+                  rgba(2,6,23,1) 100%);
+      border: 1px solid rgba(51,65,85,0.9);
+    }
+
+    .stage-col-right .section-title {
+      color: #7dd3fc;
+    }
+
     .contact-link a {
-      color: #1cff88;
+      color: #22c55e;
       text-decoration: none;
+      font-size: 13px;
       word-break: break-all;
     }
     .contact-link a:hover {
@@ -205,98 +256,112 @@
     }
 
     .status {
-      font-size: 13px;
-      margin-top: 6px;
-      color: #ff8a8a;
+      grid-column: 1 / -1;
+      font-size: 12px;
+      margin-top: 4px;
+      color: #fca5a5;
       min-height: 1.2em;
     }
 
-    /* ── Mobile ── */
-    @media (max-width: 600px) {
-      .stage-hero {
-        height: 44vh;
-      }
+    /* ── Mobile: einspaltig, Panel bleibt stylisch ──────────────── */
 
-      .bg-video video {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;     /* ganze Bühne sichtbar */
-        object-position: center top;
+    @media (max-width: 600px) {
+      .stage-wrap {
+        padding: 0 10px 16px;
+        align-items: flex-end;
       }
 
       .stage-photo-orb {
-        top: 60%;
+        top: 12vh;
         width: 160px;
         height: 160px;
       }
 
-      .stage-shell {
-        padding: 0 10px 16px;
-      }
-
       .stage-card {
-        margin-top: -60px;
-        padding: 18px 16px 16px;
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 12px;
+        padding: 16px 14px 14px;
         border-radius: 20px;
+        max-width: 100%;
       }
 
-      .artist-name { font-size: 22px; }
+      .stage-card-header {
+        align-items: flex-start;
+      }
+
+      .artist-name { font-size: 20px; }
       .section-title { font-size: 11px; }
       .text-block { font-size: 13px; }
-      .close-btn { top: 10px; right: 10px; }
+
+      .stage-col-right {
+        padding: 10px 10px;
+      }
+
+      .close-btn {
+        padding: 5px 10px;
+        font-size: 9px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- HERO / BÜHNE -->
-  <section class="stage-hero">
-    <div class="bg-video">
-      <video src="Stage.mp4" autoplay muted loop playsinline></video>
-    </div>
-    <div class="hero-overlay"></div>
+  <!-- Hintergrund-Video -->
+  <div class="bg-video">
+    <video src="Stage.mp4" autoplay muted loop playsinline></video>
+  </div>
+  <div class="overlay"></div>
 
-    <div class="stage-photo-orb" id="stageOrb">
-      <div class="orb-placeholder" id="orbPlaceholder">
-        Exklusives Stage‑Foto<br />
-        wird hier angezeigt,<br />
-        sobald der Artist eines<br />
-        hochgeladen hat.
-      </div>
+  <!-- optionaler Orb in der Bühne -->
+  <div class="stage-photo-orb" id="stageOrb">
+    <div class="orb-placeholder" id="orbPlaceholder">
+      Exklusives Stage‑Foto<br />
+      wird hier angezeigt,<br />
+      sobald der Artist eines<br />
+      hochgeladen hat.
     </div>
-  </section>
+  </div>
 
-  <!-- CONTENT -->
-  <main class="stage-shell">
+  <!-- Stage-Control-Panel -->
+  <div class="stage-wrap">
     <div class="stage-card">
-      <button id="backButton" class="close-btn">Zurück</button>
-
-      <div class="top-row">
-        <div>
-          <div class="logo">UnterGrund Explorer</div>
+      <div class="stage-card-header">
+        <div class="stage-meta">
+          <div class="stage-subtitle">UnterGrund Stage</div>
           <div id="artistName" class="artist-name">Artist</div>
+          <div class="stage-pill-row">
+            <span class="badge">Stage</span>
+          </div>
         </div>
-        <div class="badge">Stage</div>
+        <button id="backButton" class="close-btn">Zurück</button>
       </div>
 
-      <div class="profile-section">
-        <div class="bio">
+      <!-- Linke Spalte -->
+      <div class="stage-col-left">
+        <div>
           <div class="section-title">Was verbindet ihn/sie mit Musik?</div>
           <div id="musicConnection" class="text-block"></div>
-
+        </div>
+        <div>
           <div class="section-title">Botschaft an die UnterGrund‑Community</div>
           <div id="ugMessage" class="text-block"></div>
         </div>
       </div>
 
-      <div class="section-title">Collab‑Wunsch</div>
-      <div id="collabNote" class="text-block"></div>
-
-      <div class="section-title">Kontakt</div>
-      <div id="contact" class="text-block contact-link"></div>
+      <!-- Rechte Spalte -->
+      <div class="stage-col-right">
+        <div>
+          <div class="section-title">Collab‑Wunsch</div>
+          <div id="collabNote" class="text-block"></div>
+        </div>
+        <div>
+          <div class="section-title">Kontakt</div>
+          <div id="contact" class="text-block contact-link"></div>
+        </div>
+      </div>
 
       <div id="status" class="status"></div>
     </div>
-  </main>
+  </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
