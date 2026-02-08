@@ -20,7 +20,7 @@
       background: #000;
     }
 
-    /* ── Video-Hintergrund ── */
+    /* Hintergrund-Video mit leichtem Zoom */
     .bg-video {
       position: fixed;
       inset: 0;
@@ -28,14 +28,14 @@
       z-index: -2;
     }
     .bg-video video {
-      width: 100%;
-      height: 100%;
+      width: 115%;
+      height: 115%;
       object-fit: cover;
-      object-position: center center;
-      filter: brightness(0.55) saturate(1.2);
+      object-position: center top;
+      transform: translate(-7.5%, -7.5%);
+      filter: brightness(0.6) saturate(1.2);
     }
 
-    /* ── Overlay ── */
     .overlay {
       position: fixed;
       inset: 0;
@@ -47,21 +47,44 @@
       z-index: -1;
     }
 
-    /* ── Wrapper ── */
+    /* Stage-Foto-Orb in der Bühne */
+    .stage-photo-orb {
+      position: fixed;
+      top: 18vh;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 2px solid rgba(28,255,136,0.9);
+      box-shadow:
+        0 0 24px rgba(28,255,136,0.6),
+        0 0 60px rgba(0,0,0,0.9);
+      background: radial-gradient(circle, #000 0, #020617 60%);
+      z-index: 0;
+    }
+    .stage-photo-orb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
     .stage-wrap {
       position: relative;
       min-height: 100vh;
       overflow-y: auto;
-      padding: 20px 10px 26px;
+      padding: 52vh 10px 20px; /* Card direkt unter Bühne */
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
     }
 
-    /* ── Card ── */
     .stage-card {
       width: 100%;
       max-width: 720px;
+      max-height: 80vh;
       overflow-y: auto;
       background: rgba(5,5,5,0.72);
       backdrop-filter: blur(14px) saturate(1.3);
@@ -135,29 +158,12 @@
       flex-wrap: wrap;
       margin-bottom: 12px;
     }
+
+    /* Foto-Block in der Card komplett ausgeblendet */
     .photo-wrap {
-      flex: 0 0 170px;
-      max-width: 190px;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: radial-gradient(circle, rgba(28,255,136,0.15) 0, #050505 55%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: none;
     }
-    .photo-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-    .fallback-photo {
-      font-size: 12px;
-      text-align: center;
-      padding: 20px 10px;
-      color: #d0ffd9;
-    }
+
     .bio {
       flex: 1 1 220px;
       font-size: 14px;
@@ -178,6 +184,7 @@
       color: #f0f0f0;
       white-space: pre-wrap;
     }
+
     .contact-link a {
       color: #1cff88;
       text-decoration: none;
@@ -186,6 +193,7 @@
     .contact-link a:hover {
       text-decoration: underline;
     }
+
     .status {
       font-size: 13px;
       margin-top: 6px;
@@ -193,47 +201,21 @@
       min-height: 1.2em;
     }
 
-    /* ── Desktop ── */
-    @media (min-width: 900px) {
-      .stage-wrap {
-        align-items: flex-start;
-        padding-top: 18vh;
-      }
-      .stage-card {
-        max-height: 80vh;
-      }
-    }
-
-    /* ── Mobile: Video rauszoomen, Card volle Breite ── */
     @media (max-width: 600px) {
-      /* Video: contain statt cover → ganze Bühne sichtbar */
-      .bg-video video {
-        object-fit: contain;
-        object-position: center top;
-        filter: brightness(0.6) saturate(1.2);
+      .stage-photo-orb {
+        top: 16vh;
+        width: 140px;
+        height: 140px;
       }
-
       .stage-wrap {
-        padding: 12px 8px 16px;
-        align-items: flex-end;   /* Card rutscht nach UNTEN, Bühne oben sichtbar */
+        padding-top: 48vh;
         padding-bottom: 16px;
       }
-
       .stage-card {
         max-width: 100%;
-        max-height: 62vh;        /* Card nimmt max 62% Bildschirmhöhe */
+        max-height: 62vh;
         padding: 16px 14px 14px;
         border-radius: 18px;
-      }
-
-      .profile-section {
-        flex-direction: row;
-        gap: 12px;
-      }
-      .photo-wrap {
-        flex: 0 0 110px;
-        max-width: 110px;
-        max-height: 110px;
       }
       .artist-name { font-size: 20px; }
       .section-title { font-size: 11px; }
@@ -243,11 +225,14 @@
   </style>
 </head>
 <body>
-
+  <!-- Hintergrund-Video -->
   <div class="bg-video">
     <video src="Stage.mp4" autoplay muted loop playsinline></video>
   </div>
   <div class="overlay"></div>
+
+  <!-- Stage-Foto in der Bühne -->
+  <div class="stage-photo-orb" id="stageOrb"></div>
 
   <div class="stage-wrap">
     <div class="stage-card">
@@ -263,8 +248,9 @@
 
       <div class="profile-section">
         <div class="photo-wrap" id="photoWrap">
+          <!-- wird nicht mehr genutzt, nur Fallback falls kein Orb -->
           <div class="fallback-photo">
-            Exklusives Stage‑Foto<br />wird hier angezeigt,
+            Exklusives Stage‑Foto wird hier angezeigt,
             sobald der Artist eines hochgeladen hat.
           </div>
         </div>
@@ -303,6 +289,7 @@
     const statusEl = document.getElementById("status");
     const photoWrap = document.getElementById("photoWrap");
     const backButton = document.getElementById("backButton");
+    const orb = document.getElementById("stageOrb");
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
@@ -368,17 +355,23 @@
         contactEl.textContent = "Noch kein Kontaktlink angegeben.";
       }
 
+      // Stage-Foto nur in der Bühne anzeigen
       if (data.stage_photo_path) {
         const { data: publicUrlData } = client
           .storage
           .from(STORAGE_BUCKET)
           .getPublicUrl(data.stage_photo_path);
 
-        if (publicUrlData && publicUrlData.publicUrl) {
+        if (publicUrlData && publicUrlData.publicUrl && orb) {
           const img = document.createElement("img");
           img.src = publicUrlData.publicUrl;
-          photoWrap.innerHTML = "";
-          photoWrap.appendChild(img);
+          orb.innerHTML = "";
+          orb.appendChild(img);
+        }
+
+        // Card-Foto ausblenden
+        if (photoWrap) {
+          photoWrap.style.display = "none";
         }
       }
     }
