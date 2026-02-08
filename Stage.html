@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>UnterGrund Stage</title>
+  <title>UnterGrund Stage Karte</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link
@@ -21,8 +21,7 @@
       overflow: hidden;
     }
 
-    /* ── Video-Hintergrund ───────────────────────────────────── */
-
+    /* Hintergrundvideo */
     .bg-video {
       position: fixed;
       inset: 0;
@@ -30,8 +29,6 @@
       z-index: -2;
       background: #000;
     }
-
-    /* Desktop: komplette 16:9 Bühne sichtbar (Letterbox) */
     .bg-video video {
       width: 100%;
       height: 100%;
@@ -40,18 +37,12 @@
       filter: brightness(0.6) saturate(1.2);
       background: #000;
     }
-
-    /* Mobile: Video darf fullscreen wirken */
     @media (max-width: 600px) {
       .bg-video video {
-        width: 100%;
-        height: 100%;
         object-fit: cover;
         object-position: center top;
-        background: #000;
       }
     }
-
     .overlay {
       position: fixed;
       inset: 0;
@@ -59,364 +50,307 @@
         radial-gradient(ellipse at top center,
           rgba(28,255,136,0.18) 0%,
           rgba(0,0,0,0.3) 40%,
-          rgba(0,0,0,0.85) 100%);
+          rgba(0,0,0,0.9) 100%);
       z-index: -1;
       pointer-events: none;
     }
 
-    /* ── Stage-Photo-Orb ────────────────────────────────────── */
-
-    .stage-photo-orb {
-      position: fixed;
-      top: 13vh;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 2px solid rgba(28,255,136,0.9);
-      box-shadow:
-        0 0 28px rgba(28,255,136,0.7),
-        0 0 80px rgba(0,0,0,0.95);
-      background: radial-gradient(circle, #000 0, #020617 60%);
-      z-index: 0;
+    /* Layout */
+    .stage-wrap {
+      position: relative;
+      min-height: 100vh;
+      padding: 12px 12px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-    .stage-photo-orb img {
+
+    /* Sammelkarte – äußerer Rahmen */
+    .card-shell {
+      position: relative;
+      width: 100%;
+      max-width: 430px;
+      aspect-ratio: 3 / 4;
+      border-radius: 26px;
+      padding: 3px;
+      background: linear-gradient(135deg,#22c55e,#0ea5e9,#f97316);
+      box-shadow:
+        0 24px 80px rgba(0,0,0,0.95),
+        0 0 30px rgba(34,197,94,0.45);
+      transform: rotate(-1.2deg);
+    }
+
+    /* Theme-Varianten (Rahmenfarbe) */
+    .card-theme-neon {
+      background: linear-gradient(135deg,#22c55e,#4ade80,#22c55e);
+    }
+    .card-theme-electric-blue {
+      background: linear-gradient(135deg,#0ea5e9,#38bdf8,#6366f1);
+    }
+    .card-theme-warm-orange {
+      background: linear-gradient(135deg,#fb923c,#facc15,#f97316);
+    }
+    .card-theme-deep-purple {
+      background: linear-gradient(135deg,#4c1d95,#7c3aed,#ec4899);
+    }
+    .card-theme-rose-magenta {
+      background: linear-gradient(135deg,#f97393,#ec4899,#a855f7);
+    }
+    .card-theme-aqua {
+      background: linear-gradient(135deg,#06b6d4,#22c55e,#67e8f9);
+    }
+    .card-theme-gold {
+      background: linear-gradient(135deg,#f97316,#facc15,#f59e0b);
+    }
+    .card-theme-ice {
+      background: linear-gradient(135deg,#e5e7eb,#38bdf8,#a5b4fc);
+    }
+    .card-theme-dark {
+      background: linear-gradient(135deg,#020617,#0f172a,#020617);
+    }
+
+    /* eigentliche Karte */
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 22px;
+      padding: 10px 12px 10px;
+      background: radial-gradient(circle at top,
+                  rgba(15,23,42,0.96) 0,
+                  rgba(15,23,42,0.98) 40%,
+                  rgba(2,6,23,1) 100%);
+      display: flex;
+      flex-direction: column;
+      color: #e5e7eb;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    /* Holo-Glanz */
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: linear-gradient(
+        120deg,
+        rgba(255,255,255,0.12),
+        transparent 40%,
+        rgba(56,189,248,0.16) 60%,
+        transparent 80%,
+        rgba(244,114,182,0.18)
+      );
+      mix-blend-mode: screen;
+      opacity: 0.65;
+      transform: translateX(-20%);
+      pointer-events: none;
+    }
+
+    /* Kopfbereich */
+    .card-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 6px;
+    }
+    .card-title-block {
+      max-width: 70%;
+    }
+    .card-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+    .card-artist {
+      font-family: "Russo One", system-ui, sans-serif;
+      font-size: 20px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      color: #f9fafb;
+    }
+    .card-subline {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .back-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.75);
+      background: rgba(15,23,42,0.95);
+      color: #e5e7eb;
+      padding: 5px 10px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Foto-Bereich */
+    .card-photo {
+      position: relative;
+      z-index: 1;
+      flex: 0 0 60%;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: radial-gradient(circle,#020617 0,#020617 60%,#000 100%);
+      margin-bottom: 8px;
+    }
+    .card-photo img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       display: block;
     }
-    .orb-placeholder {
+    .card-photo-placeholder {
       width: 100%;
       height: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      font-size: 11px;
-      line-height: 1.4;
-      color: #c4fce0;
+      font-size: 12px;
       padding: 10px;
+      color: #c4fce0;
     }
 
-    @media (max-width: 600px) {
-      .stage-photo-orb {
-        top: 16vh;
-        width: 180px;
-        height: 180px;
-      }
-    }
-
-    /* ── Wrapper ────────────────────────────────────────────── */
-
-    .stage-wrap {
+    /* Stats-Leiste */
+    .card-stats {
       position: relative;
-      min-height: 100vh;
-      padding: 0 14px 24px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-    }
-
-    /* ── Backstage-Pass-Card ───────────────────────────────── */
-
-    .stage-pass {
-      width: 100%;
-      max-width: 820px;
-      background: radial-gradient(circle at top left,
-                  rgba(15,23,42,0.96) 0,
-                  rgba(2,6,23,0.98) 45%,
-                  rgba(0,0,0,0.98) 100%);
-      border-radius: 24px;
-      border: 1px solid rgba(55,65,81,0.95);
-      box-shadow:
-        0 30px 80px rgba(0,0,0,0.95),
-        0 0 30px rgba(34,197,94,0.45);
-      padding: 16px 18px 14px;
-      position: relative;
-      color: #e5e7eb;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
-    }
-
-    /* Lasche oben (Backstage-Pass-Anmutung) */
-    .stage-pass::before {
-      content: "";
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 80px;
-      height: 24px;
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.6);
-      background: radial-gradient(circle at top,
-                  rgba(15,23,42,0.96) 0,
-                  rgba(15,23,42,0.9) 55%,
-                  rgba(15,23,42,0) 100%);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.9);
-    }
-    .stage-pass::after {
-      content: "";
-      position: absolute;
-      top: -3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 22px;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(15,23,42,1);
-      border: 1px solid rgba(75,85,99,0.95);
-    }
-
-    /* Header */
-    .stage-pass-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .stage-pass-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.95);
-      border: 1px solid rgba(34,197,94,0.8);
-      box-shadow: 0 0 14px rgba(34,197,94,0.45);
-    }
-    .pass-label {
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: #bbf7d0;
-    }
-    .pass-tier {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: linear-gradient(90deg,#22c55e,#06b6d4);
-      color: #022c22;
-    }
-
-    .pass-close {
-      border-radius: 999px;
-      border: 1px solid rgba(148,163,184,0.75);
-      background: rgba(15,23,42,0.95);
-      color: #e5e7eb;
-      padding: 6px 12px;
-      font-size: 10px;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
-    .pass-close:hover {
-      border-color: #22c55e;
-      box-shadow: 0 0 12px rgba(34,197,94,0.35);
-    }
-
-    /* Main: ID-Spalte + Meta-Spalte */
-    .stage-pass-main {
-      display: grid;
-      grid-template-columns: minmax(0,1.4fr) minmax(0,1fr);
-      gap: 18px;
-      margin-bottom: 12px;
-    }
-
-    /* ID-Spalte */
-    .pass-id-column {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .pass-chip-row {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 8px;
-      border-radius: 999px;
-      background: rgba(15,23,42,0.95);
-      border: 1px solid rgba(75,85,99,0.9);
-      font-size: 11px;
-    }
-    .chip {
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
-      background: linear-gradient(135deg,#22c55e,#0ea5e9);
-      box-shadow: 0 0 12px rgba(34,197,94,0.6);
-    }
-    .chip-text {
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: #9ca3af;
-    }
-    .chip-id {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      color: #e5e7eb;
-    }
-
-    .pass-name-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: #9ca3af;
-      margin-bottom: 2px;
-    }
-    .pass-name-value {
-      font-family: "Russo One", system-ui, sans-serif;
-      font-size: 24px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #f9fafb;
-      text-shadow: 0 0 10px rgba(0,0,0,0.8);
-    }
-
-    .pass-tag-row {
+      z-index: 1;
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
+      margin-bottom: 8px;
     }
-    .pass-tag {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      padding: 3px 8px;
+    .stat-pill {
+      font-size: 11px;
+      padding: 4px 7px;
       border-radius: 999px;
       border: 1px solid rgba(55,65,81,0.9);
       background: rgba(15,23,42,0.9);
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .pass-tag-stage {
-      border-color: rgba(34,197,94,0.9);
-      color: #bbf7d0;
-    }
-    .pass-tag-status {
-      color: #e5e7eb;
-    }
-
-    /* Meta-Spalte */
-    .pass-meta-column {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .pass-meta-block {
-      padding: 8px 9px;
-      border-radius: 14px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(51,65,85,0.95);
-    }
-    .pass-meta-label {
-      font-size: 11px;
+    .stat-label {
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      color: #7dd3fc;
-      margin-bottom: 2px;
-    }
-    .pass-meta-text {
-      font-size: 13px;
-      line-height: 1.5;
-      color: #e5e7eb;
-      white-space: pre-wrap;
+      color: #9ca3af;
+      margin-right: 4px;
+      font-size: 9px;
     }
 
-    /* Body: 2 Textbereiche */
-    .stage-pass-body {
-      display: grid;
-      grid-template-columns: minmax(0,1fr) minmax(0,1fr);
-      gap: 16px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(31,41,55,0.9);
+    /* Textblöcke */
+    .card-body {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
     }
-    .pass-section-label {
-      font-size: 11px;
+    .card-section-label {
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
       color: #9effc7;
-      margin-bottom: 4px;
+      margin-bottom: 1px;
     }
-    .pass-section-text {
-      font-size: 13px;
-      line-height: 1.6;
+    .card-text {
+      font-size: 12px;
+      line-height: 1.5;
       color: #e5e7eb;
-      white-space: pre-wrap;
+      max-height: 4.5em;
+      overflow: hidden;
+    }
+
+    .card-collabs {
+      margin-top: 4px;
+    }
+    .collab-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .collab-pill {
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(59,130,246,0.8);
+      background: rgba(15,23,42,0.9);
     }
 
     /* Footer */
-    .stage-pass-footer {
+    .card-footer {
+      position: relative;
+      z-index: 1;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      margin-top: 10px;
-      padding-top: 8px;
+      margin-top: 6px;
+      padding-top: 6px;
       border-top: 1px dashed rgba(55,65,81,0.9);
+      font-size: 11px;
     }
-    .pass-status-line {
-      font-size: 12px;
+    .card-footer-left {
+      max-width: 65%;
       color: #fca5a5;
       min-height: 1.2em;
     }
-    .pass-footer-code {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
+    .card-footer-right {
+      text-align: right;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       color: #9ca3af;
     }
-    .code-label {
+    .card-number {
+      font-size: 11px;
+    }
+    .card-set {
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.16em;
       color: #6ee7b7;
     }
 
-    /* Links */
     .contact-link a {
       color: #22c55e;
       text-decoration: none;
-      word-break: break-all;
     }
     .contact-link a:hover {
       text-decoration: underline;
     }
 
-    /* Mobile */
+    /* Mobile Anpassungen */
     @media (max-width: 600px) {
       .stage-wrap {
-        padding: 0 10px 16px;
+        padding: 12px 10px 18px;
       }
-
-      .stage-pass {
-        padding: 14px 12px 12px;
-        border-radius: 20px;
+      .card-shell {
+        max-width: 360px;
+        transform: rotate(0deg);
       }
-
-      .stage-pass-main {
-        grid-template-columns: minmax(0,1fr);
-        gap: 12px;
+      .card {
+        padding: 9px 10px 9px;
       }
-
-      .stage-pass-body {
-        grid-template-columns: minmax(0,1fr);
-        gap: 12px;
+      .card-artist {
+        font-size: 18px;
       }
-
-      .pass-name-value {
-        font-size: 20px;
+      .card-photo {
+        flex-basis: 58%;
       }
-
-      .pass-close {
-        padding: 5px 10px;
+      .card-text {
+        max-height: 5.2em;
       }
     }
   </style>
@@ -428,74 +362,69 @@
   </div>
   <div class="overlay"></div>
 
-  <!-- Stage-Foto-Orb -->
-  <div class="stage-photo-orb" id="stageOrb">
-    <div class="orb-placeholder" id="orbPlaceholder">
-      Exklusives Stage‑Foto<br />
-      wird hier angezeigt,<br />
-      sobald der Artist eines<br />
-      hochgeladen hat.
-    </div>
-  </div>
-
-  <!-- Backstage-Pass-Card -->
+  <!-- Sammelkarte -->
   <div class="stage-wrap">
-    <div class="stage-pass">
-      <div class="stage-pass-header">
-        <div class="stage-pass-badge">
-          <span class="pass-label">UNDERGROUND → STAGE</span>
-          <span class="pass-tier">PUSHED</span>
+    <div id="cardShell" class="card-shell card-theme-neon">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title-block">
+            <div class="card-label">UnterGrund Stage Karte</div>
+            <div id="artistName" class="card-artist">Artist</div>
+            <div class="card-subline">Von der UnterGrund‑Community auf die Stage gepusht.</div>
+          </div>
+          <button id="backButton" class="back-btn">Zurück</button>
         </div>
-        <button id="backButton" class="pass-close">Zurück</button>
-      </div>
 
-      <div class="stage-pass-main">
-        <div class="pass-id-column">
-          <div class="pass-chip-row">
-            <span class="chip"></span>
-            <span class="chip-text">Stage‑ID</span>
-            <span id="artistIdDisplay" class="chip-id">#0000</span>
-          </div>
-
-          <div class="pass-name">
-            <div class="pass-name-label">Artist</div>
-            <div id="artistName" class="pass-name-value">Artist Name</div>
-          </div>
-
-          <div class="pass-tag-row">
-            <span class="pass-tag pass-tag-stage">Stage</span>
-            <span class="pass-tag pass-tag-status" id="passStatusTag">pending</span>
+        <div class="card-photo">
+          <img id="cardPhoto" alt="Stage Foto" style="display:none;" />
+          <div id="cardPhotoPlaceholder" class="card-photo-placeholder">
+            Exklusives Stage‑Foto<br />
+            wird hier angezeigt,<br />
+            sobald du eines<br />
+            hochgeladen hast.
           </div>
         </div>
 
-        <div class="pass-meta-column">
-          <div class="pass-meta-block">
-            <div class="pass-meta-label">Collab‑Wunsch</div>
-            <div id="collabNote" class="pass-meta-text"></div>
+        <div class="card-stats">
+          <div id="statSound" class="stat-pill" style="display:none;">
+            <span class="stat-label">Sound</span><span id="soundText"></span>
           </div>
-          <div class="pass-meta-block">
-            <div class="pass-meta-label">Kontakt</div>
-            <div id="contact" class="pass-meta-text contact-link"></div>
+          <div id="statSkill" class="stat-pill" style="display:none;">
+            <span class="stat-label">Skill</span><span id="skillText"></span>
+          </div>
+          <div id="statActive" class="stat-pill" style="display:none;">
+            <span class="stat-label">Seit</span><span id="activeText"></span>
           </div>
         </div>
-      </div>
 
-      <div class="stage-pass-body">
-        <div class="pass-section">
-          <div class="pass-section-label">Verbindung zu Musik</div>
-          <div id="musicConnection" class="pass-section-text"></div>
-        </div>
-        <div class="pass-section">
-          <div class="pass-section-label">Botschaft an die UnterGrund‑Community</div>
-          <div id="ugMessage" class="pass-section-text"></div>
-        </div>
-      </div>
+        <div class="card-body">
+          <div>
+            <div class="card-section-label">Was verbindet dich mit Musik?</div>
+            <div id="musicConnection" class="card-text"></div>
+          </div>
 
-      <div class="stage-pass-footer">
-        <div id="status" class="pass-status-line"></div>
-        <div class="pass-footer-code">
-          <span class="code-label">UG‑Route</span>
-          <span class="code-value">EXPLORER › COMMUNITY › STAGE</span>
+          <div>
+            <div class="card-section-label">Botschaft an die UnterGrund‑Community</div>
+            <div id="ugMessage" class="card-text"></div>
+          </div>
+
+          <div class="card-collabs">
+            <div class="card-section-label">Collab‑Wunsch</div>
+            <div class="collab-list" id="collabList"></div>
+          </div>
+
+          <div>
+            <div class="card-section-label">Kontakt</div>
+            <div id="contact" class="card-text contact-link"></div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div id="status" class="card-footer-left"></div>
+          <div class="card-footer-right">
+            <div id="cardNumber" class="card-number">UG‑CARD #0000</div>
+            <div class="card-set">Set: UnterGrund Explorer · S1</div>
+          </div>
         </div>
       </div>
     </div>
@@ -512,14 +441,23 @@
     const artistNameEl = document.getElementById("artistName");
     const musicConnectionEl = document.getElementById("musicConnection");
     const ugMessageEl = document.getElementById("ugMessage");
-    const collabNoteEl = document.getElementById("collabNote");
     const contactEl = document.getElementById("contact");
     const statusEl = document.getElementById("status");
     const backButton = document.getElementById("backButton");
-    const orb = document.getElementById("stageOrb");
-    const orbPlaceholder = document.getElementById("orbPlaceholder");
-    const artistIdDisplay = document.getElementById("artistIdDisplay");
-    const passStatusTag = document.getElementById("passStatusTag");
+    const cardNumberEl = document.getElementById("cardNumber");
+    const cardShellEl = document.getElementById("cardShell");
+
+    const cardPhotoImg = document.getElementById("cardPhoto");
+    const cardPhotoPlaceholder = document.getElementById("cardPhotoPlaceholder");
+
+    const statSound = document.getElementById("statSound");
+    const statSkill = document.getElementById("statSkill");
+    const statActive = document.getElementById("statActive");
+    const soundText = document.getElementById("soundText");
+    const skillText = document.getElementById("skillText");
+    const activeText = document.getElementById("activeText");
+
+    const collabListEl = document.getElementById("collabList");
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
@@ -538,6 +476,52 @@
       }
     }
 
+    function applyPalette(palette) {
+      const baseClass = "card-theme-";
+      const themes = [
+        "neon",
+        "electric-blue",
+        "warm-orange",
+        "deep-purple",
+        "rose-magenta",
+        "aqua",
+        "gold",
+        "ice",
+        "dark"
+      ];
+      themes.forEach(t => cardShellEl.classList.remove(baseClass + t));
+      const selected = themes.includes(palette) ? palette : "neon";
+      cardShellEl.classList.add(baseClass + selected);
+    }
+
+    function setCardNumber(id) {
+      if (!id) {
+        cardNumberEl.textContent = "UG‑CARD #0000";
+        return;
+      }
+      const num = String(id).padStart(4, "0");
+      cardNumberEl.textContent = "UG‑CARD #" + num;
+    }
+
+    function fillCollabs(c1, c2, c3) {
+      collabListEl.innerHTML = "";
+      const values = [c1, c2, c3].map(v => (v || "").trim()).filter(Boolean);
+      if (values.length === 0) {
+        const span = document.createElement("span");
+        span.textContent = "Noch kein Collab‑Wunsch hinterlegt.";
+        span.style.fontSize = "11px";
+        span.style.color = "#e5e7eb";
+        collabListEl.appendChild(span);
+        return;
+      }
+      values.forEach(v => {
+        const pill = document.createElement("div");
+        pill.className = "collab-pill";
+        pill.textContent = v;
+        collabListEl.appendChild(pill);
+      });
+    }
+
     async function loadStage() {
       const artistId = getArtistIdFromUrl();
       if (!artistId) {
@@ -546,40 +530,68 @@
       }
 
       backButton.addEventListener("click", () => goBackToExplorer(artistId));
-      setStatus("Stage wird geladen …");
+      setStatus("Stage‑Karte wird geladen …");
 
       const { data, error } = await client
         .from("artists")
-        .select("id, name, stage_unlocked, stage_music_connection, stage_ug_message, stage_photo_path, stage_collab_note, stage_contact")
+        .select(`
+          id,
+          name,
+          stage_unlocked,
+          stage_music_connection,
+          stage_ug_message,
+          stage_photo_path,
+          stage_sound,
+          stage_special_skill,
+          stage_active_since,
+          stage_collab_1,
+          stage_collab_2,
+          stage_collab_3,
+          stage_contact,
+          stage_palette
+        `)
         .eq("id", artistId)
         .limit(1)
         .single();
 
       if (error || !data) {
         console.error(error);
-        setStatus("Stage konnte nicht geladen werden.");
+        setStatus("Stage‑Karte konnte nicht geladen werden.");
         return;
       }
 
       artistNameEl.textContent = data.name || "Artist";
-      artistIdDisplay.textContent = data.id ? "#" + String(data.id).padStart(4,"0") : "#0000";
+      setCardNumber(data.id);
 
       if (!data.stage_unlocked) {
         setStatus("Dieser Artist wurde noch nicht offiziell auf die Stage eingeladen.");
-        passStatusTag.textContent = "pending";
-        passStatusTag.style.borderColor = "rgba(248,113,113,0.9)";
-        passStatusTag.style.color = "#fecaca";
       } else {
         setStatus("");
-        passStatusTag.textContent = "live";
-        passStatusTag.style.borderColor = "rgba(34,197,94,0.9)";
-        passStatusTag.style.color = "#bbf7d0";
       }
 
-      musicConnectionEl.textContent = data.stage_music_connection || "Noch nichts eingetragen.";
-      ugMessageEl.textContent = data.stage_ug_message || "Noch keine Botschaft an die Community.";
-      collabNoteEl.textContent = data.stage_collab_note || "Noch kein Collab‑Wunsch hinterlegt.";
+      musicConnectionEl.textContent =
+        data.stage_music_connection || "Noch nichts eingetragen.";
+      ugMessageEl.textContent =
+        data.stage_ug_message || "Noch keine Botschaft an die Community.";
 
+      // Stats
+      if (data.stage_sound) {
+        soundText.textContent = " " + data.stage_sound;
+        statSound.style.display = "inline-flex";
+      }
+      if (data.stage_special_skill) {
+        skillText.textContent = " " + data.stage_special_skill;
+        statSkill.style.display = "inline-flex";
+      }
+      if (data.stage_active_since) {
+        activeText.textContent = " " + data.stage_active_since;
+        statActive.style.display = "inline-flex";
+      }
+
+      // Collabs
+      fillCollabs(data.stage_collab_1, data.stage_collab_2, data.stage_collab_3);
+
+      // Kontakt
       if (data.stage_contact) {
         const link = document.createElement("a");
         link.href = data.stage_contact;
@@ -592,18 +604,20 @@
         contactEl.textContent = "Noch kein Kontaktlink angegeben.";
       }
 
-      // Stage-Foto im Orb
+      // Palette
+      applyPalette(data.stage_palette || "neon");
+
+      // Foto
       if (data.stage_photo_path) {
         const { data: publicUrlData } = client
           .storage
           .from(STORAGE_BUCKET)
           .getPublicUrl(data.stage_photo_path);
 
-        if (publicUrlData && publicUrlData.publicUrl && orb) {
-          const img = document.createElement("img");
-          img.src = publicUrlData.publicUrl;
-          orb.innerHTML = "";
-          orb.appendChild(img);
+        if (publicUrlData && publicUrlData.publicUrl) {
+          cardPhotoImg.src = publicUrlData.publicUrl;
+          cardPhotoImg.style.display = "block";
+          cardPhotoPlaceholder.style.display = "none";
         }
       }
     }
