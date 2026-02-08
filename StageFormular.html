@@ -1,1 +1,347 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>UnterGrund Stage Formular</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      padding: 32px 12px;
+      box-sizing: border-box;
+    }
+    .stage-form {
+      width: 100%;
+      max-width: 780px;
+      background: rgba(0, 0, 0, 0.85);
+      border-radius: 20px;
+      border: 1px solid rgba(28, 255, 136, 0.35);
+      box-shadow: 0 0 30px rgba(28, 255, 136, 0.25);
+      padding: 24px 22px 20px;
+      box-sizing: border-box;
+    }
+    .logo {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #9effc7;
+      margin-bottom: 4px;
+    }
+    h1 {
+      margin: 0 0 4px;
+      font-size: 22px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: #c4c4c4;
+      margin-bottom: 18px;
+    }
+    .field-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+    .field {
+      flex: 1 1 100%;
+      margin-bottom: 16px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+    }
+    .hint {
+      font-size: 11px;
+      color: #a0a0a0;
+      margin-bottom: 6px;
+    }
+    textarea,
+    input[type="text"],
+    input[type="url"],
+    input[type="file"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(15, 15, 15, 0.9);
+      color: #f5f5f5;
+      font-size: 14px;
+      outline: none;
+      resize: vertical;
+    }
+    textarea:focus,
+    input:focus {
+      border-color: #1cff88;
+      box-shadow: 0 0 0 1px rgba(28, 255, 136, 0.45);
+    }
+    textarea {
+      min-height: 80px;
+    }
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: linear-gradient(90deg, #1cff88, #00b35c);
+      color: #020202;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(28, 255, 136, 0.45);
+      filter: brightness(1.05);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+    .status {
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .status.error {
+      color: #ff6b6b;
+    }
+    .status.success {
+      color: #9effc7;
+    }
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9effc7;
+      margin: 14px 0 6px;
+    }
+    .artist-name {
+      font-size: 15px;
+      color: #e3ffe5;
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="stage-form">
+    <div class="logo">UnterGrund Explorer</div>
+    <h1>Stage Formular</h1>
+    <div class="subtitle">
+      Deine Community hat dich auf die Stage gepusht. Hier kannst du ihnen etwas zurückgeben
+      und zeigen, wofür du stehst.
+    </div>
+
+    <div id="artistNameDisplay" class="artist-name"></div>
+
+    <div class="section-title">Deine Verbindung zu Musik</div>
+    <div class="field">
+      <label for="musicConnection">Was verbindet dich mit Musik?</label>
+      <div class="hint">
+        Beschreibe in ein paar Sätzen, warum du Musik machst und was sie für dich bedeutet.
+      </div>
+      <textarea id="musicConnection" maxlength="800"></textarea>
+    </div>
+
+    <div class="section-title">Botschaft an die UnterGrund‑Community</div>
+    <div class="field">
+      <label for="ugMessage">Was möchtest du der UnterGrund‑Community sagen?</label>
+      <div class="hint">
+        Nutze diesen Platz als persönliches Dankeschön an alle, die dich aus dem UnterGrund
+        auf die Stage gepusht haben.
+      </div>
+      <textarea id="ugMessage" maxlength="800"></textarea>
+    </div>
+
+    <div class="section-title">Exklusives Stage‑Foto</div>
+    <div class="field">
+      <label for="photo">Exklusives Stage‑Foto hochladen</label>
+      <div class="hint">
+        Wähle ein Bild, das nur hier auf deiner UnterGrund‑Stage zu sehen ist.
+        Empfohlen: quadratisch oder hochkant, max. 5&nbsp;MB.
+      </div>
+      <input id="photo" type="file" accept="image/*" />
+    </div>
+
+    <div class="section-title">Collab‑Wunsch</div>
+    <div class="field">
+      <label for="collabNote">Mit wem würdest du gern etwas starten?</label>
+      <div class="hint">
+        Nenne bis zu drei Artists aus dem UnterGrund oder von der Stage, mit denen du dir ein
+        gemeinsames Projekt vorstellen kannst. Wir zeigen deine Collab‑Wünsche sichtbar auf deiner Stage.
+      </div>
+      <textarea id="collabNote" maxlength="400"></textarea>
+    </div>
+
+    <div class="section-title">Kontakt</div>
+    <div class="field">
+      <label for="contact">Kontakt für Collabs &amp; Anfragen</label>
+      <div class="hint">
+        Link zu deinem bevorzugten Kontakt (z.B. Instagram, Mail oder Linktree), damit Leute
+        dich nach der Stage direkt erreichen können.
+      </div>
+      <input id="contact" type="url" placeholder="https://instagram.com/deinname oder https://linktr.ee/..." />
+    </div>
+
+    <div class="actions">
+      <button id="saveButton">Stage speichern</button>
+      <div id="status" class="status"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+  <script>
+    // Gleiche Daten wie in StageLogin.html einsetzen
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const musicConnectionEl = document.getElementById("musicConnection");
+    const ugMessageEl = document.getElementById("ugMessage");
+    const photoInput = document.getElementById("photo");
+    const collabNoteEl = document.getElementById("collabNote");
+    const contactEl = document.getElementById("contact");
+    const saveButton = document.getElementById("saveButton");
+    const statusEl = document.getElementById("status");
+    const artistNameDisplay = document.getElementById("artistNameDisplay");
+
+    function setStatus(message, type = "") {
+      statusEl.textContent = message;
+      statusEl.className = "status " + type;
+    }
+
+    function getArtistIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("artist_id");
+    }
+
+    async function loadArtist() {
+      const artistId = getArtistIdFromUrl();
+      if (!artistId) {
+        setStatus("Fehlende artist_id in der URL.", "error");
+        saveButton.disabled = true;
+        return;
+      }
+
+      setStatus("Lade deine Stage …");
+
+      const { data, error } = await client
+        .from("artists")
+        .select("name, stage_unlocked, stage_music_connection, stage_ug_message, stage_photo_path, stage_collab_note, stage_contact")
+        .eq("id", artistId)
+        .limit(1)
+        .single();
+
+      if (error || !data) {
+        console.error(error);
+        setStatus("Artist konnte nicht geladen werden.", "error");
+        saveButton.disabled = true;
+        return;
+      }
+
+      if (!data.stage_unlocked) {
+        setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
+        saveButton.disabled = true;
+        return;
+      }
+
+      artistNameDisplay.textContent = "Angemeldet als: " + data.name;
+
+      musicConnectionEl.value = data.stage_music_connection || "";
+      ugMessageEl.value = data.stage_ug_message || "";
+      collabNoteEl.value = data.stage_collab_note || "";
+      contactEl.value = data.stage_contact || "";
+
+      setStatus("Stage geladen. Du kannst deine Angaben bearbeiten.", "success");
+    }
+
+    async function uploadPhotoIfNeeded(artistId) {
+      const file = photoInput.files[0];
+      if (!file) return null; // kein neues Bild ausgewählt
+
+      const fileExt = file.name.split(".").pop();
+      const fileName = `stage_${artistId}.${fileExt}`;
+      const filePath = `artist_${artistId}/${fileName}`;
+
+      const { error: uploadError } = await client.storage
+        .from("stage-photos") // Bucket-Name anpassen
+        .upload(filePath, file, {
+          upsert: true,
+          cacheControl: "3600",
+        });
+
+      if (uploadError) {
+        console.error(uploadError);
+        throw new Error("Bild-Upload fehlgeschlagen.");
+      }
+
+      return filePath;
+    }
+
+    saveButton.addEventListener("click", async () => {
+      const artistId = getArtistIdFromUrl();
+      if (!artistId) {
+        setStatus("Fehlende artist_id in der URL.", "error");
+        return;
+      }
+
+      setStatus("Speichere Stage …");
+      saveButton.disabled = true;
+
+      try {
+        let photoPath = null;
+        if (photoInput.files.length > 0) {
+          photoPath = await uploadPhotoIfNeeded(artistId);
+        }
+
+        const updatePayload = {
+          stage_music_connection: musicConnectionEl.value.trim() || null,
+          stage_ug_message: ugMessageEl.value.trim() || null,
+          stage_collab_note: collabNoteEl.value.trim() || null,
+          stage_contact: contactEl.value.trim() || null,
+        };
+
+        if (photoPath) {
+          updatePayload.stage_photo_path = photoPath;
+        }
+
+        const { error: updateError } = await client
+          .from("artists")
+          .update(updatePayload)
+          .eq("id", artistId);
+
+        if (updateError) {
+          console.error(updateError);
+          setStatus("Speichern nicht möglich.", "error");
+          saveButton.disabled = false;
+          return;
+        }
+
+        setStatus("Stage gespeichert. Du kannst diese Seite jederzeit erneut nutzen, um deine Angaben zu ändern.", "success");
+      } catch (e) {
+        console.error(e);
+        setStatus(e.message || "Fehler beim Speichern.", "error");
+      } finally {
+        saveButton.disabled = false;
+      }
+    });
+
+    loadArtist();
+  </script>
+</body>
+</html>
 
