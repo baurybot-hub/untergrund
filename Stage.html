@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>UnterGrund Stage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+      overflow: hidden;
+      background: #000;
+    }
+    .bg-video {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: -1;
+    }
+    .bg-video video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.28) saturate(1.2);
+    }
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(28,255,136,0.25) 0, rgba(0,0,0,0.9) 45%, #000 100%);
+      z-index: -1;
+    }
+    .stage-wrap {
+      position: relative;
+      min-height: 100vh;
+      padding: 20px 10px 26px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .stage-card {
+      width: 100%;
+      max-width: 960px;
+      max-height: 92vh;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.86);
+      border-radius: 22px;
+      border: 1px solid rgba(28,255,136,0.4);
+      box-shadow: 0 0 40px rgba(28,255,136,0.35);
+      padding: 20px 20px 18px;
+    }
+    .top-row {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .logo {
+      font-size: 12px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #9effc7;
+    }
+    .artist-name {
+      font-size: 22px;
+      font-weight: 600;
+    }
+    .badge {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(28,255,136,0.7);
+      color: #9effc7;
+      background: rgba(10,40,25,0.9);
+    }
+    .profile-section {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .photo-wrap {
+      flex: 0 0 160px;
+      max-width: 180px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: radial-gradient(circle, #1cff88 0, #050505 55%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .photo-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .fallback-photo {
+      font-size: 12px;
+      text-align: center;
+      padding: 20px 10px;
+      color: #d0ffd9;
+    }
+    .bio {
+      flex: 1 1 220px;
+      font-size: 14px;
+      color: #dcdcdc;
+    }
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9effc7;
+      margin-top: 10px;
+      margin-bottom: 4px;
+    }
+    .text-block {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #f0f0f0;
+      white-space: pre-wrap;
+    }
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .contact-link a {
+      color: #1cff88;
+      text-decoration: none;
+      word-break: break-all;
+    }
+    .contact-link a:hover {
+      text-decoration: underline;
+    }
+    .status {
+      font-size: 13px;
+      margin-top: 6px;
+      color: #ff8a8a;
+    }
+  </style>
+</head>
+<body>
+  <!-- Video-Hintergrund -->
+  <div class="bg-video">
+    <video src="Stage.mp4" autoplay muted loop playsinline></video>
+  </div>
+  <div class="overlay"></div>
+
+  <div class="stage-wrap">
+    <div class="stage-card">
+      <div class="top-row">
+        <div>
+          <div class="logo">UnterGrund Explorer</div>
+          <div id="artistName" class="artist-name">Artist</div>
+        </div>
+        <div class="badge">Stage</div>
+      </div>
+
+      <div class="profile-section">
+        <div class="photo-wrap" id="photoWrap">
+          <div class="fallback-photo">
+            Exklusives Stage‑Foto<br />wird hier angezeigt,
+            sobald der Artist eines hochgeladen hat.
+          </div>
+        </div>
+        <div class="bio">
+          <div class="section-title">Was verbindet ihn/sie mit Musik?</div>
+          <div id="musicConnection" class="text-block"></div>
+
+          <div class="section-title">Botschaft an die UnterGrund‑Community</div>
+          <div id="ugMessage" class="text-block"></div>
+        </div>
+      </div>
+
+      <div class="section-title">Collab‑Wunsch</div>
+      <div id="collabNote" class="text-block"></div>
+
+      <div class="section-title">Kontakt</div>
+      <div id="contact" class="text-block contact-link"></div>
+
+      <div id="status" class="status"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+  <script>
+    // Gleiche Werte wie in den anderen Dateien einsetzen
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const STORAGE_BUCKET = "stage-photos"; // Bucket-Name
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const artistNameEl = document.getElementById("artistName");
+    const musicConnectionEl = document.getElementById("musicConnection");
+    const ugMessageEl = document.getElementById("ugMessage");
+    const collabNoteEl = document.getElementById("collabNote");
+    const contactEl = document.getElementById("contact");
+    const statusEl = document.getElementById("status");
+    const photoWrap = document.getElementById("photoWrap");
+
+    function setStatus(msg) {
+      statusEl.textContent = msg || "";
+    }
+
+    function getArtistIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("artist_id");
+    }
+
+    async function loadStage() {
+      const artistId = getArtistIdFromUrl();
+      if (!artistId) {
+        setStatus("Keine artist_id in der URL gefunden.");
+        return;
+      }
+
+      setStatus("Stage wird geladen …");
+
+      const { data, error } = await client
+        .from("artists")
+        .select("name, stage_unlocked, stage_music_connection, stage_ug_message, stage_photo_path, stage_collab_note, stage_contact")
+        .eq("id", artistId)
+        .limit(1)
+        .single();
+
+      if (error || !data) {
+        console.error(error);
+        setStatus("Stage konnte nicht geladen werden.");
+        return;
+      }
+
+      if (!data.stage_unlocked) {
+        setStatus("Dieser Artist wurde noch nicht offiziell auf die Stage eingeladen.");
+        return;
+      }
+
+      artistNameEl.textContent = data.name || "Artist";
+
+      musicConnectionEl.textContent = data.stage_music_connection || "Noch nichts eingetragen.";
+      ugMessageEl.textContent = data.stage_ug_message || "Noch keine Botschaft an die Community.";
+      collabNoteEl.textContent = data.stage_collab_note || "Noch kein Collab‑Wunsch hinterlegt.";
+
+      if (data.stage_contact) {
+        const link = document.createElement("a");
+        link.href = data.stage_contact;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = data.stage_contact;
+        contactEl.innerHTML = "";
+        contactEl.appendChild(link);
+      } else {
+        contactEl.textContent = "Noch kein Kontaktlink angegeben.";
+      }
+
+      if (data.stage_photo_path) {
+        const { data: publicUrlData } = client
+          .storage
+          .from(STORAGE_BUCKET)
+          .getPublicUrl(data.stage_photo_path);
+
+        if (publicUrlData && publicUrlData.publicUrl) {
+          const img = document.createElement("img");
+          img.src = publicUrlData.publicUrl;
+          photoWrap.innerHTML = "";
+          photoWrap.appendChild(img);
+        }
+      }
+
+      setStatus("");
+    }
+
+    loadStage();
+  </script>
+</body>
+</html>
