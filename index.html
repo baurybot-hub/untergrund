@@ -731,33 +731,57 @@ input:focus {
 
 
     async function handleFocusPlay() {
-      if (!currentArtist) return;
-      const res = await addFocus(currentArtist, "play");
+  if (!currentArtist) return;
+  
+  // NEU: Video SOFORT starten wenn 100% erreicht wird
+  const video = document.getElementById("ug-bg");
+  const currentScore = currentArtist.focus_score || 0;
+  const willReachMax = currentScore + 1 >= MAX_FOCUS_SCORE;
+  
+  if (video && willReachMax && !bgVideoPlayedForMax) {
+    video.play()
+      .then(() => { bgVideoPlayedForMax = true; })
+      .catch(err => console.warn("Play blocked:", err));
+  }
+  
+  const res = await addFocus(currentArtist, "play");
 
-      if (res.ok) {
-        alert(`Focus +1 – du hast ${currentArtist.name || "den Artist"} gepusht.`);
-      } else if (res.reason && res.reason.startsWith("limit")) {
-        alert("Limit erreicht – du kannst diesen Artist nicht weiter pushen.");
-      }
-      await updateFocusUI();
+  if (res.ok) {
+    alert(`Focus +1 – du hast ${currentArtist.name || "den Artist"} gepusht.`);
+  } else if (res.reason && res.reason.startsWith("limit")) {
+    alert("Limit erreicht – du kannst diesen Artist nicht weiter pushen.");
+  }
+  await updateFocusUI();
 
-      const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
-      if (url) window.open(url, "_blank");
+  const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
+  if (url) window.open(url, "_blank");
     }
 
     async function handleFocusFollow() {
-      if (!currentArtist) return;
-      const res = await addFocus(currentArtist, "follow");
+  if (!currentArtist) return;
+  
+  // NEU: Video SOFORT starten wenn 100% erreicht wird
+  const video = document.getElementById("ug-bg");
+  const currentScore = currentArtist.focus_score || 0;
+  const willReachMax = currentScore + 1 >= MAX_FOCUS_SCORE;
+  
+  if (video && willReachMax && !bgVideoPlayedForMax) {
+    video.play()
+      .then(() => { bgVideoPlayedForMax = true; })
+      .catch(err => console.warn("Play blocked:", err));
+  }
+  
+  const res = await addFocus(currentArtist, "follow");
 
-      if (res.ok) {
-        alert(`Focus +1 – du folgst ${currentArtist.name || "dem Artist"} (auf Spotify öffnen).`);
-      } else if (res.reason && res.reason.startsWith("limit")) {
-        alert("Follow-Limit erreicht – du kannst diesen Artist nur einmal follow-pushen.");
-      }
-      await updateFocusUI();
+  if (res.ok) {
+    alert(`Focus +1 – du folgst ${currentArtist.name || "dem Artist"} (auf Spotify öffnen).`);
+  } else if (res.reason && res.reason.startsWith("limit")) {
+    alert("Follow-Limit erreicht – du kannst diesen Artist nur einmal follow-pushen.");
+  }
+  await updateFocusUI();
 
-      const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
-      if (url) window.open(url, "_blank");
+  const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
+  if (url) window.open(url, "_blank");
     }
 
     async function shareCurrentArtist() {
