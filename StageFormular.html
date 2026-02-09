@@ -139,6 +139,11 @@
     .status.success {
       color: #9effc7;
     }
+    .preview-hint {
+      font-size: 11px;
+      color: #a0a0a0;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -271,20 +276,13 @@
       <div id="status" class="status"></div>
     </div>
 
-    <!-- NEU: Vorschau-Link Sektion -->
-    <div class="section-title" style="margin-top: 32px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;">
-      Live-Vorschau deiner Stage-Karte
-    </div>
-    <div class="field">
-      <div class="hint" style="margin-bottom: 12px;">
-        Hinweis: Speichere deine Karte zuerst, bevor du die Vorschau öffnest. 
-        Nur gespeicherte Änderungen werden in der Live-Ansicht angezeigt.
+    <!-- Vorschau-Button -->
+    <div style="margin-top: 16px;">
+      <button id="previewButton">Stage‑Karte ansehen</button>
+      <div class="preview-hint">
+        Hinweis: Speichere vorher deine Änderungen, damit sie in der Vorschau erscheinen.
       </div>
-      <button id="previewButton" style="background: transparent; border: 1px solid #1cff88; color: #1cff88;">
-        Vorschau in neuem Tab öffnen
-      </button>
     </div>
-
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
@@ -325,6 +323,7 @@
       if (!artistId) {
         setStatus("Fehlende artist_id in der URL.", "error");
         saveButton.disabled = true;
+        previewButton.disabled = true;
         return;
       }
 
@@ -355,12 +354,14 @@
         console.error(error);
         setStatus("Artist konnte nicht geladen werden.", "error");
         saveButton.disabled = true;
+        previewButton.disabled = true;
         return;
       }
 
       if (!data.stage_unlocked) {
         setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
         saveButton.disabled = true;
+        previewButton.disabled = true;
         return;
       }
 
@@ -457,19 +458,13 @@
       }
     });
 
-    // Event Listener für den Vorschau-Button
     previewButton.addEventListener("click", () => {
       const artistId = getArtistIdFromUrl();
       if (!artistId) {
-        alert("Keine artist_id gefunden. Bitte lade das Formular neu.");
+        alert("Keine artist_id gefunden. Vorschau nicht möglich.");
         return;
       }
-
-      const confirmed = confirm("Hast du deine Änderungen gespeichert?
-Nur gespeicherte Daten erscheinen in der Vorschau.");
-      if (confirmed) {
-        window.open(`Stage.html?artist_id=${artistId}`, '_blank');
-      }
+      window.open(`Stage.html?artist_id=${encodeURIComponent(artistId)}`, "_blank");
     });
 
     loadArtist();
