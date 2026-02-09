@@ -26,7 +26,7 @@
       padding: 24px 22px 20px;
     }
     .logo {
-      font-size: 13px;
+      font-size: 14px;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: #9effc7;
@@ -34,20 +34,20 @@
     }
     h1 {
       margin: 0 0 4px;
-      font-size: 22px;
+      font-size: 24px;
     }
     .subtitle {
-      font-size: 13px;
+      font-size: 14px;
       color: #c4c4c4;
       margin-bottom: 18px;
     }
     .artist-name {
-      font-size: 15px;
+      font-size: 16px;
       color: #e3ffe5;
       margin-bottom: 4px;
     }
     .section-title {
-      font-size: 12px;
+      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
       color: #9effc7;
@@ -64,11 +64,11 @@
     }
     label {
       display: block;
-      font-size: 13px;
+      font-size: 14px;
       margin-bottom: 6px;
     }
     .hint {
-      font-size: 11px;
+      font-size: 12px;
       color: #a0a0a0;
       margin-bottom: 6px;
     }
@@ -83,7 +83,7 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       background: rgba(15, 15, 15, 0.9);
       color: #f5f5f5;
-      font-size: 14px;
+      font-size: 15px;
       outline: none;
       resize: vertical;
     }
@@ -95,6 +95,12 @@
     }
     textarea {
       min-height: 80px;
+    }
+    .char-counter {
+      font-size: 11px;
+      color: #a0a0a0;
+      text-align: right;
+      margin-top: 4px;
     }
     .collab-grid {
       display: grid;
@@ -114,7 +120,7 @@
       background: linear-gradient(90deg, #1cff88, #00b35c);
       color: #020202;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
       transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
     }
@@ -130,7 +136,7 @@
       box-shadow: none;
     }
     .status {
-      font-size: 13px;
+      font-size: 14px;
       min-height: 18px;
     }
     .status.error {
@@ -140,7 +146,7 @@
       color: #9effc7;
     }
     .preview-hint {
-      font-size: 11px;
+      font-size: 12px;
       color: #a0a0a0;
       margin-top: 4px;
     }
@@ -165,6 +171,7 @@
         Schreib in 3–5 Sätzen, was Musik für dich bedeutet. Dieser Text ist das Herz deiner Stage‑Karte.
       </div>
       <textarea id="musicConnection" maxlength="250"></textarea>
+      <div id="musicConnectionCounter" class="char-counter">0 / 250</div>
     </div>
 
     <!-- Botschaft an die UnterGrund-Community -->
@@ -175,6 +182,7 @@
         Kurz, direkt, persönlich. Dieser Text erscheint unten auf deiner Karte und zeigt, wofür du stehst.
       </div>
       <textarea id="ugMessage" maxlength="250"></textarea>
+      <div id="ugMessageCounter" class="char-counter">0 / 250</div>
     </div>
 
     <!-- Sound / Spezial / Aktiv seit -->
@@ -186,6 +194,7 @@
         Wir zeigen sie als Stats auf deiner Karte.
       </div>
       <input id="sound" type="text" maxlength="75" />
+      <div id="soundCounter" class="char-counter">0 / 75</div>
     </div>
 
     <div class="field">
@@ -194,6 +203,7 @@
         Was macht dich auf der Stage besonders? Z.B. <i>Live‑Vocals, modulare Freakouts, Storytelling‑Sets</i>.
       </div>
       <input id="specialSkill" type="text" maxlength="75" />
+      <div id="specialSkillCounter" class="char-counter">0 / 75</div>
     </div>
 
     <div class="field">
@@ -308,6 +318,11 @@
     const artistNameDisplay = document.getElementById("artistNameDisplay");
     const previewButton = document.getElementById("previewButton");
 
+    const musicConnectionCounterEl = document.getElementById("musicConnectionCounter");
+    const ugMessageCounterEl = document.getElementById("ugMessageCounter");
+    const soundCounterEl = document.getElementById("soundCounter");
+    const specialSkillCounterEl = document.getElementById("specialSkillCounter");
+
     function setStatus(message, type = "") {
       statusEl.textContent = message;
       statusEl.className = "status " + type;
@@ -317,6 +332,18 @@
       const params = new URLSearchParams(window.location.search);
       return params.get("artist_id");
     }
+
+    function updateCounters() {
+      musicConnectionCounterEl.textContent = musicConnectionEl.value.length + " / 250";
+      ugMessageCounterEl.textContent = ugMessageEl.value.length + " / 250";
+      soundCounterEl.textContent = soundEl.value.length + " / 75";
+      specialSkillCounterEl.textContent = specialSkillEl.value.length + " / 75";
+    }
+
+    musicConnectionEl.addEventListener("input", updateCounters);
+    ugMessageEl.addEventListener("input", updateCounters);
+    soundEl.addEventListener("input", updateCounters);
+    specialSkillEl.addEventListener("input", updateCounters);
 
     async function loadArtist() {
       const artistId = getArtistIdFromUrl();
@@ -377,6 +404,8 @@
       collab3El.value = data.stage_collab_3 || "";
       contactEl.value = data.stage_contact || "";
       paletteEl.value = data.stage_palette || "neon";
+
+      updateCounters();
 
       setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
     }
