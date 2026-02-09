@@ -16,26 +16,15 @@
       justify-content: center;
       padding: 32px 12px;
     }
-
-    /* Wrapper für Formular + Vorschau-Link */
-    .stage-layout {
-      width: 100%;
-      max-width: 1200px;
-      display: grid;
-      grid-template-columns: 1.4fr 1fr;
-      gap: 20px;
-      align-items: flex-start;
-    }
-
     .stage-form {
       width: 100%;
+      max-width: 820px;
       background: rgba(0, 0, 0, 0.88);
       border-radius: 20px;
       border: 1px solid rgba(28, 255, 136, 0.35);
       box-shadow: 0 0 30px rgba(28, 255, 136, 0.25);
       padding: 24px 22px 20px;
     }
-
     .logo {
       font-size: 13px;
       letter-spacing: 0.2em;
@@ -107,12 +96,6 @@
     textarea {
       min-height: 80px;
     }
-    .char-counter {
-      font-size: 11px;
-      color: #a0a0a0;
-      text-align: right;
-      margin-top: 2px;
-    }
     .collab-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -156,157 +139,144 @@
     .status.success {
       color: #9effc7;
     }
-
-    @media (max-width: 900px) {
-      .stage-layout {
-        grid-template-columns: 1fr;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="stage-layout">
-    <div class="stage-form">
-      <div class="logo">UnterGrund Explorer</div>
-      <h1>Stage Karte gestalten</h1>
-      <div class="subtitle">
-        Deine Community hat dich aus dem UnterGrund auf die Stage gepusht.
-        Hier gestaltest du deine persönliche UnterGrund&nbsp;Stage‑Karte.
+  <div class="stage-form">
+    <div class="logo">UnterGrund Explorer</div>
+    <h1>Stage Karte gestalten</h1>
+    <div class="subtitle">
+      Deine Community hat dich aus dem UnterGrund auf die Stage gepusht.
+      Hier gestaltest du deine persönliche UnterGrund&nbsp;Stage‑Karte.
+    </div>
+
+    <div id="artistNameDisplay" class="artist-name"></div>
+
+    <!-- Verbindung zu Musik -->
+    <div class="section-title">Was verbindet dich mit Musik?</div>
+    <div class="field">
+      <label for="musicConnection">Erzähl kurz, warum du Musik machst.</label>
+      <div class="hint">
+        Schreib in 3–5 Sätzen, was Musik für dich bedeutet. Dieser Text ist das Herz deiner Stage‑Karte.
       </div>
+      <textarea id="musicConnection" maxlength="250"></textarea>
+    </div>
 
-      <div id="artistNameDisplay" class="artist-name"></div>
-
-      <!-- Verbindung zu Musik -->
-      <div class="section-title">Was verbindet dich mit Musik?</div>
-      <div class="field">
-        <label for="musicConnection">Erzähl kurz, warum du Musik machst.</label>
-        <div class="hint">
-          Schreib in 3–5 Sätzen, was Musik für dich bedeutet. Dieser Text ist das Herz deiner Stage‑Karte.
-        </div>
-        <textarea id="musicConnection" maxlength="250"></textarea>
-        <div id="musicConnectionCount" class="char-counter">0 / 250</div>
+    <!-- Botschaft an die UnterGrund-Community -->
+    <div class="section-title">Botschaft an die UnterGrund‑Community</div>
+    <div class="field">
+      <label for="ugMessage">Deine Message an alle, die dich gepusht haben.</label>
+      <div class="hint">
+        Kurz, direkt, persönlich. Dieser Text erscheint unten auf deiner Karte und zeigt, wofür du stehst.
       </div>
+      <textarea id="ugMessage" maxlength="250"></textarea>
+    </div>
 
-      <!-- Botschaft an die UnterGrund-Community -->
-      <div class="section-title">Botschaft an die UnterGrund‑Community</div>
-      <div class="field">
-        <label for="ugMessage">Deine Message an alle, die dich gepusht haben.</label>
-        <div class="hint">
-          Kurz, direkt, persönlich. Dieser Text erscheint unten auf deiner Karte und zeigt, wofür du stehst.
-        </div>
-        <textarea id="ugMessage" maxlength="250"></textarea>
-        <div id="ugMessageCount" class="char-counter">0 / 250</div>
+    <!-- Sound / Spezial / Aktiv seit -->
+    <div class="section-title">Dein Sound &amp; deine Skills</div>
+    <div class="field">
+      <label for="sound">Sound / Genres</label>
+      <div class="hint">
+        Maximal drei Begriffe, z.B. <i>Techno / Rave / experimentell</i>.
+        Wir zeigen sie als Stats auf deiner Karte.
       </div>
+      <input id="sound" type="text" maxlength="75" />
+    </div>
 
-      <!-- Sound / Spezial / Aktiv seit -->
-      <div class="section-title">Dein Sound &amp; deine Skills</div>
-      <div class="field">
-        <label for="sound">Sound / Genres</label>
-        <div class="hint">
-          Maximal drei Begriffe, z.B. <i>Techno / Rave / experimentell</i>.
-          Wir zeigen sie als Stats auf deiner Karte.
-        </div>
-        <input id="sound" type="text" maxlength="75" />
+    <div class="field">
+      <label for="specialSkill">Spezialfähigkeit</label>
+      <div class="hint">
+        Was macht dich auf der Stage besonders? Z.B. <i>Live‑Vocals, modulare Freakouts, Storytelling‑Sets</i>.
       </div>
+      <input id="specialSkill" type="text" maxlength="75" />
+    </div>
 
-      <div class="field">
-        <label for="specialSkill">Spezialfähigkeit</label>
-        <div class="hint">
-          Was macht dich auf der Stage besonders? Z.B. <i>Live‑Vocals, modulare Freakouts, Storytelling‑Sets</i>.
-        </div>
-        <input id="specialSkill" type="text" maxlength="75" />
+    <div class="field">
+      <label for="activeSince">Aktiv seit</label>
+      <div class="hint">
+        Jahr, seit dem du im UnterGrund unterwegs bist (z.B. 2018).
       </div>
+      <input id="activeSince" type="text" maxlength="4" placeholder="2018" />
+    </div>
 
-      <div class="field">
-        <label for="activeSince">Aktiv seit</label>
-        <div class="hint">
-          Jahr, seit dem du im UnterGrund unterwegs bist (z.B. 2018).
-        </div>
-        <input id="activeSince" type="text" maxlength="4" placeholder="2018" />
+    <!-- Collab-Wünsche -->
+    <div class="section-title">Collab‑Wunsch</div>
+    <div class="field">
+      <div class="hint">
+        Mit wem aus dem UnterGrund würdest du gern etwas starten?
+        Trag bis zu drei Artists ein. Das hilft später, Collab‑Matches zu finden
+        und von Zuhörer:innen gezielt gepusht zu werden.
       </div>
-
-      <!-- Collab-Wünsche -->
-      <div class="section-title">Collab‑Wunsch</div>
-      <div class="field">
-        <div class="hint">
-          Mit wem aus dem UnterGrund würdest du gern etwas starten?
-          Trag bis zu drei Artists ein. Das hilft später, Collab‑Matches zu finden
-          und von Zuhörer:innen gezielt gepusht zu werden.
+      <div class="collab-grid">
+        <div>
+          <label for="collab1">Collab‑Wunsch 1</label>
+          <input id="collab1" type="text" maxlength="80" />
         </div>
-        <div class="collab-grid">
-          <div>
-            <label for="collab1">Collab‑Wunsch 1</label>
-            <input id="collab1" type="text" maxlength="80" />
-          </div>
-          <div>
-            <label for="collab2">Collab‑Wunsch 2 (optional)</label>
-            <input id="collab2" type="text" maxlength="80" />
-          </div>
-          <div>
-            <label for="collab3">Collab‑Wunsch 3 (optional)</label>
-            <input id="collab3" type="text" maxlength="80" />
-          </div>
+        <div>
+          <label for="collab2">Collab‑Wunsch 2 (optional)</label>
+          <input id="collab2" type="text" maxlength="80" />
         </div>
-      </div>
-
-      <!-- Kontakt -->
-      <div class="section-title">Kontakt</div>
-      <div class="field">
-        <label for="contact">Kontakt‑Link für Collabs &amp; Anfragen</label>
-        <div class="hint">
-          Link zu deinem bevorzugten Kontakt (z.B. Instagram, Mail oder Linktree),
-          damit Leute dich nach der Stage direkt erreichen können.
+        <div>
+          <label for="collab3">Collab‑Wunsch 3 (optional)</label>
+          <input id="collab3" type="text" maxlength="80" />
         </div>
-        <input id="contact" type="url" placeholder="https://instagram.com/deinname oder https://linktr.ee/..." />
-      </div>
-
-      <!-- Stage-Foto -->
-      <div class="section-title">Exklusives Stage‑Foto</div>
-      <div class="field">
-        <label for="photo">Stage‑Foto hochladen</label>
-        <div class="hint">
-          Wähle ein Bild, das nur auf deiner UnterGrund‑Stage‑Karte zu sehen ist.
-          Empfohlen: hochkant oder quadratisch, max. 5&nbsp;MB.
-        </div>
-        <input id="photo" type="file" accept="image/*" />
-      </div>
-
-      <!-- Farbpalette -->
-      <div class="section-title">Karten‑Farbstimmung</div>
-      <div class="field">
-        <label for="palette">Look deiner Stage‑Karte</label>
-        <div class="hint">
-          Wähle eine Farbstimmung für Rahmen und Akzente deiner Karte.
-          Du kannst das später jederzeit ändern.
-        </div>
-        <select id="palette">
-          <option value="neon">Neon‑Grün</option>
-          <option value="electric-blue">Electric‑Blau</option>
-          <option value="warm-orange">Warmes Orange</option>
-          <option value="deep-purple">Tiefes Violett</option>
-          <option value="rose-magenta">Rosé / Magenta</option>
-          <option value="aqua">Cyan / Aqua</option>
-          <option value="gold">Gold / Bernstein</option>
-          <option value="ice">Eisblau / Silber</option>
-          <option value="dark">Dunkler UnterGrund</option>
-        </select>
-      </div>
-
-      <div class="actions">
-        <button id="saveButton">Stage‑Karte speichern</button>
-        <div id="status" class="status"></div>
       </div>
     </div>
 
-    <!-- Vorschau-Link -->
-    <div>
-      <div class="section-title">Live‑Vorschau deiner Karte</div>
-      <p style="font-size:12px;color:#c4c4c4;margin-top:0;margin-bottom:8px;">
-        Speichere zuerst deine Angaben. Danach kannst du dir deine Stage‑Karte in voller Größe ansehen.
-      </p>
-      <button id="previewButton" style="width:100%;max-width:260px;">
-        Karte in neuer Ansicht öffnen
-      </button>
+    <!-- Kontakt -->
+    <div class="section-title">Kontakt</div>
+    <div class="field">
+      <label for="contact">Kontakt‑Link für Collabs &amp; Anfragen</label>
+      <div class="hint">
+        Link zu deinem bevorzugten Kontakt (z.B. Instagram, Mail oder Linktree),
+        damit Leute dich nach der Stage direkt erreichen können.
+      </div>
+      <input id="contact" type="url" placeholder="https://instagram.com/deinname oder https://linktr.ee/..." />
+    </div>
+
+    <!-- Stage-Foto -->
+    <div class="section-title">Exklusives Stage‑Foto</div>
+    <div class="field">
+      <label for="photo">Stage‑Foto hochladen</label>
+      <div class="hint">
+        Wähle ein Bild, das nur auf deiner UnterGrund‑Stage‑Karte zu sehen ist.
+        Empfohlen: hochkant oder quadratisch, max. 5&nbsp;MB.
+      </div>
+      <input id="photo" type="file" accept="image/*" />
+    </div>
+
+    <!-- Farbpalette -->
+    <div class="section-title">Karten‑Farbstimmung</div>
+    <div class="field">
+      <label for="palette">Look deiner Stage‑Karte</label>
+      <div class="hint">
+        Wähle eine Farbstimmung für Rahmen und Akzente deiner Karte.
+        Du kannst das später jederzeit ändern.
+      </div>
+      <select id="palette">
+        <option value="neon">Neon‑Grün</option>
+        <option value="electric-blue">Electric‑Blau</option>
+        <option value="warm-orange">Warmes Orange</option>
+        <option value="deep-purple">Tiefes Violett</option>
+        <option value="rose-magenta">Rosé / Magenta</option>
+        <option value="aqua">Cyan / Aqua</option>
+        <option value="gold">Gold / Bernstein</option>
+        <option value="ice">Eisblau / Silber</option>
+        <option value="dark">Dunkler UnterGrund</option>
+      </select>
+    </div>
+
+    <div class="actions">
+      <button id="saveButton">Stage‑Karte speichern</button>
+      <div id="status" class="status"></div>
+    </div>
+
+    <!-- Vorschau-Button -->
+    <div style="margin-top:16px;">
+      <button id="previewButton">Stage‑Karte in neuer Ansicht anzeigen</button>
+      <div style="font-size:12px;color:#c4c4c4;margin-top:4px;">
+        Hinweis: Ungespeicherte Änderungen erscheinen nicht in der Vorschau.
+      </div>
     </div>
   </div>
 
@@ -333,9 +303,6 @@
     const artistNameDisplay = document.getElementById("artistNameDisplay");
     const previewButton = document.getElementById("previewButton");
 
-    const musicConnectionCountEl = document.getElementById("musicConnectionCount");
-    const ugMessageCountEl = document.getElementById("ugMessageCount");
-
     function setStatus(message, type = "") {
       statusEl.textContent = message;
       statusEl.className = "status " + type;
@@ -345,16 +312,6 @@
       const params = new URLSearchParams(window.location.search);
       return params.get("artist_id");
     }
-
-    function updateCharCounters() {
-      musicConnectionCountEl.textContent =
-        musicConnectionEl.value.length + " / 250";
-      ugMessageCountEl.textContent =
-        ugMessageEl.value.length + " / 250";
-    }
-
-    musicConnectionEl.addEventListener("input", updateCharCounters);
-    ugMessageEl.addEventListener("input", updateCharCounters);
 
     async function loadArtist() {
       const artistId = getArtistIdFromUrl();
@@ -415,8 +372,6 @@
       collab3El.value = data.stage_collab_3 || "";
       contactEl.value = data.stage_contact || "";
       paletteEl.value = data.stage_palette || "neon";
-
-      updateCharCounters();
 
       setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
     }
@@ -505,7 +460,7 @@
         return;
       }
 
-      const confirmed = confirm(
+      const ok = confirm(
         "Bitte stelle sicher, dass du deine Karte gespeichert hast.
 " +
         "Ungespeicherte Änderungen erscheinen nicht in der Vorschau.
@@ -513,13 +468,12 @@
 " +
         "Vorschau jetzt in neuer Ansicht öffnen?"
       );
-      if (!confirmed) return;
+      if (!ok) return;
 
-      const url = `Stage.html?artist_id=${encodeURIComponent(artistId)}`;
-      window.open(url, "_blank");
+      window.open(`Stage.html?artist_id=${encodeURIComponent(artistId)}`, "_blank");
     });
 
     loadArtist();
   </script>
 </body>
-  </html>
+</html>
