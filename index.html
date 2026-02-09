@@ -733,15 +733,11 @@ input:focus {
     async function handleFocusPlay() {
   if (!currentArtist) return;
   
-  // NEU: Video SOFORT starten wenn 100% erreicht wird
-  const video = document.getElementById("ug-bg");
-  const currentScore = currentArtist.focus_score || 0;
-  const willReachMax = currentScore + 1 >= MAX_FOCUS_SCORE;
-  
-  if (video && willReachMax && !bgVideoPlayedForMax) {
-    video.play()
-      .then(() => { bgVideoPlayedForMax = true; })
-      .catch(err => console.warn("Play blocked:", err));
+  // Video jetzt starten wenn 100% erreicht wird
+  const willBe100 = (currentArtist.focus_score || 0) + 1 >= MAX_FOCUS_SCORE;
+  if (willBe100 && !bgVideoPlayedForMax) {
+    document.getElementById("ug-bg")?.play().catch(() => {});
+    bgVideoPlayedForMax = true;
   }
   
   const res = await addFocus(currentArtist, "play");
@@ -760,15 +756,11 @@ input:focus {
     async function handleFocusFollow() {
   if (!currentArtist) return;
   
-  // NEU: Video SOFORT starten wenn 100% erreicht wird
-  const video = document.getElementById("ug-bg");
-  const currentScore = currentArtist.focus_score || 0;
-  const willReachMax = currentScore + 1 >= MAX_FOCUS_SCORE;
-  
-  if (video && willReachMax && !bgVideoPlayedForMax) {
-    video.play()
-      .then(() => { bgVideoPlayedForMax = true; })
-      .catch(err => console.warn("Play blocked:", err));
+  // Video jetzt starten wenn 100% erreicht wird
+  const willBe100 = (currentArtist.focus_score || 0) + 1 >= MAX_FOCUS_SCORE;
+  if (willBe100 && !bgVideoPlayedForMax) {
+    document.getElementById("ug-bg")?.play().catch(() => {});
+    bgVideoPlayedForMax = true;
   }
   
   const res = await addFocus(currentArtist, "follow");
