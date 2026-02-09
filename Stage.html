@@ -38,12 +38,7 @@
       filter: brightness(0.6) saturate(1.2);
       background: #000;
     }
-    @media (max-width: 600px) {
-      .bg-video video {
-        object-fit: cover;
-        object-position: center top;
-      }
-    }
+
     .overlay {
       position: fixed;
       inset: 0;
@@ -331,8 +326,13 @@
       text-decoration: underline;
     }
 
-    /* Mobile: Karte füllt fast den ganzen Screen, Rand bleibt sichtbar */
+    /* Mobile: Karte füllt fast den ganzen Screen, Rand bleibt sichtbar, Karte nicht scrollbar */
     @media (max-width: 600px) {
+      .bg-video video {
+        object-fit: cover;
+        object-position: center top;
+      }
+
       .stage-wrap {
         min-height: 100vh;
         padding: 8px;
@@ -349,25 +349,28 @@
         border-radius: 22px;
       }
 
+      /* Karte fix, leicht skaliert, kein Scrollen */
       .card {
         height: 100%;
         border-radius: 18px;
-        padding: 10px 12px 9px;
-        overflow-y: auto;              /* Inhalt in der Karte scrollt */
-        -webkit-overflow-scrolling: touch;
+        padding: 8px 10px 8px;
+        overflow: hidden;
+        transform: scale(0.9);          /* ggf. auf 0.85 oder 0.8 anpassen */
+        transform-origin: center center;
       }
 
-      .card-artist {
-        font-size: 20px;
-      }
+      /* Schrift & Abstände etwas kleiner */
+      .card-artist { font-size: 18px; }
+      .card-subline { font-size: 10px; }
+      .card-section-label { font-size: 9px; }
+      .card-text { font-size: 11px; max-height: none; }
+      .stat-pill { font-size: 10px; padding: 3px 6px; }
+      .collab-pill { font-size: 10px; padding: 2px 6px; }
+      .card-footer { font-size: 10px; }
+      .card-number { font-size: 10px; }
+      .card-set { font-size: 9px; }
 
-      .card-photo {
-        flex-basis: 58%;
-      }
-
-      .card-text {
-        max-height: none;              /* volle Höhe nutzen */
-      }
+      .card-photo { flex-basis: 55%; }
     }
   </style>
 </head>
