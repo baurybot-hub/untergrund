@@ -17,7 +17,7 @@
       padding: 32px 12px;
     }
 
-    /* Wrapper für Formular + (frühere) Vorschau */
+    /* Wrapper für Formular + Vorschau */
     .stage-layout {
       width: 100%;
       max-width: 1200px;
@@ -157,6 +157,61 @@
       color: #9effc7;
     }
 
+    /* Karten-Vorschau (vereinfachte Version deiner Stage-Karte) */
+    .card-preview-shell {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto;
+      border-radius: 20px;
+      padding: 3px;
+      background: linear-gradient(135deg,#22c55e,#4ade80,#22c55e);
+      box-shadow:
+        0 24px 60px rgba(0,0,0,0.9),
+        0 0 24px rgba(34,197,94,0.4);
+    }
+    .card-preview {
+      border-radius: 16px;
+      padding: 10px 12px 10px;
+      background: radial-gradient(circle at top,
+                  rgba(15,23,42,0.96) 0,
+                  rgba(15,23,42,0.98) 40%,
+                  rgba(2,6,23,1) 100%);
+      color: #e5e7eb;
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .card-preview-header {
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+    .card-preview-artist {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .card-preview-photo {
+      margin-top: 6px;
+      border-radius: 12px;
+      background: #020617;
+      height: 120px;
+    }
+    .card-preview-section-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9effc7;
+    }
+    .card-preview-text {
+      font-size: 11px;
+      line-height: 1.4;
+      max-height: 4.5em;
+      overflow: hidden;
+    }
+
     @media (max-width: 900px) {
       .stage-layout {
         grid-template-columns: 1fr;
@@ -206,7 +261,7 @@
           Maximal drei Begriffe, z.B. <i>Techno / Rave / experimentell</i>.
           Wir zeigen sie als Stats auf deiner Karte.
         </div>
-        <input id="sound" type="text" maxlength="75" />
+        <input id="sound" type="text" maxlength="80" />
       </div>
 
       <div class="field">
@@ -214,7 +269,7 @@
         <div class="hint">
           Was macht dich auf der Stage besonders? Z.B. <i>Live‑Vocals, modulare Freakouts, Storytelling‑Sets</i>.
         </div>
-        <input id="specialSkill" type="text" maxlength="75" />
+        <input id="specialSkill" type="text" maxlength="80" />
       </div>
 
       <div class="field">
@@ -298,15 +353,27 @@
       </div>
     </div>
 
-    <!-- Statt eingebauter Vorschau: Vorschau-Button -->
+    <!-- Karten-Vorschau -->
     <div>
       <div class="section-title">Live‑Vorschau deiner Karte</div>
-      <p style="font-size:12px;color:#c4c4c4;margin-top:0;margin-bottom:8px;">
-        Speichere zuerst deine Angaben. Danach kannst du dir deine Stage‑Karte in voller Größe ansehen.
-      </p>
-      <button id="previewButton" style="width:100%;max-width:260px;">
-        Karte in neuer Ansicht öffnen
-      </button>
+      <div class="card-preview-shell">
+        <div class="card-preview">
+          <div class="card-preview-header">UnterGrund Stage Karte</div>
+          <div id="previewArtist" class="card-preview-artist">Artist</div>
+
+          <div class="card-preview-photo"></div>
+
+          <div>
+            <div class="card-preview-section-label">Was verbindet dich mit Musik?</div>
+            <div id="previewMusicConnection" class="card-preview-text"></div>
+          </div>
+
+          <div>
+            <div class="card-preview-section-label">Botschaft an die UnterGrund‑Community</div>
+            <div id="previewUgMessage" class="card-preview-text"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -331,10 +398,13 @@
     const saveButton = document.getElementById("saveButton");
     const statusEl = document.getElementById("status");
     const artistNameDisplay = document.getElementById("artistNameDisplay");
-    const previewButton = document.getElementById("previewButton");
 
     const musicConnectionCountEl = document.getElementById("musicConnectionCount");
     const ugMessageCountEl = document.getElementById("ugMessageCount");
+
+    const previewArtistEl = document.getElementById("previewArtist");
+    const previewMusicConnectionEl = document.getElementById("previewMusicConnection");
+    const previewUgMessageEl = document.getElementById("previewUgMessage");
 
     function setStatus(message, type = "") {
       statusEl.textContent = message;
@@ -353,15 +423,27 @@
         ugMessageEl.value.length + " / 250";
     }
 
-    musicConnectionEl.addEventListener("input", updateCharCounters);
-    ugMessageEl.addEventListener("input", updateCharCounters);
+    function updatePreview() {
+      previewMusicConnectionEl.textContent =
+        musicConnectionEl.value || "Dein Text zu Musik erscheint hier.";
+      previewUgMessageEl.textContent =
+        ugMessageEl.value || "Deine Botschaft an die Community erscheint hier.";
+    }
+
+    musicConnectionEl.addEventListener("input", () => {
+      updateCharCounters();
+      updatePreview();
+    });
+    ugMessageEl.addEventListener("input", () => {
+      updateCharCounters();
+      updatePreview();
+    });
 
     async function loadArtist() {
       const artistId = getArtistIdFromUrl();
       if (!artistId) {
         setStatus("Fehlende artist_id in der URL.", "error");
         saveButton.disabled = true;
-        previewButton.disabled = true;
         return;
       }
 
@@ -392,18 +474,17 @@
         console.error(error);
         setStatus("Artist konnte nicht geladen werden.", "error");
         saveButton.disabled = true;
-        previewButton.disabled = true;
         return;
       }
 
       if (!data.stage_unlocked) {
         setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
         saveButton.disabled = true;
-        previewButton.disabled = true;
         return;
       }
 
       artistNameDisplay.textContent = "Angemeldet als: " + data.name;
+      previewArtistEl.textContent = data.name || "Artist";
 
       musicConnectionEl.value = data.stage_music_connection || "";
       ugMessageEl.value = data.stage_ug_message || "";
@@ -417,6 +498,7 @@
       paletteEl.value = data.stage_palette || "neon";
 
       updateCharCounters();
+      updatePreview();
 
       setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
     }
@@ -496,26 +578,6 @@
       } finally {
         saveButton.disabled = false;
       }
-    });
-
-    previewButton.addEventListener("click", () => {
-      const artistId = getArtistIdFromUrl();
-      if (!artistId) {
-        alert("Keine artist_id in der URL gefunden. Vorschau nicht möglich.");
-        return;
-      }
-
-      const ok = confirm(
-        "Bitte stelle sicher, dass du deine Karte gespeichert hast.
-" +
-        "Ungespeicherte Änderungen erscheinen nicht in der Vorschau.
-
-" +
-        "Vorschau jetzt in neuer Ansicht öffnen?"
-      );
-      if (!ok) return;
-
-      window.open(`Stage.html?artist_id=${encodeURIComponent(artistId)}`, "_blank");
     });
 
     loadArtist();
