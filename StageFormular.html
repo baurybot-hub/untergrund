@@ -340,11 +340,6 @@
       specialSkillCounterEl.textContent = specialSkillEl.value.length + " / 75";
     }
 
-    musicConnectionEl.addEventListener("input", updateCounters);
-    ugMessageEl.addEventListener("input", updateCounters);
-    soundEl.addEventListener("input", updateCounters);
-    specialSkillEl.addEventListener("input", updateCounters);
-
     async function loadArtist() {
       const artistId = getArtistIdFromUrl();
       if (!artistId) {
@@ -495,6 +490,12 @@
       }
       window.open(`Stage.html?artist_id=${encodeURIComponent(artistId)}`, "_blank");
     });
+
+    // Event-Listener für Live-Zähler NACH dem DOM
+    musicConnectionEl.addEventListener("input", updateCounters);
+    ugMessageEl.addEventListener("input", updateCounters);
+    soundEl.addEventListener("input", updateCounters);
+    specialSkillEl.addEventListener("input", updateCounters);
 
     loadArtist();
   </script>
