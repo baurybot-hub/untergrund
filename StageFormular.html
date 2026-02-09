@@ -159,7 +159,7 @@
       <div class="hint">
         Schreib in 3–5 Sätzen, was Musik für dich bedeutet. Dieser Text ist das Herz deiner Stage‑Karte.
       </div>
-      <textarea id="musicConnection" maxlength="800"></textarea>
+      <textarea id="musicConnection" maxlength="250"></textarea>
     </div>
 
     <!-- Botschaft an die UnterGrund-Community -->
@@ -169,7 +169,7 @@
       <div class="hint">
         Kurz, direkt, persönlich. Dieser Text erscheint unten auf deiner Karte und zeigt, wofür du stehst.
       </div>
-      <textarea id="ugMessage" maxlength="800"></textarea>
+      <textarea id="ugMessage" maxlength="250"></textarea>
     </div>
 
     <!-- Sound / Spezial / Aktiv seit -->
@@ -180,7 +180,7 @@
         Maximal drei Begriffe, z.B. <i>Techno / Rave / experimentell</i>.
         Wir zeigen sie als Stats auf deiner Karte.
       </div>
-      <input id="sound" type="text" maxlength="80" />
+      <input id="sound" type="text" maxlength="75" />
     </div>
 
     <div class="field">
@@ -188,7 +188,7 @@
       <div class="hint">
         Was macht dich auf der Stage besonders? Z.B. <i>Live‑Vocals, modulare Freakouts, Storytelling‑Sets</i>.
       </div>
-      <input id="specialSkill" type="text" maxlength="80" />
+      <input id="specialSkill" type="text" maxlength="75" />
     </div>
 
     <div class="field">
@@ -270,6 +270,21 @@
       <button id="saveButton">Stage‑Karte speichern</button>
       <div id="status" class="status"></div>
     </div>
+
+    <!-- NEU: Vorschau-Link Sektion -->
+    <div class="section-title" style="margin-top: 32px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px;">
+      Live-Vorschau deiner Stage-Karte
+    </div>
+    <div class="field">
+      <div class="hint" style="margin-bottom: 12px;">
+        Hinweis: Speichere deine Karte zuerst, bevor du die Vorschau öffnest. 
+        Nur gespeicherte Änderungen werden in der Live-Ansicht angezeigt.
+      </div>
+      <button id="previewButton" style="background: transparent; border: 1px solid #1cff88; color: #1cff88;">
+        Vorschau in neuem Tab öffnen
+      </button>
+    </div>
+
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
@@ -293,6 +308,7 @@
     const saveButton = document.getElementById("saveButton");
     const statusEl = document.getElementById("status");
     const artistNameDisplay = document.getElementById("artistNameDisplay");
+    const previewButton = document.getElementById("previewButton");
 
     function setStatus(message, type = "") {
       statusEl.textContent = message;
@@ -438,6 +454,21 @@
         setStatus(e.message || "Fehler beim Speichern.", "error");
       } finally {
         saveButton.disabled = false;
+      }
+    });
+
+    // Event Listener für den Vorschau-Button
+    previewButton.addEventListener("click", () => {
+      const artistId = getArtistIdFromUrl();
+      if (!artistId) {
+        alert("Keine artist_id gefunden. Bitte lade das Formular neu.");
+        return;
+      }
+
+      const confirmed = confirm("Hast du deine Änderungen gespeichert?
+Nur gespeicherte Daten erscheinen in der Vorschau.");
+      if (confirmed) {
+        window.open(`Stage.html?artist_id=${artistId}`, '_blank');
       }
     });
 
