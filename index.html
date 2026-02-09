@@ -402,23 +402,27 @@ input:focus {
     let bgVideoPlayedForMax = false;
 
     function updateFocusBackground() {
-      const video = document.getElementById("ug-bg");
-      if (!video || !currentArtist) return;
+  const video = document.getElementById("ug-bg");
+  if (!video || !currentArtist) return;
 
-      const score = currentArtist.focus_score || 0;
-      const clamped = Math.max(0, Math.min(MAX_FOCUS_SCORE, score));
-      const targetTime = (clamped / MAX_FOCUS_SCORE) * VIDEO_DURATION;
+  const score = currentArtist.focus_score || 0;
+  const clamped = Math.max(0, Math.min(MAX_FOCUS_SCORE, score));
+  const targetTime = (clamped / MAX_FOCUS_SCORE) * VIDEO_DURATION;
 
-      const setTimeAndMaybePlay = () => {
-        video.currentTime = targetTime;
+  const setTimeAndMaybePlay = () => {
+    video.currentTime = targetTime;
 
-        if (score >= MAX_FOCUS_SCORE && !bgVideoPlayedForMax) {
-          video.play().catch(() => {});
-          bgVideoPlayedForMax = true;
-        } else {
-          video.pause();
-        }
-      };
+    if (score < MAX_FOCUS_SCORE) {
+      video.pause();
+    }
+  };
+
+  if (isNaN(video.duration) || video.duration === 0) {
+    video.addEventListener("canplay", setTimeAndMaybePlay, { once: true });
+  } else {
+    setTimeAndMaybePlay();
+  }
+    }
 
       if (isNaN(video.duration) || video.duration === 0) {
         video.addEventListener("canplay", setTimeAndMaybePlay, { once: true });
