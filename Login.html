@@ -10,7 +10,7 @@
       margin: 0;
       min-height: 100vh;
       background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       color: #f5f5f5;
       display: flex;
       justify-content: center;
@@ -23,27 +23,11 @@
       background: rgba(0, 0, 0, 0.88);
       border-radius: 20px;
       border: 1px solid rgba(28, 255, 136, 0.35);
-      box-shadow: 0 0 30px rgba(28, 255, 136, 0.25);
       padding: 40px 30px;
       text-align: center;
     }
-    .logo {
-      font-size: 14px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #9effc7;
-      margin-bottom: 8px;
-    }
-    h1 {
-      font-size: 28px;
-      margin: 0 0 8px;
-    }
-    .subtitle {
-      font-size: 14px;
-      color: #c0c0c0;
-      margin-bottom: 32px;
-      line-height: 1.5;
-    }
+    h1 { font-size: 28px; margin: 0 0 8px; }
+    .subtitle { font-size: 14px; color: #c0c0c0; margin-bottom: 32px; }
     .login-button {
       width: 100%;
       border: none;
@@ -52,145 +36,55 @@
       font-weight: 600;
       font-size: 15px;
       cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
       margin-bottom: 12px;
     }
-    .login-button:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-    }
-    .login-button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .spotify {
-      background: #1DB954;
-      color: #fff;
-    }
-    .google {
-      background: #4285F4;
-      color: #fff;
-    }
-    .hint {
-      font-size: 12px;
-      color: #a0a0a0;
-      margin-top: 24px;
-    }
-    .success-message {
-      background: rgba(28, 255, 136, 0.2);
-      border: 1px solid rgba(28, 255, 136, 0.5);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 20px;
-      display: none;
-    }
-    .success-message.show {
-      display: block;
-    }
-    .success-message h2 {
-      margin: 0 0 8px;
-      font-size: 18px;
-      color: #1cff88;
-    }
-    .success-message p {
-      margin: 0 0 16px;
-      font-size: 14px;
-    }
-    .success-message a {
-      display: inline-block;
-      padding: 10px 20px;
-      background: #1cff88;
-      color: #020202;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .success-message a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(28, 255, 136, 0.5);
-    }
+    .google { background: #4285F4; color: #fff; }
+    .spotify { background: #1DB954; color: #fff; }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <div class="success-message" id="successMessage">
-      <h2>✅ Erfolgreich angemeldet!</h2>
-      <p>Du bist jetzt eingeloggt.</p>
-      <a href="MeineSammlung.html">Zur Sammlung →</a>
-    </div>
+    <div style="font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: #9effc7; margin-bottom: 8px;">🎴 UNTERGRUND</div>
+    <h1>Deine Sammlung</h1>
+    <div class="subtitle">Melde dich an, um Stage-Karten zu sammeln</div>
 
-    <div id="loginForm">
-      <div class="logo">🎴 UnterGrund</div>
-      <h1>Deine Sammlung</h1>
-      <div class="subtitle">
-        Melde dich an, um Stage-Karten zu sammeln<br>
-        und dein persönliches Underground-Album aufzubauen.
-      </div>
+    <button class="login-button google" onclick="loginWithGoogle()">
+      🔵 Mit Google anmelden
+    </button>
 
-      <button class="login-button spotify" id="spotifyBtn" onclick="loginWithSpotify()">
-        <span style="font-size: 20px;">🎵</span>
-        <span>Mit Spotify anmelden</span>
-      </button>
-
-      <button class="login-button google" id="googleBtn" onclick="loginWithGoogle()">
-        <span style="font-size: 20px;">🔵</span>
-        <span>Mit Google anmelden</span>
-      </button>
-
-      <div class="hint">
-        Dauert nur 2 Sekunden ⚡<br>
-        Keine Werbung, keine versteckten Kosten.
-      </div>
-    </div>
+    <button class="login-button spotify" onclick="loginWithSpotify()">
+      🎵 Mit Spotify anmelden
+    </button>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
-    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    async function loginWithSpotify() {
-      document.getElementById('spotifyBtn').disabled = true;
-      document.getElementById('googleBtn').disabled = true;
-
-      await client.auth.signInWithOAuth({
-        provider: 'spotify',
-        options: {
-          redirectTo: 'https://baurybot-hub.github.io/untergrund/Login.html'
-        }
-      });
-    }
+    const { createClient } = supabase;
+    const client = createClient(
+      "https://tyflhzwrwzfakwedipig.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb"
+    );
 
     async function loginWithGoogle() {
-      document.getElementById('spotifyBtn').disabled = true;
-      document.getElementById('googleBtn').disabled = true;
-
-      await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: 'https://baurybot-hub.github.io/untergrund/Login.html'
-        }
+      const { error } = await client.auth.signInWithOAuth({
+        provider: 'google'
       });
+      if (error) console.error(error);
     }
 
-    // Prüfe ob User zurückkommt von OAuth
-    async function checkSession() {
-      const { data: { session } } = await client.auth.getSession();
-      
+    async function loginWithSpotify() {
+      const { error } = await client.auth.signInWithOAuth({
+        provider: 'spotify'
+      });
+      if (error) console.error(error);
+    }
+
+    // Check if already logged in
+    client.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        // User ist eingeloggt - zeige Success-Nachricht
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('successMessage').classList.add('show');
+        window.location.href = 'MeineSammlung.html';
       }
-    }
-
-    checkSession();
+    });
   </script>
 </body>
 </html>
