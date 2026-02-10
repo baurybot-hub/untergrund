@@ -109,12 +109,14 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
+
     async function loginWithSpotify() {
       const params = new URLSearchParams(window.location.search);
       const redirect = params.get('redirect') || 'MeineSammlung.html';
       const artistId = params.get('artist_id') || '';
       
-      const redirectUrl = 'https://baurybot-hub.github.io/untergrund/' + redirect + (artistId ? '?artist_id=' + artistId : '');
+      const redirectUrl = BASE_URL + redirect + (artistId ? '?artist_id=' + artistId : '');
 
       await client.auth.signInWithOAuth({
         provider: 'spotify',
@@ -129,7 +131,7 @@
       const redirect = params.get('redirect') || 'MeineSammlung.html';
       const artistId = params.get('artist_id') || '';
       
-      const redirectUrl = 'https://baurybot-hub.github.io/untergrund/' + redirect + (artistId ? '?artist_id=' + artistId : '');
+      const redirectUrl = BASE_URL + redirect + (artistId ? '?artist_id=' + artistId : '');
 
       await client.auth.signInWithOAuth({
         provider: 'google',
@@ -139,15 +141,26 @@
       });
     }
 
-    // Check, ob User bereits eingeloggt ist
+    // Check, ob User bereits eingeloggt ist - ABER nicht von Login.html weg!
     async function checkAuth() {
+      // Prüfe ob wir gerade von OAuth zurückkommen
+      const hash = window.location.hash;
+      if (hash && hash.includes('access_token')) {
+        // OAuth Callback - lass Supabase das verarbeiten
+        return;
+      }
+
       const { data } = await client.auth.getSession();
       if (data.session) {
-        window.location.href = 'MeineSammlung.html';
+        // Nur weiterleiten wenn nicht gerade OAuth-Callback
+        window.location.href = BASE_URL + 'MeineSammlung.html';
       }
     }
 
-    checkAuth();
+    // Nur checkAuth aufrufen wenn kein OAuth-Callback
+    if (!window.location.hash.includes('access_token')) {
+      checkAuth();
+    }
   </script>
 </body>
 </html>
