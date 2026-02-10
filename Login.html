@@ -106,7 +106,7 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function loginWithSpotify() {
@@ -114,7 +114,7 @@
       const redirect = params.get('redirect') || 'MeineSammlung.html';
       const artistId = params.get('artist_id') || '';
       
-      const redirectUrl = window.location.origin + '/' + redirect + (artistId ? '?artist_id=' + artistId : '');
+      const redirectUrl = 'https://baurybot-hub.github.io/untergrund/' + redirect + (artistId ? '?artist_id=' + artistId : '');
 
       await client.auth.signInWithOAuth({
         provider: 'spotify',
@@ -129,7 +129,7 @@
       const redirect = params.get('redirect') || 'MeineSammlung.html';
       const artistId = params.get('artist_id') || '';
       
-      const redirectUrl = window.location.origin + '/' + redirect + (artistId ? '?artist_id=' + artistId : '');
+      const redirectUrl = 'https://baurybot-hub.github.io/untergrund/' + redirect + (artistId ? '?artist_id=' + artistId : '');
 
       await client.auth.signInWithOAuth({
         provider: 'google',
