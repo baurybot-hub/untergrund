@@ -121,10 +121,22 @@
       transform: translateY(-2px);
       box-shadow: 0 0 20px rgba(28, 255, 136, 0.5);
     }
+    .user-info {
+      background: rgba(0, 0, 0, 0.5);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #9effc7;
+      margin-bottom: 24px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="user-info" id="userInfo">
+      Lädt...
+    </div>
+
     <div class="header">
       <div class="header-left">
         <h1>🎴 Meine Sammlung <span id="cardCount" style="font-size: 18px; color: #9effc7;">(0)</span></h1>
@@ -150,7 +162,7 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function logout() {
@@ -167,6 +179,10 @@
       }
 
       const userId = session.session.user.id;
+      const userEmail = session.session.user.email;
+
+      // User-Info anzeigen
+      document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
 
       // Hole gesammelte Karten
       const { data: collections, error } = await client
