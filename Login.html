@@ -63,6 +63,10 @@
       transform: translateY(-2px);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
+    .login-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
     .spotify {
       background: #1DB954;
       color: #fff;
@@ -76,30 +80,67 @@
       color: #a0a0a0;
       margin-top: 24px;
     }
+    .success-message {
+      background: rgba(28, 255, 136, 0.2);
+      border: 1px solid rgba(28, 255, 136, 0.5);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .success-message.show {
+      display: block;
+    }
+    .success-message h2 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      color: #1cff88;
+    }
+    .success-message p {
+      margin: 0 0 16px;
+      font-size: 14px;
+    }
+    .success-message a {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #1cff88;
+      color: #020202;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <div class="logo">🎴 UnterGrund</div>
-    <h1>Deine Sammlung</h1>
-    <div class="subtitle">
-      Melde dich an, um Stage-Karten zu sammeln<br>
-      und dein persönliches Underground-Album aufzubauen.
+    <div class="success-message" id="successMessage">
+      <h2>✅ Erfolgreich angemeldet!</h2>
+      <p>Du bist jetzt eingeloggt.</p>
+      <a href="https://baurybot-hub.github.io/untergrund/MeineSammlung.html">Zur Sammlung →</a>
     </div>
 
-    <button class="login-button spotify" onclick="loginWithSpotify()">
-      <span style="font-size: 20px;">🎵</span>
-      Mit Spotify anmelden
-    </button>
+    <div id="loginForm">
+      <div class="logo">🎴 UnterGrund</div>
+      <h1>Deine Sammlung</h1>
+      <div class="subtitle">
+        Melde dich an, um Stage-Karten zu sammeln<br>
+        und dein persönliches Underground-Album aufzubauen.
+      </div>
 
-    <button class="login-button google" onclick="loginWithGoogle()">
-      <span style="font-size: 20px;">🔵</span>
-      Mit Google anmelden
-    </button>
+      <button class="login-button spotify" id="spotifyBtn" onclick="loginWithSpotify()">
+        <span style="font-size: 20px;">🎵</span>
+        <span>Mit Spotify anmelden</span>
+      </button>
 
-    <div class="hint">
-      Dauert nur 2 Sekunden ⚡<br>
-      Keine Werbung, keine versteckten Kosten.
+      <button class="login-button google" id="googleBtn" onclick="loginWithGoogle()">
+        <span style="font-size: 20px;">🔵</span>
+        <span>Mit Google anmelden</span>
+      </button>
+
+      <div class="hint">
+        Dauert nur 2 Sekunden ⚡<br>
+        Keine Werbung, keine versteckten Kosten.
+      </div>
     </div>
   </div>
 
@@ -109,58 +150,36 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
-
     async function loginWithSpotify() {
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get('redirect') || 'MeineSammlung.html';
-      const artistId = params.get('artist_id') || '';
-      
-      const redirectUrl = BASE_URL + redirect + (artistId ? '?artist_id=' + artistId : '');
+      document.getElementById('spotifyBtn').disabled = true;
+      document.getElementById('googleBtn').disabled = true;
 
       await client.auth.signInWithOAuth({
-        provider: 'spotify',
-        options: {
-          redirectTo: redirectUrl
-        }
+        provider: 'spotify'
       });
     }
 
     async function loginWithGoogle() {
-      const params = new URLSearchParams(window.location.search);
-      const redirect = params.get('redirect') || 'MeineSammlung.html';
-      const artistId = params.get('artist_id') || '';
-      
-      const redirectUrl = BASE_URL + redirect + (artistId ? '?artist_id=' + artistId : '');
+      document.getElementById('spotifyBtn').disabled = true;
+      document.getElementById('googleBtn').disabled = true;
 
       await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl
-        }
+        provider: 'google'
       });
     }
 
-    // Check, ob User bereits eingeloggt ist - ABER nicht von Login.html weg!
-    async function checkAuth() {
-      // Prüfe ob wir gerade von OAuth zurückkommen
-      const hash = window.location.hash;
-      if (hash && hash.includes('access_token')) {
-        // OAuth Callback - lass Supabase das verarbeiten
-        return;
-      }
-
-      const { data } = await client.auth.getSession();
-      if (data.session) {
-        // Nur weiterleiten wenn nicht gerade OAuth-Callback
-        window.location.href = BASE_URL + 'MeineSammlung.html';
+    // Prüfe ob User zurückkommt von OAuth
+    async function checkSession() {
+      const { data: { session } } = await client.auth.getSession();
+      
+      if (session) {
+        // User ist eingeloggt - zeige Success-Nachricht
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('successMessage').classList.add('show');
       }
     }
 
-    // Nur checkAuth aufrufen wenn kein OAuth-Callback
-    if (!window.location.hash.includes('access_token')) {
-      checkAuth();
-    }
+    checkSession();
   </script>
 </body>
 </html>
