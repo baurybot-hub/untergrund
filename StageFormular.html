@@ -258,6 +258,9 @@
         Empfohlen: hochkant oder quadratisch, max. 5&nbsp;MB.
       </div>
       <input id="photo" type="file" accept="image/*" />
+      <button id="deletePhotoButton" type="button" style="margin-top:8px; background:#333; color:#f5f5f5;">
+        Foto von Karte entfernen
+      </button>
     </div>
 
     <!-- Farbpalette -->
@@ -299,7 +302,6 @@
   <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
-
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const musicConnectionEl = document.getElementById("musicConnection");
@@ -313,6 +315,7 @@
     const contactEl = document.getElementById("contact");
     const paletteEl = document.getElementById("palette");
     const photoInput = document.getElementById("photo");
+    const deletePhotoButton = document.getElementById("deletePhotoButton");
     const saveButton = document.getElementById("saveButton");
     const statusEl = document.getElementById("status");
     const artistNameDisplay = document.getElementById("artistNameDisplay");
@@ -346,6 +349,7 @@
         setStatus("Fehlende artist_id in der URL.", "error");
         saveButton.disabled = true;
         previewButton.disabled = true;
+        deletePhotoButton.disabled = true;
         return;
       }
 
@@ -377,6 +381,7 @@
         setStatus("Artist konnte nicht geladen werden.", "error");
         saveButton.disabled = true;
         previewButton.disabled = true;
+        deletePhotoButton.disabled = true;
         return;
       }
 
@@ -384,6 +389,7 @@
         setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
         saveButton.disabled = true;
         previewButton.disabled = true;
+        deletePhotoButton.disabled = true;
         return;
       }
 
@@ -417,7 +423,7 @@
         .from("stage-photos")
         .upload(filePath, file, {
           upsert: true,
-          cacheControl: "3600",
+          cacheControl: "0"
         });
 
       if (uploadError) {
@@ -455,6 +461,7 @@
           stage_collab_3: collab3El.value.trim() || null,
           stage_contact: contactEl.value.trim() || null,
           stage_palette: paletteEl.value || "neon",
+          has_stage_card: true   // Karte als fertig markiert
         };
 
         if (photoPath) {
@@ -482,6 +489,37 @@
       }
     });
 
+    deletePhotoButton.addEventListener("click", async () => {
+      const artistId = getArtistIdFromUrl();
+      if (!artistId) {
+        setStatus("Fehlende artist_id in der URL.", "error");
+        return;
+      }
+
+      setStatus("Entferne Stage‑Foto von deiner Karte …");
+      deletePhotoButton.disabled = true;
+
+      try {
+        const { error } = await client
+          .from("artists")
+          .update({ stage_photo_path: null })
+          .eq("id", artistId);
+
+        if (error) {
+          console.error(error);
+          setStatus("Foto konnte nicht entfernt werden.", "error");
+        } else {
+          photoInput.value = "";
+          setStatus("Stage‑Foto entfernt. Lade ein neues hoch, wenn du willst.", "success");
+        }
+      } catch (e) {
+        console.error(e);
+        setStatus("Fehler beim Entfernen des Fotos.", "error");
+      } finally {
+        deletePhotoButton.disabled = false;
+      }
+    });
+
     previewButton.addEventListener("click", () => {
       const artistId = getArtistIdFromUrl();
       if (!artistId) {
@@ -491,7 +529,6 @@
       window.open(`Stage.html?artist_id=${encodeURIComponent(artistId)}`, "_blank");
     });
 
-    // Event-Listener für Live-Zähler NACH dem DOM
     musicConnectionEl.addEventListener("input", updateCounters);
     ugMessageEl.addEventListener("input", updateCounters);
     soundEl.addEventListener("input", updateCounters);
