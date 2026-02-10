@@ -326,6 +326,8 @@
     const soundCounterEl = document.getElementById("soundCounter");
     const specialSkillCounterEl = document.getElementById("specialSkillCounter");
 
+    let currentPhotoPath = null;
+
     function setStatus(message, type = "") {
       statusEl.textContent = message;
       statusEl.className = "status " + type;
@@ -406,6 +408,8 @@
       contactEl.value = data.stage_contact || "";
       paletteEl.value = data.stage_palette || "neon";
 
+      currentPhotoPath = data.stage_photo_path || null;
+
       updateCounters();
 
       setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
@@ -431,6 +435,7 @@
         throw new Error("Bild‑Upload fehlgeschlagen.");
       }
 
+      currentPhotoPath = filePath;
       return filePath;
     }
 
@@ -461,7 +466,7 @@
           stage_collab_3: collab3El.value.trim() || null,
           stage_contact: contactEl.value.trim() || null,
           stage_palette: paletteEl.value || "neon",
-          has_stage_card: true   // Karte als fertig markiert
+          has_stage_card: true
         };
 
         if (photoPath) {
@@ -500,18 +505,33 @@
       deletePhotoButton.disabled = true;
 
       try {
-        const { error } = await client
+        const { error: updateError } = await client
           .from("artists")
           .update({ stage_photo_path: null })
           .eq("id", artistId);
 
-        if (error) {
-          console.error(error);
+        if (updateError) {
+          console.error(updateError);
           setStatus("Foto konnte nicht entfernt werden.", "error");
-        } else {
-          photoInput.value = "";
-          setStatus("Stage‑Foto entfernt. Lade ein neues hoch, wenn du willst.", "success");
+          deletePhotoButton.disabled = false;
+          return;
         }
+
+        if (currentPhotoPath) {
+          const { error: storageError } = await client
+            .storage
+            .from("stage-photos")
+            .remove([currentPhotoPath]);
+
+          if (storageError) {
+            console.error(storageError);
+          } else {
+            currentPhotoPath = null;
+          }
+        }
+
+        photoInput.value = "";
+        setStatus("Stage‑Foto entfernt. Lade ein neues hoch, wenn du willst.", "success");
       } catch (e) {
         console.error(e);
         setStatus("Fehler beim Entfernen des Fotos.", "error");
