@@ -65,23 +65,49 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb"
     );
 
+    // WICHTIG: Explizite Redirect-URL für Chrome!
+    const REDIRECT_URL = 'https://baurybot-hub.github.io/untergrund/Login.html';
+
     async function loginWithGoogle() {
       const { error } = await client.auth.signInWithOAuth({
-        provider: 'google'
+        provider: 'google',
+        options: {
+          redirectTo: REDIRECT_URL,
+          skipBrowserRedirect: false
+        }
       });
-      if (error) console.error(error);
+      if (error) {
+        console.error('Google login error:', error);
+        alert('Login-Fehler: ' + error.message);
+      }
     }
 
     async function loginWithSpotify() {
       const { error } = await client.auth.signInWithOAuth({
-        provider: 'spotify'
+        provider: 'spotify',
+        options: {
+          redirectTo: REDIRECT_URL,
+          skipBrowserRedirect: false
+        }
       });
-      if (error) console.error(error);
+      if (error) {
+        console.error('Spotify login error:', error);
+        alert('Login-Fehler: ' + error.message);
+      }
     }
 
-    // Check if already logged in
+    // Check if already logged in and redirect
     client.auth.getSession().then(({ data: { session } }) => {
       if (session) {
+        console.log('Already logged in, redirecting...');
+        window.location.href = 'MeineSammlung.html';
+      }
+    });
+
+    // Listen for auth changes
+    client.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event, session);
+      if (event === 'SIGNED_IN' && session) {
         window.location.href = 'MeineSammlung.html';
       }
     });
