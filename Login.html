@@ -108,6 +108,11 @@
       border-radius: 999px;
       text-decoration: none;
       font-weight: 600;
+      transition: all 0.2s;
+    }
+    .success-message a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(28, 255, 136, 0.5);
     }
   </style>
 </head>
@@ -116,7 +121,7 @@
     <div class="success-message" id="successMessage">
       <h2>✅ Erfolgreich angemeldet!</h2>
       <p>Du bist jetzt eingeloggt.</p>
-      <a href="https://baurybot-hub.github.io/untergrund/MeineSammlung.html">Zur Sammlung →</a>
+      <a href="MeineSammlung.html">Zur Sammlung →</a>
     </div>
 
     <div id="loginForm">
@@ -155,7 +160,10 @@
       document.getElementById('googleBtn').disabled = true;
 
       await client.auth.signInWithOAuth({
-        provider: 'spotify'
+        provider: 'spotify',
+        options: {
+          redirectTo: 'https://baurybot-hub.github.io/untergrund/Login.html'
+        }
       });
     }
 
@@ -164,7 +172,10 @@
       document.getElementById('googleBtn').disabled = true;
 
       await client.auth.signInWithOAuth({
-        provider: 'google'
+        provider: 'google',
+        options: {
+          redirectTo: 'https://baurybot-hub.github.io/untergrund/Login.html'
+        }
       });
     }
 
