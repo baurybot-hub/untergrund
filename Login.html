@@ -64,12 +64,15 @@
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
     const { createClient } = supabase;
-    const client = createClient(
-      "https://tyflhzwrwzfakwedipig.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb"
-    );
 
-    const REDIRECT = 'https://baurybot-hub.github.io/untergrund/Login.html';
+    // GitHub-Pages-Basis-URL DEINER Seite (wichtig: mit Slash am Ende)
+    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
+    const REDIRECT = BASE_URL + 'Login.html';
+
+    const client = createClient(
+      'https://tyflhzwrwzfakwedipig.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
+    );
 
     async function loginWithGoogle() {
       const { error } = await client.auth.signInWithOAuth({
@@ -94,23 +97,21 @@
     // Nach OAuth-Callback: Hash (#access_token=...) auswerten und Session holen
     async function handleAuthFromHash() {
       if (window.location.hash.includes('access_token')) {
-        // Supabase wertet intern den Hash aus, wenn wir getUser/getSession aufrufen
-        await client.auth.getUser();
-        // Hash aus der URL entfernen (optisch aufräumen)
-        history.replaceState(null, '', REDIRECT);
+        await client.auth.getUser(); // löst intern den Hash auf
+        history.replaceState(null, '', REDIRECT); // URL aufräumen
       }
     }
 
     async function redirectIfLoggedIn() {
       const { data: { session } } = await client.auth.getSession();
       if (session) {
-        window.location.replace('MeineSammlung.html');
+        window.location.replace(BASE_URL + 'MeineSammlung.html');
       }
     }
 
     client.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        window.location.replace('MeineSammlung.html');
+        window.location.replace(BASE_URL + 'MeineSammlung.html');
       }
     });
 
