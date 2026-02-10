@@ -44,7 +44,7 @@
 </head>
 <body>
   <div class="login-container">
-    <div style="font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: #9effc7; margin-bottom: 8px;">🎴 UNTERGRUND</div>
+    <div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#9effc7;margin-bottom:8px;">🎴 UNTERGRUND</div>
     <h1>Deine Sammlung</h1>
     <div class="subtitle">Melde dich an, um Stage-Karten zu sammeln</div>
 
@@ -65,50 +65,40 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb"
     );
 
-    // WICHTIG: Explizite Redirect-URL für Chrome!
-    const REDIRECT_URL = 'https://baurybot-hub.github.io/untergrund/Login.html';
+    // EXAKT die gleiche URL wie in Supabase Redirect URLs!
+    const REDIRECT = 'https://baurybot-hub.github.io/untergrund/Login.html';
 
     async function loginWithGoogle() {
-      const { error } = await client.auth.signInWithOAuth({
+      const { data, error } = await client.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: REDIRECT_URL,
-          skipBrowserRedirect: false
+          redirectTo: REDIRECT
         }
       });
-      if (error) {
-        console.error('Google login error:', error);
-        alert('Login-Fehler: ' + error.message);
-      }
+      if (error) alert('Fehler: ' + error.message);
     }
 
     async function loginWithSpotify() {
-      const { error } = await client.auth.signInWithOAuth({
+      const { data, error } = await client.auth.signInWithOAuth({
         provider: 'spotify',
         options: {
-          redirectTo: REDIRECT_URL,
-          skipBrowserRedirect: false
+          redirectTo: REDIRECT
         }
       });
-      if (error) {
-        console.error('Spotify login error:', error);
-        alert('Login-Fehler: ' + error.message);
-      }
+      if (error) alert('Fehler: ' + error.message);
     }
 
-    // Check if already logged in and redirect
-    client.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        console.log('Already logged in, redirecting...');
-        window.location.href = 'MeineSammlung.html';
+    // Nach OAuth-Callback: Session prüfen und weiterleiten
+    client.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        window.location.replace('MeineSammlung.html');
       }
     });
 
-    // Listen for auth changes
-    client.auth.onAuthStateChange((event, session) => {
-      console.log('Auth event:', event, session);
-      if (event === 'SIGNED_IN' && session) {
-        window.location.href = 'MeineSammlung.html';
+    // Bereits eingeloggt? Weiterleiten
+    client.auth.getSession().then(({ data: { session } }) => {
+      if (session && !window.location.hash.includes('access_token')) {
+        window.location.replace('MeineSammlung.html');
       }
     });
   </script>
