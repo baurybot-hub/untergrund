@@ -44,9 +44,13 @@
 </head>
 <body>
   <div class="login-container">
-    <div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#9effc7;margin-bottom:8px;">🎴 UNTERGRUND</div>
+    <div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#9effc7;margin-bottom:8px;">
+      🎴 UNTERGRUND
+    </div>
     <h1>Deine Sammlung</h1>
-    <div class="subtitle">Melde dich an, um Stage-Karten zu sammeln</div>
+    <div class="subtitle">
+      Melde dich an, um Stage-Karten zu sammeln und dein persönliches Underground-Album aufzubauen.
+    </div>
 
     <button class="login-button google" onclick="loginWithGoogle()">
       🔵 Mit Google anmelden
@@ -65,42 +69,55 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NzY3NTIsImV4cCI6MjA1NDI1Mjc1Mn0.sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb"
     );
 
-    // EXAKT die gleiche URL wie in Supabase Redirect URLs!
     const REDIRECT = 'https://baurybot-hub.github.io/untergrund/Login.html';
 
     async function loginWithGoogle() {
-      const { data, error } = await client.auth.signInWithOAuth({
+      const { error } = await client.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: REDIRECT
         }
       });
-      if (error) alert('Fehler: ' + error.message);
+      if (error) console.error('Google login error:', error);
     }
 
     async function loginWithSpotify() {
-      const { data, error } = await client.auth.signInWithOAuth({
+      const { error } = await client.auth.signInWithOAuth({
         provider: 'spotify',
         options: {
           redirectTo: REDIRECT
         }
       });
-      if (error) alert('Fehler: ' + error.message);
+      if (error) console.error('Spotify login error:', error);
     }
 
-    // Nach OAuth-Callback: Session prüfen und weiterleiten
+    // Nach OAuth-Callback: Hash (#access_token=...) auswerten und Session holen
+    async function handleAuthFromHash() {
+      if (window.location.hash.includes('access_token')) {
+        // Supabase wertet intern den Hash aus, wenn wir getUser/getSession aufrufen
+        await client.auth.getUser();
+        // Hash aus der URL entfernen (optisch aufräumen)
+        history.replaceState(null, '', REDIRECT);
+      }
+    }
+
+    async function redirectIfLoggedIn() {
+      const { data: { session } } = await client.auth.getSession();
+      if (session) {
+        window.location.replace('MeineSammlung.html');
+      }
+    }
+
     client.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         window.location.replace('MeineSammlung.html');
       }
     });
 
-    // Bereits eingeloggt? Weiterleiten
-    client.auth.getSession().then(({ data: { session } }) => {
-      if (session && !window.location.hash.includes('access_token')) {
-        window.location.replace('MeineSammlung.html');
-      }
-    });
+    (async () => {
+      await handleAuthFromHash();
+      await redirectIfLoggedIn();
+    })();
   </script>
 </body>
 </html>
