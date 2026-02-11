@@ -201,18 +201,23 @@
     }
 
     async function loadCollection() {
-      const {  session } = await client.auth.getSession();
-      
-      if (!session.session) {
-        window.location.href = 'Login.html?from=collection';
-        return;
-      }
+  const { data, error } = await client.auth.getSession();
+  if (error) {
+    console.error('getSession error:', error);
+  }
 
-      const userId = session.session.user.id;
-      const userEmail = session.session.user.email;
+  const session = data?.session || null;
 
-      // User-Info anzeigen
-      document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
+  if (!session) {
+    window.location.href = 'Login.html?from=collection';
+    return;
+  }
+
+  const userId = session.user.id;
+  const userEmail = session.user.email;
+
+  // User-Info anzeigen
+  document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
 
       // 1) Nur Collection-Einträge holen
       const {  collections, error: collError } = await client
