@@ -592,6 +592,7 @@
       });
     }
 
+    // NEU: Desktop ohne Scaling, Mobile wie bisher
     function updateViewportScale() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -599,20 +600,27 @@
       const shell = document.querySelector('.card-shell');
       if (!shell) return;
 
-      const outerPadding = 4 * 2;
-      const availableHeight = window.innerHeight - outerPadding;
-      const baseHeight = 900;
-      const scale = Math.min(1, availableHeight / baseHeight);
+      const isMobile = window.innerWidth <= 600;
 
-      shell.style.transformOrigin = 'center center';
-      shell.style.transform = `scale(${scale})`;
+      if (isMobile) {
+        const outerPadding = 4 * 2;
+        const availableHeight = window.innerHeight - outerPadding;
+        const baseHeight = 900;
+        const scale = Math.min(1, availableHeight / baseHeight);
+
+        shell.style.transformOrigin = 'center center';
+        shell.style.transform = `scale(${scale})`;
+      } else {
+        shell.style.transformOrigin = 'center top';
+        shell.style.transform = 'none';
+      }
     }
 
     window.addEventListener('resize', updateViewportScale);
     window.addEventListener('orientationchange', updateViewportScale);
 
     async function checkIfAlreadyCollected(artistId) {
-      const { data: sessionData } = await client.auth.getSession();
+      const {  sessionData } = await client.auth.getSession();
       if (!sessionData.session) return false;
 
       const userId = sessionData.session.user.id;
@@ -633,7 +641,7 @@
     }
 
     async function handleCollectButton(artist) {
-      const { data: sessionData } = await client.auth.getSession();
+      const {  sessionData } = await client.auth.getSession();
       
       if (!artist.can_be_collected) {
         collectButton.style.display = 'none';
@@ -666,9 +674,12 @@
 
       if (alreadyCollected) {
         collectButton.style.display = 'inline-block';
-        collectButton.disabled = true;
-        collectButton.textContent = 'Bereits gesammelt';
-        collectInfo.textContent = 'Diese Karte ist bereits in deiner Sammlung.';
+        collectButton.disabled = false;
+        collectButton.textContent = 'In Sammlung ansehen';
+        collectInfo.textContent = 'Diese Karte ist bereits in deinem Album.';
+        collectButton.onclick = () => {
+          window.location.href = 'MeineSammlung.html';
+        };
         return;
       }
 
@@ -701,8 +712,12 @@
         collectInfo.textContent = 'Karte wurde zu deiner Sammlung hinzugefügt.';
         
         setTimeout(() => {
-          collectButton.textContent = 'Bereits gesammelt';
+          collectButton.textContent = 'In Sammlung ansehen';
           collectInfo.textContent = 'Diese Karte ist jetzt in deiner Sammlung.';
+          collectButton.disabled = false;
+          collectButton.onclick = () => {
+            window.location.href = 'MeineSammlung.html';
+          };
         }, 2000);
       };
     }
@@ -794,7 +809,7 @@
       applyPalette(data.stage_palette || "neon");
 
       if (data.stage_photo_path) {
-        const { data: publicUrlData } = client
+        const {  publicUrlData } = client
           .storage
           .from(STORAGE_BUCKET)
           .getPublicUrl(data.stage_photo_path);
@@ -813,7 +828,7 @@
       const autoCollect = params.get('auto_collect') === 'true';
 
       if (autoCollect) {
-        const { data: sessionData } = await client.auth.getSession();
+        const {  sessionData } = await client.auth.getSession();
         if (sessionData.session) {
           const alreadyCollected = await checkIfAlreadyCollected(data.id);
 
@@ -834,8 +849,12 @@
               collectInfo.textContent = 'Karte wurde zu deiner Sammlung hinzugefügt.';
 
               setTimeout(() => {
-                collectButton.textContent = 'Bereits gesammelt';
+                collectButton.textContent = 'In Sammlung ansehen';
                 collectInfo.textContent = 'Diese Karte ist jetzt in deiner Sammlung.';
+                collectButton.disabled = false;
+                collectButton.onclick = () => {
+                  window.location.href = 'MeineSammlung.html';
+                };
               }, 2000);
             }
           }
