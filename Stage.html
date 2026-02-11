@@ -593,29 +593,21 @@
     }
 
     function updateViewportScale() {
-  const vh = window.innerHeight * 0.01;
+  const vh = window.innerHeight * 0.02;
   document.documentElement.style.setProperty('--vh', `${vh}px`);
 
   const shell = document.querySelector('.card-shell');
   if (!shell) return;
 
-  const isMobile = window.innerWidth <= 600;
+  const outerPadding = 4 * 2;
+  const availableHeight = window.innerHeight - outerPadding;
+  const baseHeight = 1200;
+  const scale = Math.min(1, availableHeight / baseHeight);
 
-  if (isMobile) {
-    // Dein bisheriges Verhalten für Handy
-    const outerPadding = 4 * 2;
-    const availableHeight = window.innerHeight - outerPadding;
-    const baseHeight = 900;
-    const scale = Math.min(1, availableHeight / baseHeight);
-
-    shell.style.transformOrigin = 'center center';
-    shell.style.transform = `scale(${scale})`;
-  } else {
-    // Desktop: überhaupt nicht skalieren → Karte bleibt im Original
-    shell.style.transformOrigin = 'center top';
-    shell.style.transform = 'none';
-  }
+  shell.style.transformOrigin = 'center center';
+  shell.style.transform = `scale(${scale})`;
 }
+
 
 
 
