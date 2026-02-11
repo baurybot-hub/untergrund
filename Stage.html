@@ -602,7 +602,7 @@
   const isMobile = window.innerWidth <= 600;
 
   if (isMobile) {
-    // dein bisheriges Verhalten für Handy
+    // Dein bisheriges Verhalten für Handy
     const outerPadding = 4 * 2;
     const availableHeight = window.innerHeight - outerPadding;
     const baseHeight = 900;
@@ -611,15 +611,12 @@
     shell.style.transformOrigin = 'center center';
     shell.style.transform = `scale(${scale})`;
   } else {
-    // Desktop: leicht verkleinern, damit unten alles sichtbar bleibt
-    const maxHeight = window.innerHeight - 40; // kleiner Rand oben/unten
-    const baseHeight = shell.getBoundingClientRect().height || 900;
-    const scale = Math.min(1, maxHeight / baseHeight);
-
+    // Desktop: überhaupt nicht skalieren → Karte bleibt im Original
     shell.style.transformOrigin = 'center top';
-    shell.style.transform = `scale(${scale})`;
+    shell.style.transform = 'none';
   }
 }
+
 
 
     window.addEventListener('resize', updateViewportScale);
