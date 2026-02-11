@@ -366,7 +366,7 @@
       text-decoration: underline;
     }
 
-    /* Mobile: gesamte Karte (inkl. Rand) wird skaliert */
+    /* Mobile */
     @media (max-width: 600px) {
       .bg-video video {
         object-fit: cover;
@@ -649,6 +649,7 @@
         return;
       }
 
+      // Nicht eingeloggt → zum Login mit from=stage
       if (!sessionData.session) {
         collectButton.style.display = 'inline-block';
         collectButton.disabled = false;
@@ -656,7 +657,7 @@
         collectInfo.textContent = 'Melde dich an, um diese Karte zu deinem Album hinzuzufügen.';
         
         collectButton.onclick = () => {
-          window.location.href = 'Login.html';
+          window.location.href = `Login.html?from=stage&artist_id=${artist.id}`;
         };
         return;
       }
@@ -806,6 +807,44 @@
       }
 
       await handleCollectButton(data);
+
+      // Auto-Sammeln, wenn wir aus dem Login mit auto_collect=true zurückkommen
+      const params = new URLSearchParams(window.location.search);
+      const autoCollect = params.get('auto_collect') === 'true';
+
+      if (autoCollect) {
+        const { data: sessionData } = await client.auth.getSession();
+        if (sessionData.session) {
+          const alreadyCollected = await checkIfAlreadyCollected(data.id);
+
+          if (!alreadyCollected) {
+            const userId = sessionData.session.user.id;
+
+            const { error: insertError } = await client
+              .from('user_collections')
+              .insert({
+                user_id: userId,
+                artist_id: data.id
+              });
+
+            if (!insertError) {
+              collectButton.style.display = 'inline-block';
+              collectButton.disabled = true;
+              collectButton.textContent = '✓ Gesammelt!';
+              collectInfo.textContent = 'Karte wurde zu deiner Sammlung hinzugefügt.';
+
+              setTimeout(() => {
+                collectButton.textContent = 'Bereits gesammelt';
+                collectInfo.textContent = 'Diese Karte ist jetzt in deiner Sammlung.';
+              }, 2000);
+            }
+          }
+        }
+
+        // URL aufräumen: auto_collect wieder entfernen
+        const cleanUrl = `Stage.html?artist_id=${encodeURIComponent(data.id)}`;
+        window.history.replaceState(null, '', cleanUrl);
+      }
 
       updateViewportScale();
     }
