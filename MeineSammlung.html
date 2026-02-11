@@ -214,14 +214,14 @@
 
       document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
 
-      // 1) Erstmal roh aus user_collections holen
-      const {  collections, error: collError } = await client
+      // 1) eigene Collections holen
+      const { data: collections, error: collError } = await client
         .from('user_collections')
-        .select('*')
+        .select('artist_id, collected_at')
         .eq('user_id', userId)
         .order('collected_at', { ascending: false });
 
-      console.log('Collections raw:', collections, collError);
+      console.log('Collections:', collections, collError);
 
       const cardsGrid = document.getElementById('cardsGrid');
       const emptyState = document.getElementById('emptyState');
@@ -241,8 +241,62 @@
       }
 
       cardCount.textContent = `(${collections.length})`;
-      console.log('Sammlung hat Einträge, Rendering bauen wir gleich.');
-      return; // fürs Debugging erstmal hier stoppen
+
+      // 2) korrespondierende Artists holen
+      const artistIds = collections.map(c => c.artist_id);
+      const { data: artists, error: artistError } = await client
+        .from('artists')
+        .select('id, name, stage_photo_path, stage_sound')
+        .in('id', artistIds);
+
+      console.log('Artists:', artists, artistError);
+
+      if (artistError) {
+        console.error('artists error:', artistError);
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      const artistMap = new Map();
+      (artists || []).forEach(a => artistMap.set(a.id, a));
+
+      // 3) Karten rendern
+      cardsGrid.innerHTML = '';
+
+      collections.forEach(item => {
+        const artist = artistMap.get(item.artist_id);
+        if (!artist) return;
+
+        const card = document.createElement('div');
+        card.className = 'card-item';
+        card.onclick = () => window.location.href = `Stage.html?artist_id=${artist.id}`;
+
+        let photoUrl = 'https://via.placeholder.com/300x400?text=No+Photo';
+        if (artist.stage_photo_path) {
+          const { data: photoData } = client.storage
+            .from('stage-photos')
+            .getPublicUrl(artist.stage_photo_path);
+          if (photoData?.publicUrl) {
+            photoUrl = photoData.publicUrl;
+          }
+        }
+
+        const collectedDate = item.collected_at
+          ? new Date(item.collected_at).toLocaleDateString('de-DE')
+          : '';
+
+        card.innerHTML = `
+          <img class="card-image" src="${photoUrl}" alt="${artist.name}" />
+          <div class="card-info">
+            <div class="card-name">${artist.name}</div>
+            <div class="card-meta">
+              ${collectedDate ? `Gesammelt am ${collectedDate}` : ''}
+            </div>
+          </div>
+        `;
+
+        cardsGrid.appendChild(card);
+      });
     }
 
     loadCollection();
