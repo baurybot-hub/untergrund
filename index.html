@@ -242,12 +242,21 @@ input:focus {
   <div class="app">
     <header>
       <div class="logo-text">UnterGrund</div>
-      <button class="pill-btn" onclick="openSubmit()">
-        ➕ Artist vorschlagen
-      </button>
+      <div style="display:flex; gap:8px;">
+        <button id="collection-btn" class="pill-btn" style="background:#0b1120;color:#e5e7eb;">
+          📚 Meine Sammlung
+        </button>
+        <button id="login-btn" class="pill-btn">
+          Anmelden
+        </button>
+      </div>
     </header>
 
     <div class="card">
+      <button class="pill-btn" style="width:100%;justify-content:center;margin-bottom:12px;background:#0b1120;color:#e5e7eb;" onclick="openSubmit()">
+        ➕ Artist vorschlagen
+      </button>
+
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
         <div class="card-title" id="card-title">UnterGrund Explorer</div>
         <button id="info-btn"
@@ -288,7 +297,7 @@ input:focus {
         </div>
       </div>
 
-            <div id="status-text" class="status-text"></div>
+      <div id="status-text" class="status-text"></div>
 
       <!-- Teilen-Button -->
       <button class="pill-btn"
@@ -338,7 +347,7 @@ input:focus {
   </div>
 
   <div id="legal-modal-backdrop" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.9);z-index:80;">
-    <div id="legal-modal" style="width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:#020617;border-radius:18px;border:1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.78rem;color:#e5e7eb;">
+    <div id="legal-modal" style="width:100%;max-width:480px;max-height:80vh;overflow-y:auto;background:#020617;border-radius:18px;border:1px solid #1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.78rem;color:#e5e7eb;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
         <h2 id="legal-modal-title" style="font-size:0.9rem;margin:0;">Rechtliches</h2>
         <button onclick="closeLegal()" style="background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">&times;</button>
@@ -355,12 +364,12 @@ input:focus {
         <button onclick="closeInfoModal()" style="background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">&times;</button>
       </div>
       <p style="color:#9ca3af;line-height:1.45;margin:0 0 8px;">
-        Jeder Klick auf „Play on Spotify“ oder „Follow“ gibt diesem Artist Focus‑Punkte
+        Jeder Klick auf „Play on Spotify" oder „Follow" gibt diesem Artist Focus‑Punkte
         (maximal 7 pro Browser). Dein Support entscheidet, wer aus dem UnterGrund hochkommt.
       </p>
       <p style="color:#9ca3af;line-height:1.45;margin:0 0 8px;">
         Der grüne Focus‑Balken zeigt, wie weit ein Artist ist – von 0&nbsp;% bis 100&nbsp;%.
-        Je höher der Score, desto heftiger reagiert der UnterGrund im Hintergrund‑Video.
+        Je höher der Score, desto heftiger reagiert der UnterGrund im Hintergrundvideo.
       </p>
       <p style="color:#9ca3af;line-height:1.45;margin:0;">
         Erreicht ein Artist 100&nbsp;%, bekommt er die Stage: wir nehmen Kontakt auf und
@@ -378,10 +387,18 @@ input:focus {
     </button>
   </footer>
   
+  <!-- Supabase JS laden -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+  
   <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const ARTISTS_TABLE = "artists";
+
+    // Supabase Client
+    const client = window.supabase?.createClient
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      : null;
 
     const MAX_PLAY_POINTS = 3;
     const MAX_JUMP_POINTS = 3;
@@ -402,26 +419,26 @@ input:focus {
     let bgVideoPlayedForMax = false;
 
     function updateFocusBackground() {
-  const video = document.getElementById("ug-bg");
-  if (!video || !currentArtist) return;
+      const video = document.getElementById("ug-bg");
+      if (!video || !currentArtist) return;
 
-  const score = currentArtist.focus_score || 0;
-  const clamped = Math.max(0, Math.min(MAX_FOCUS_SCORE, score));
-  const targetTime = (clamped / MAX_FOCUS_SCORE) * VIDEO_DURATION;
+      const score = currentArtist.focus_score || 0;
+      const clamped = Math.max(0, Math.min(MAX_FOCUS_SCORE, score));
+      const targetTime = (clamped / MAX_FOCUS_SCORE) * VIDEO_DURATION;
 
-  const setTimeAndMaybePlay = () => {
-    video.currentTime = targetTime;
+      const setTimeAndMaybePlay = () => {
+        video.currentTime = targetTime;
 
-    if (score < MAX_FOCUS_SCORE) {
-      video.pause();
-    }
-  };
+        if (score < MAX_FOCUS_SCORE) {
+          video.pause();
+        }
+      };
 
-  if (isNaN(video.duration) || video.duration === 0) {
-    video.addEventListener("canplay", setTimeAndMaybePlay, { once: true });
-  } else {
-    setTimeAndMaybePlay();
-  }
+      if (isNaN(video.duration) || video.duration === 0) {
+        video.addEventListener("canplay", setTimeAndMaybePlay, { once: true });
+      } else {
+        setTimeAndMaybePlay();
+      }
     }
 
     function getClientId() {
@@ -636,14 +653,14 @@ input:focus {
     }
 
     
-     async function updateFocusUI() {
+    async function updateFocusUI() {
       const infoEl = document.getElementById("focus-info");
       const btnPlay = document.getElementById("focus-play");
       const btnFollow = document.getElementById("focus-follow");
       const bar = document.getElementById("focus-progress-bar");
       const label = document.getElementById("focus-progress-label");
-      const stageBtn = document.getElementById("stage-button");   // STAGE
-      const stageHint = document.getElementById("stage-hint");    // STAGE
+      const stageBtn = document.getElementById("stage-button");
+      const stageHint = document.getElementById("stage-hint");
 
       if (!currentArtist) {
         btnPlay.disabled = true;
@@ -653,8 +670,8 @@ input:focus {
           bar.style.width = "0%";
           label.textContent = "0%";
         }
-        if (stageBtn) stageBtn.style.display = "none";            // STAGE
-        if (stageHint) stageHint.textContent = "";                // STAGE
+        if (stageBtn) stageBtn.style.display = "none";
+        if (stageHint) stageHint.textContent = "";
         return;
       }
 
@@ -698,7 +715,7 @@ input:focus {
           "Manche entdecken hier noch einen versteckten UnterGrund‑Boost.";
       } else if (totalLeft > 0) {
         infoEl.textContent =
-          `Jeder Push erhöht den Focus‑Score (0–100 %). ` +
+          `Jeder Push erhöht den Focus‑Score (0–100 %). ` +
           `Du kannst ${currentArtist.name || "diesen Artist"} noch ${totalLeft}× pushen ` +
           `(max. ${maxTotal} Punkte pro Browser).`;
       } else {
@@ -726,51 +743,48 @@ input:focus {
       }
     }
 
-
     async function handleFocusPlay() {
-  if (!currentArtist) return;
-  
-  // Video jetzt starten wenn 100% erreicht wird
-  const willBe100 = (currentArtist.focus_score || 0) + 1 >= MAX_FOCUS_SCORE;
-  if (willBe100 && !bgVideoPlayedForMax) {
-    document.getElementById("ug-bg")?.play().catch(() => {});
-    bgVideoPlayedForMax = true;
-  }
-  
-  const res = await addFocus(currentArtist, "play");
+      if (!currentArtist) return;
+      
+      const willBe100 = (currentArtist.focus_score || 0) + 1 >= MAX_FOCUS_SCORE;
+      if (willBe100 && !bgVideoPlayedForMax) {
+        document.getElementById("ug-bg")?.play().catch(() => {});
+        bgVideoPlayedForMax = true;
+      }
+      
+      const res = await addFocus(currentArtist, "play");
 
-  if (res.ok) {
-    alert(`Focus +1 – du hast ${currentArtist.name || "den Artist"} gepusht.`);
-  } else if (res.reason && res.reason.startsWith("limit")) {
-    alert("Limit erreicht – du kannst diesen Artist nicht weiter pushen.");
-  }
-  await updateFocusUI();
+      if (res.ok) {
+        alert(`Focus +1 – du hast ${currentArtist.name || "den Artist"} gepusht.`);
+      } else if (res.reason && res.reason.startsWith("limit")) {
+        alert("Limit erreicht – du kannst diesen Artist nicht weiter pushen.");
+      }
+      await updateFocusUI();
 
-  const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
-  if (url) window.open(url, "_blank");
+      const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
+      if (url) window.open(url, "_blank");
     }
 
     async function handleFocusFollow() {
-  if (!currentArtist) return;
-  
-  // Video jetzt starten wenn 100% erreicht wird
-  const willBe100 = (currentArtist.focus_score || 0) + 1 >= MAX_FOCUS_SCORE;
-  if (willBe100 && !bgVideoPlayedForMax) {
-    document.getElementById("ug-bg")?.play().catch(() => {});
-    bgVideoPlayedForMax = true;
-  }
-  
-  const res = await addFocus(currentArtist, "follow");
+      if (!currentArtist) return;
+      
+      const willBe100 = (currentArtist.focus_score || 0) + 1 >= MAX_FOCUS_SCORE;
+      if (willBe100 && !bgVideoPlayedForMax) {
+        document.getElementById("ug-bg")?.play().catch(() => {});
+        bgVideoPlayedForMax = true;
+      }
+      
+      const res = await addFocus(currentArtist, "follow");
 
-  if (res.ok) {
-    alert(`Focus +1 – du folgst ${currentArtist.name || "dem Artist"} (auf Spotify öffnen).`);
-  } else if (res.reason && res.reason.startsWith("limit")) {
-    alert("Follow-Limit erreicht – du kannst diesen Artist nur einmal follow-pushen.");
-  }
-  await updateFocusUI();
+      if (res.ok) {
+        alert(`Focus +1 – du folgst ${currentArtist.name || "dem Artist"} (auf Spotify öffnen).`);
+      } else if (res.reason && res.reason.startsWith("limit")) {
+        alert("Follow-Limit erreicht – du kannst diesen Artist nur einmal follow-pushen.");
+      }
+      await updateFocusUI();
 
-  const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
-  if (url) window.open(url, "_blank");
+      const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
+      if (url) window.open(url, "_blank");
     }
 
     async function shareCurrentArtist() {
@@ -874,7 +888,7 @@ input:focus {
       }
     }
 
-        async function loadNextArtist() {
+    async function loadNextArtist() {
       if (loading) return;
       loading = true;
 
@@ -887,8 +901,8 @@ input:focus {
       const infoEl = document.getElementById("focus-info");
       const bar = document.getElementById("focus-progress-bar");
       const label = document.getElementById("focus-progress-label");
-      const stageBtn = document.getElementById("stage-button"); // STAGE
-      const stageHint = document.getElementById("stage-hint"); // STAGE
+      const stageBtn = document.getElementById("stage-button");
+      const stageHint = document.getElementById("stage-hint");
 
       nameEl.textContent = "Suche nächsten Artist…";
       statusEl.textContent = "";
@@ -902,8 +916,8 @@ input:focus {
         bar.style.width = "0%";
         label.textContent = "0%";
       }
-      if (stageBtn) stageBtn.style.display = "none";   // STAGE
-      if (stageHint) stageHint.textContent = "";       // STAGE
+      if (stageBtn) stageBtn.style.display = "none";
+      if (stageHint) stageHint.textContent = "";
 
       cheatTapCount = 0;
       lastCheatTapTime = 0;
@@ -1146,8 +1160,42 @@ input:focus {
       }
     }
 
+    // Auth-Buttons aktualisieren
+    async function updateAuthButtons() {
+      const loginBtn = document.getElementById("login-btn");
+      const collectionBtn = document.getElementById("collection-btn");
+      if (!client || !loginBtn || !collectionBtn) return;
+
+      const { data } = await client.auth.getSession();
+      const session = data?.session || null;
+
+      if (session) {
+        // Eingeloggt
+        loginBtn.textContent = "Abmelden";
+        loginBtn.onclick = async () => {
+          await client.auth.signOut();
+          window.location.href = "index.html";
+        };
+
+        collectionBtn.onclick = () => {
+          window.location.href = "MeineSammlung.html";
+        };
+      } else {
+        // Nicht eingeloggt
+        loginBtn.textContent = "Anmelden";
+        loginBtn.onclick = () => {
+          window.location.href = "Login.html";
+        };
+
+        collectionBtn.onclick = () => {
+          window.location.href = "Login.html?from=collection";
+        };
+      }
+    }
+
     async function initApp() {
       setupCheatListener();
+      await updateAuthButtons();
 
       const params = new URLSearchParams(window.location.search);
       const artistIdFromUrl = params.get("artist");
