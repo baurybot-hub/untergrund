@@ -593,20 +593,34 @@
     }
 
     function updateViewportScale() {
-      const vh = window.innerHeight * 0.01;
-      document.documentElement.style.setProperty('--vh', `${vh}px`);
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
 
-      const shell = document.querySelector('.card-shell');
-      if (!shell) return;
+  const shell = document.querySelector('.card-shell');
+  if (!shell) return;
 
-      const outerPadding = 4 * 2;
-      const availableHeight = window.innerHeight - outerPadding;
-      const baseHeight = 900;
-      const scale = Math.min(1, availableHeight / baseHeight);
+  const isMobile = window.innerWidth <= 600;
 
-      shell.style.transformOrigin = 'center center';
-      shell.style.transform = `scale(${scale})`;
-    }
+  if (isMobile) {
+    // dein bisheriges Verhalten für Handy
+    const outerPadding = 4 * 2;
+    const availableHeight = window.innerHeight - outerPadding;
+    const baseHeight = 900;
+    const scale = Math.min(1, availableHeight / baseHeight);
+
+    shell.style.transformOrigin = 'center center';
+    shell.style.transform = `scale(${scale})`;
+  } else {
+    // Desktop: leicht verkleinern, damit unten alles sichtbar bleibt
+    const maxHeight = window.innerHeight - 40; // kleiner Rand oben/unten
+    const baseHeight = shell.getBoundingClientRect().height || 900;
+    const scale = Math.min(1, maxHeight / baseHeight);
+
+    shell.style.transformOrigin = 'center top';
+    shell.style.transform = `scale(${scale})`;
+  }
+}
+
 
     window.addEventListener('resize', updateViewportScale);
     window.addEventListener('orientationchange', updateViewportScale);
