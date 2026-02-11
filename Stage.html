@@ -285,6 +285,47 @@
       background: rgba(15,23,42,0.9);
     }
 
+    /* Sammeln-Button */
+    .collect-section {
+      position: relative;
+      z-index: 1;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .collect-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(34,197,94,0.8);
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      color: #020617;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+    .collect-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(34,197,94,0.5);
+    }
+    .collect-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: rgba(55,65,81,0.6);
+      border-color: rgba(148,163,184,0.4);
+      color: #9ca3af;
+    }
+    .collect-info {
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+      min-height: 1em;
+    }
+
     /* Footer */
     .card-footer {
       position: relative;
@@ -332,7 +373,6 @@
         object-position: center top;
       }
 
-      /* kleiner Außenabstand zum Handyrand */
       .stage-wrap {
         min-height: calc(var(--vh, 1vh) * 100);
         padding: 4px;
@@ -341,13 +381,12 @@
         justify-content: center;
       }
 
-      /* Shell = „Pokémon-Karte“ mit Rand, Basisgröße für Scale */
       .card-shell {
         width: 100%;
         max-width: 420px;
-        height: 900px;             /* Basis-Höhe */
+        height: 900px;
         border-radius: 18px;
-        padding: 4px;              /* dünner Kartenrand */
+        padding: 4px;
         box-sizing: border-box;
       }
 
@@ -357,7 +396,7 @@
         border-radius: 14px;
         padding: 10px 12px 9px;
         overflow: hidden;
-        transform: none;           /* Scale liegt auf card-shell */
+        transform: none;
       }
 
       .card-artist { font-size: 18px; }
@@ -366,6 +405,8 @@
       .card-text { font-size: 11px; max-height: none; }
       .stat-pill { font-size: 10px; padding: 3px 6px; }
       .collab-pill { font-size: 10px; padding: 2px 6px; }
+      .collect-btn { font-size: 11px; padding: 7px 12px; }
+      .collect-info { font-size: 10px; }
       .card-footer { font-size: 10px; }
       .card-number { font-size: 10px; }
       .card-set { font-size: 9px; }
@@ -437,6 +478,12 @@
           </div>
         </div>
 
+        <!-- Sammeln-Button -->
+        <div class="collect-section">
+          <button id="collectButton" class="collect-btn" style="display:none;">Karte sammeln</button>
+          <div id="collectInfo" class="collect-info"></div>
+        </div>
+
         <div class="card-footer">
           <div id="status" class="card-footer-left"></div>
           <div class="card-footer-right">
@@ -476,6 +523,11 @@
     const activeText = document.getElementById("activeText");
 
     const collabListEl = document.getElementById("collabList");
+
+    const collectButton = document.getElementById("collectButton");
+    const collectInfo = document.getElementById("collectInfo");
+
+    let currentArtistId = null;
 
     function setStatus(msg) {
       statusEl.textContent = msg || "";
@@ -540,7 +592,6 @@
       });
     }
 
-    // Dynamische Viewport-Höhe & Scale für Mobile
     function updateViewportScale() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -548,11 +599,9 @@
       const shell = document.querySelector('.card-shell');
       if (!shell) return;
 
-      const outerPadding = 4 * 2; // stage-wrap padding oben+unten im Mobile-Layout
+      const outerPadding = 4 * 2;
       const availableHeight = window.innerHeight - outerPadding;
-
-      const baseHeight = 900; // muss zu .card-shell height im CSS passen
-
+      const baseHeight = 900;
       const scale = Math.min(1, availableHeight / baseHeight);
 
       shell.style.transformOrigin = 'center center';
@@ -562,6 +611,101 @@
     window.addEventListener('resize', updateViewportScale);
     window.addEventListener('orientationchange', updateViewportScale);
 
+    async function checkIfAlreadyCollected(artistId) {
+      const { data: sessionData } = await client.auth.getSession();
+      if (!sessionData.session) return false;
+
+      const userId = sessionData.session.user.id;
+
+      const { data, error } = await client
+        .from('user_collections')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('artist_id', artistId)
+        .limit(1);
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+
+      return data && data.length > 0;
+    }
+
+    async function handleCollectButton(artist) {
+      const { data: sessionData } = await client.auth.getSession();
+      
+      if (!artist.can_be_collected) {
+        collectButton.style.display = 'none';
+        collectInfo.textContent = 'Dieser Artist ist noch im Untergrund. Sammle Focus Points, um ihn auf die Stage zu bringen.';
+        return;
+      }
+
+      if (!artist.has_stage_card) {
+        collectButton.style.display = 'inline-block';
+        collectButton.disabled = true;
+        collectButton.textContent = 'Bald sammelbar';
+        collectInfo.textContent = 'Der Artist wurde eingeladen, seine Stage-Karte zu gestalten. Bald kannst du ihn sammeln.';
+        return;
+      }
+
+      if (!sessionData.session) {
+        collectButton.style.display = 'inline-block';
+        collectButton.disabled = false;
+        collectButton.textContent = 'Karte sammeln';
+        collectInfo.textContent = 'Melde dich an, um diese Karte zu deinem Album hinzuzufügen.';
+        
+        collectButton.onclick = () => {
+          window.location.href = 'Login.html';
+        };
+        return;
+      }
+
+      const alreadyCollected = await checkIfAlreadyCollected(artist.id);
+
+      if (alreadyCollected) {
+        collectButton.style.display = 'inline-block';
+        collectButton.disabled = true;
+        collectButton.textContent = 'Bereits gesammelt';
+        collectInfo.textContent = 'Diese Karte ist bereits in deiner Sammlung.';
+        return;
+      }
+
+      collectButton.style.display = 'inline-block';
+      collectButton.disabled = false;
+      collectButton.textContent = 'Karte sammeln';
+      collectInfo.textContent = '';
+
+      collectButton.onclick = async () => {
+        collectButton.disabled = true;
+        collectInfo.textContent = 'Speichere Karte...';
+
+        const userId = sessionData.session.user.id;
+
+        const { error } = await client
+          .from('user_collections')
+          .insert({
+            user_id: userId,
+            artist_id: artist.id
+          });
+
+        if (error) {
+          console.error(error);
+          collectInfo.textContent = 'Fehler beim Sammeln. Versuch es nochmal.';
+          collectButton.disabled = false;
+          return;
+        }
+
+        collectButton.textContent = '✓ Gesammelt!';
+        collectInfo.textContent = 'Karte wurde zu deiner Sammlung hinzugefügt.';
+        
+        setTimeout(() => {
+          collectButton.textContent = 'Bereits gesammelt';
+          collectInfo.textContent = 'Diese Karte ist jetzt in deiner Sammlung.';
+        }, 2000);
+      };
+    }
+
     async function loadStage() {
       const artistId = getArtistIdFromUrl();
       if (!artistId) {
@@ -569,6 +713,7 @@
         return;
       }
 
+      currentArtistId = artistId;
       backButton.addEventListener("click", () => goBackToExplorer(artistId));
       setStatus("Stage‑Karte wird geladen …");
 
@@ -578,6 +723,8 @@
           id,
           name,
           stage_unlocked,
+          can_be_collected,
+          has_stage_card,
           stage_music_connection,
           stage_ug_message,
           stage_photo_path,
@@ -599,14 +746,17 @@
         return;
       }
 
+      if (!data.stage_unlocked) {
+        setStatus("Dieser Artist ist noch nicht auf der Stage.");
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return;
+      }
+
       artistNameEl.textContent = data.name || "Artist";
       setCardNumber(data.id);
-
-      if (!data.stage_unlocked) {
-        setStatus("Dieser Artist wurde noch nicht offiziell auf die Stage eingeladen.");
-      } else {
-        setStatus("");
-      }
+      setStatus("");
 
       musicConnectionEl.textContent =
         data.stage_music_connection || "Noch nichts eingetragen.";
@@ -649,11 +799,13 @@
           .getPublicUrl(data.stage_photo_path);
 
         if (publicUrlData && publicUrlData.publicUrl) {
-          cardPhotoImg.src = publicUrlData.publicUrl;
+          cardPhotoImg.src = publicUrlData.publicUrl + `?v=${Date.now()}`;
           cardPhotoImg.style.display = "block";
           cardPhotoPlaceholder.style.display = "none";
         }
       }
+
+      await handleCollectButton(data);
 
       updateViewportScale();
     }
