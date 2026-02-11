@@ -27,7 +27,13 @@
       text-align: center;
     }
     h1 { font-size: 28px; margin: 0 0 8px; }
-    .subtitle { font-size: 14px; color: #c0c0c0; margin-bottom: 32px; }
+    .subtitle { font-size: 14px; color: #c0c0c0; margin-bottom: 24px; }
+    .hint {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 16px;
+      min-height: 1.2em;
+    }
     .login-button {
       width: 100%;
       border: none;
@@ -51,12 +57,13 @@
     <div class="subtitle">
       Melde dich an, um Stage-Karten zu sammeln und dein persönliches Underground-Album aufzubauen.
     </div>
+    <div id="login-hint" class="hint"></div>
 
-    <button class="login-button google" onclick="loginWithGoogle()">
+    <button class="login-button google" onclick="loginWithProvider('google')">
       🔵 Mit Google anmelden
     </button>
 
-    <button class="login-button spotify" onclick="loginWithSpotify()">
+    <button class="login-button spotify" onclick="loginWithProvider('spotify')">
       🎵 Mit Spotify anmelden
     </button>
   </div>
@@ -65,57 +72,85 @@
   <script>
     const { createClient } = supabase;
 
-    // GitHub-Pages-Basis-URL DEINER Seite (wichtig: mit Slash am Ende)
     const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
-    const REDIRECT = BASE_URL + 'Login.html';
+
+    // aktuelle Query-Parameter (z.B. ?from=collection&artist_id=1)
+    const CURRENT_SEARCH = window.location.search || '';
+    const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
 
     const client = createClient(
       'https://tyflhzwrwzfakwedipig.supabase.co',
       'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
     );
 
-    async function loginWithGoogle() {
+    function getNextUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const from = params.get('from');
+      const artistId = params.get('artist_id');
+
+      if (from === 'collection') {
+        return BASE_URL + 'MeineSammlung.html';
+      }
+
+      if (from === 'stage' && artistId) {
+        // zurück zur Stage, mit Flag für Auto-Sammeln
+        return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(artistId)}&auto_collect=true`;
+      }
+
+      // Standard: zurück zum Explorer
+      return BASE_URL + 'index.html';
+    }
+
+    function setHintText() {
+      const params = new URLSearchParams(window.location.search);
+      const from = params.get('from');
+      const hintEl = document.getElementById('login-hint');
+
+      if (from === 'collection') {
+        hintEl.textContent = 'Melde dich an, um deine gesammelten Stage-Karten zu sehen.';
+      } else if (from === 'stage') {
+        hintEl.textContent = 'Melde dich an, um diese Stage-Karte zu deiner Sammlung hinzuzufügen.';
+      } else {
+        hintEl.textContent = '';
+      }
+    }
+
+    async function loginWithProvider(provider) {
       const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
+        provider,
         options: {
           redirectTo: REDIRECT
         }
       });
-      if (error) console.error('Google login error:', error);
+      if (error) console.error(provider + ' login error:', error);
     }
 
-    async function loginWithSpotify() {
-      const { error } = await client.auth.signInWithOAuth({
-        provider: 'spotify',
-        options: {
-          redirectTo: REDIRECT
-        }
-      });
-      if (error) console.error('Spotify login error:', error);
-    }
-
-    // Nach OAuth-Callback: Hash (#access_token=...) auswerten und Session holen
     async function handleAuthFromHash() {
       if (window.location.hash.includes('access_token')) {
-        await client.auth.getUser(); // löst intern den Hash auf
-        history.replaceState(null, '', REDIRECT); // URL aufräumen
+        // Hash auswerten (Session anlegen)
+        await client.auth.getUser();
+
+        // URL bereinigen, Query-Parameter behalten
+        const cleanUrl = window.location.origin + window.location.pathname + window.location.search;
+        history.replaceState(null, '', cleanUrl);
       }
     }
 
     async function redirectIfLoggedIn() {
-      const { data: { session } } = await client.auth.getSession();
+      const {  { session } } = await client.auth.getSession();
       if (session) {
-        window.location.replace(BASE_URL + 'MeineSammlung.html');
+        window.location.replace(getNextUrl());
       }
     }
 
     client.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        window.location.replace(BASE_URL + 'MeineSammlung.html');
+        window.location.replace(getNextUrl());
       }
     });
 
     (async () => {
+      setHintText();
       await handleAuthFromHash();
       await redirectIfLoggedIn();
     })();
