@@ -574,12 +574,43 @@ input:focus {
         return { ok: false, reason: "artist-update" };
       }
 
-      artist.focus_score = newScore;
+            artist.focus_score = newScore;
       if (artist === currentArtist) {
         updateFocusBackground();
       }
 
       return { ok: true, newScore };
+    }
+
+    async function unlockStageIfNeeded(artist) {
+      if (!artist) return;
+
+      const score = artist.focus_score || 0;
+      if (score < MAX_FOCUS_SCORE) return;
+
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${artist.id}`,
+          {
+            method: "PATCH",
+            headers: {
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
+              "Content-Type": "application/json",
+              "Prefer": "return=minimal"
+            },
+            body: JSON.stringify({
+              stage_unlocked: true,
+              can_be_collected: true
+            })
+          }
+        );
+        if (!res.ok) {
+          console.error("artists stage_unlocked/can_be_collected UPDATE Fehler:", await res.text());
+        }
+      } catch (err) {
+        console.error("unlockStageIfNeeded Fehler:", err);
+      }
     }
 
     async function triggerCheatBoost() {
@@ -753,6 +784,8 @@ input:focus {
       }
       
       const res = await addFocus(currentArtist, "play");
+      if (res.ok) { await unlockStageIfNeeded(currentArtist); }
+
 
       if (res.ok) {
         alert(`Focus +1 – du hast ${currentArtist.name || "den Artist"} gepusht.`);
@@ -775,6 +808,8 @@ input:focus {
       }
       
       const res = await addFocus(currentArtist, "follow");
+      if (res.ok) { await unlockStageIfNeeded(currentArtist); }
+
 
       if (res.ok) {
         alert(`Focus +1 – du folgst ${currentArtist.name || "dem Artist"} (auf Spotify öffnen).`);
