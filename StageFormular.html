@@ -346,74 +346,98 @@
     }
 
     async function loadArtist() {
-      const artistId = getArtistIdFromUrl();
-      if (!artistId) {
-        setStatus("Fehlende artist_id in der URL.", "error");
-        saveButton.disabled = true;
-        previewButton.disabled = true;
-        deletePhotoButton.disabled = true;
-        return;
-      }
+  const artistId = getArtistIdFromUrl();
+  if (!artistId) {
+    setStatus("Fehlende artist_id in der URL.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
+  }
 
-      setStatus("Lade deine Stage‑Karte …");
+  // 1. Session prüfen
+  const {  sessionData, error: sessionError } = await client.auth.getSession();
+  if (sessionError || !sessionData.session) {
+    setStatus("Du musst eingeloggt sein, um deine Stage‑Karte zu bearbeiten.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
+  }
+  const userId = sessionData.session.user.id;
 
-      const { data, error } = await client
-        .from("artists")
-        .select(`
-          name,
-          stage_unlocked,
-          stage_music_connection,
-          stage_ug_message,
-          stage_photo_path,
-          stage_sound,
-          stage_special_skill,
-          stage_active_since,
-          stage_collab_1,
-          stage_collab_2,
-          stage_collab_3,
-          stage_contact,
-          stage_palette
-        `)
-        .eq("id", artistId)
-        .limit(1)
-        .single();
+  setStatus("Lade deine Stage‑Karte …");
 
-      if (error || !data) {
-        console.error(error);
-        setStatus("Artist konnte nicht geladen werden.", "error");
-        saveButton.disabled = true;
-        previewButton.disabled = true;
-        deletePhotoButton.disabled = true;
-        return;
-      }
+  // 2. Artist inkl. owner_user_id laden
+  const { data, error } = await client
+    .from("artists")
+    .select(`
+      name,
+      owner_user_id,
+      stage_unlocked,
+      stage_music_connection,
+      stage_ug_message,
+      stage_photo_path,
+      stage_sound,
+      stage_special_skill,
+      stage_active_since,
+      stage_collab_1,
+      stage_collab_2,
+      stage_collab_3,
+      stage_contact,
+      stage_palette
+    `)
+    .eq("id", artistId)
+    .limit(1)
+    .single();
 
-      if (!data.stage_unlocked) {
-        setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
-        saveButton.disabled = true;
-        previewButton.disabled = true;
-        deletePhotoButton.disabled = true;
-        return;
-      }
+  if (error || !data) {
+    console.error(error);
+    setStatus("Artist konnte nicht geladen werden.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
+  }
 
-      artistNameDisplay.textContent = "Angemeldet als: " + data.name;
+  // 3. Owner-Schutz
+  if (!data.owner_user_id || data.owner_user_id !== userId) {
+    setStatus("Du bist nicht als Besitzer:in dieses Artists eingetragen.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
+  }
 
-      musicConnectionEl.value = data.stage_music_connection || "";
-      ugMessageEl.value = data.stage_ug_message || "";
-      soundEl.value = data.stage_sound || "";
-      specialSkillEl.value = data.stage_special_skill || "";
-      activeSinceEl.value = data.stage_active_since || "";
-      collab1El.value = data.stage_collab_1 || "";
-      collab2El.value = data.stage_collab_2 || "";
-      collab3El.value = data.stage_collab_3 || "";
-      contactEl.value = data.stage_contact || "";
-      paletteEl.value = data.stage_palette || "neon";
+  if (!data.stage_unlocked) {
+    setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
+  }
 
-      currentPhotoPath = data.stage_photo_path || null;
+  // 4. Formular befüllen
+  artistNameDisplay.textContent = "Angemeldet als: " + data.name;
 
-      updateCounters();
+  musicConnectionEl.value = data.stage_music_connection || "";
+  ugMessageEl.value = data.stage_ug_message || "";
+  soundEl.value = data.stage_sound || "";
+  specialSkillEl.value = data.stage_special_skill || "";
+  activeSinceEl.value = data.stage_active_since || "";
+  collab1El.value = data.stage_collab_1 || "";
+  collab2El.value = data.stage_collab_2 || "";
+  collab3El.value = data.stage_collab_3 || "";
+  contactEl.value = data.stage_contact || "";
+  paletteEl.value = data.stage_palette || "neon";
 
-      setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
-    }
+  currentPhotoPath = data.stage_photo_path || null;
+
+  updateCounters();
+
+  setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
+}
+
 
     async function uploadPhotoIfNeeded(artistId) {
       const file = photoInput.files[0];
