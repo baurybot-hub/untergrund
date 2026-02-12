@@ -81,20 +81,35 @@
     .card-theme-electric-blue {
       background: linear-gradient(135deg,#0ea5e9,#38bdf8,#6366f1);
     }
-    .card-theme-sunset {
+    .card-theme-warm-orange {
+      background: linear-gradient(135deg,#fb923c,#facc15,#f97316);
+    }
+    .card-theme-deep-purple {
+      background: linear-gradient(135deg,#4c1d95,#7c3aed,#ec4899);
+    }
+    .card-theme-rose-magenta {
+      background: linear-gradient(135deg,#f97393,#ec4899,#a855f7);
+    }
+    .card-theme-aqua {
+      background: linear-gradient(135deg,#06b6d4,#22c55e,#67e8f9);
+    }
+    .card-theme-gold {
       background: linear-gradient(135deg,#f97316,#facc15,#f59e0b);
     }
-    .card-theme-purple-haze {
-      background: linear-gradient(135deg,#a855f7,#ec4899,#6366f1);
+    .card-theme-ice {
+      background: linear-gradient(135deg,#e5e7eb,#38bdf8,#a5b4fc);
+    }
+    .card-theme-dark {
+      background: linear-gradient(135deg,#020617,#0f172a,#020617);
     }
 
-    /* Innenkarte */
+    /* eigentliche Karte */
     .card {
       position: relative;
       width: 100%;
       height: 100%;
-      border-radius: 20px;
-      padding: 12px 14px 10px;
+      border-radius: 18px;
+      padding: 9px 11px 7px;
       background: radial-gradient(circle at top,
                   rgba(15,23,42,0.96) 0,
                   rgba(15,23,42,0.98) 40%,
@@ -102,82 +117,84 @@
       display: flex;
       flex-direction: column;
       color: #e5e7eb;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
       overflow: hidden;
     }
 
-    /* Header mit Titel + Zurück-Button */
+    /* Holo-Glanz */
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: linear-gradient(
+        120deg,
+        rgba(255,255,255,0.12),
+        transparent 40%,
+        rgba(56,189,248,0.16) 60%,
+        transparent 80%,
+        rgba(244,114,182,0.18)
+      );
+      mix-blend-mode: screen;
+      opacity: 0.55;
+      transform: translateX(-20%);
+      pointer-events: none;
+    }
+
+    /* Kopfbereich */
     .card-header {
+      position: relative;
+      z-index: 1;
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: flex-start;
       margin-bottom: 8px;
     }
-    .card-header-left {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
+    .card-title-block {
+      max-width: 70%;
     }
     .card-label {
-      font-size: 8px;
-      letter-spacing: 0.9px;
+      font-size: 10px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      font-weight: 600;
-      line-height: 1.1;
+      color: #9ca3af;
     }
     .card-artist {
-      font-family: "Russo One", sans-serif;
-      font-size: 21px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      line-height: 1.1;
-      color: #fff;
-      margin: 0;
-      text-shadow:
-        0 0 12px rgba(34,197,94,0.5),
-        0 2px 4px rgba(0,0,0,0.6);
+      font-family: "Russo One", system-ui, sans-serif;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      color: #f9fafb;
+    }
+    .card-subline {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 2px;
     }
 
     .back-btn {
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.15);
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 11px;
-      color: #fff;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.75);
+      background: rgba(15,23,42,0.95);
+      color: #e5e7eb;
+      padding: 6px 11px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
       cursor: pointer;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.2s;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-    }
-    .back-btn:hover {
-      background: rgba(34,197,94,0.15);
-      border-color: rgba(34,197,94,0.4);
+      white-space: nowrap;
     }
 
-    /* Subline */
-    .card-subline {
-      font-size: 11px;
-      color: rgba(255,255,255,0.65);
-      margin-bottom: 10px;
-      line-height: 1.3;
-    }
-
-    /* Foto Container */
+    /* Foto-Bereich */
     .card-photo {
       position: relative;
-      width: 100%;
-      flex-basis: 50%;
-      flex-shrink: 0;
-      border-radius: 12px;
+      z-index: 1;
+      flex: 0 0 40%;
+      border-radius: 18px;
       overflow: hidden;
-      background: linear-gradient(135deg,#1e293b,#0f172a);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      border: 1px solid rgba(55,65,81,0.9);
+      background: radial-gradient(circle,#020617 0,#020617 60%,#000 100%);
       margin-bottom: 10px;
     }
     .card-photo img {
@@ -186,288 +203,393 @@
       object-fit: cover;
       display: block;
     }
-
-    /* Stats-Row */
-    .stats-row {
+    .card-photo-placeholder {
+      width: 100%;
+      height: 100%;
       display: flex;
-      gap: 6px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 12px;
+      padding: 10px;
+      color: #c4fce0;
     }
 
-    /* Section */
-    .card-section {
+    /* Stats-Leiste */
+    .card-stats {
+      position: relative;
+      z-index: 1;
       display: flex;
-      flex-direction: column;
-      gap: 4px;
+      flex-wrap: wrap;
+      gap: 6px;
       margin-bottom: 8px;
     }
-    .card-section-label {
-      font-size: 8px;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.5);
-      font-weight: 600;
-    }
-    .card-text {
+    .stat-pill {
       font-size: 11px;
-      line-height: 1.45;
-      color: rgba(255,255,255,0.85);
-      max-height: 60px;
+      padding: 4px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.9);
+      max-width: 100%;
+      white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
-    /* Pills */
-    .stat-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      padding: 4px 7px;
-      border-radius: 6px;
-      font-size: 10px;
-      font-weight: 600;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.12);
-      color: #fff;
-      white-space: nowrap;
-    }
-    .stat-pill-icon {
+    .stat-label {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+      margin-right: 4px;
       font-size: 9px;
-      opacity: 0.8;
     }
 
-    /* Collabs */
+    /* Textblöcke */
+    .card-body {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+    .card-section-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9effc7;
+      margin-bottom: 1px;
+    }
+    .card-text {
+      font-size: 12px;
+      line-height: 1.5;
+      color: #e5e7eb;
+      max-height: 4.5em;
+      overflow: hidden;
+    }
+
+    .card-collabs {
+      margin-top: 4px;
+    }
     .collab-list {
       display: flex;
       flex-wrap: wrap;
       gap: 4px;
+      margin-top: 2px;
     }
     .collab-pill {
+      font-size: 11px;
       padding: 3px 7px;
-      border-radius: 6px;
-      background: rgba(34,197,94,0.12);
-      border: 1px solid rgba(34,197,94,0.25);
-      font-size: 10px;
-      color: #4ade80;
-      font-weight: 600;
+      border-radius: 999px;
+      border: 1px solid rgba(59,130,246,0.8);
+      background: rgba(15,23,42,0.9);
     }
 
-    /* Call-to-Action Button */
+    /* Sammeln-Button */
+    .collect-section {
+      position: relative;
+      z-index: 1;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
     .collect-btn {
-      width: 100%;
+      border-radius: 999px;
+      border: 1px solid rgba(34,197,94,0.8);
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      color: #020617;
       padding: 8px 14px;
-      border: none;
-      border-radius: 10px;
-      background: linear-gradient(135deg,#22c55e,#16a34a);
-      color: #fff;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
       cursor: pointer;
-      transition: all 0.25s;
-      box-shadow:
-        0 0 20px rgba(34,197,94,0.4),
-        0 4px 12px rgba(0,0,0,0.3);
-      margin-bottom: 6px;
-    }
-    .collect-btn:hover {
-      transform: translateY(-1px);
-      box-shadow:
-        0 0 28px rgba(34,197,94,0.6),
-        0 6px 16px rgba(0,0,0,0.4);
-    }
-
-    .collect-info {
-      font-size: 9px;
-      color: rgba(255,255,255,0.5);
+      transition: all 0.2s;
       text-align: center;
-      margin-bottom: 8px;
-      line-height: 1.3;
+    }
+    .collect-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(34,197,94,0.5);
+    }
+    .collect-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: rgba(55,65,81,0.6);
+      border-color: rgba(148,163,184,0.4);
+      color: #9ca3af;
+    }
+    .collect-info {
+      font-size: 11px;
+      color: #9ca3af;
+      text-align: center;
+      min-height: 1em;
     }
 
     /* Footer */
     .card-footer {
+      position: relative;
+      z-index: 1;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-top: 6px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-      font-size: 9px;
-      color: rgba(255,255,255,0.5);
-      margin-top: auto;
+      margin-top: 6px;
+      padding-top: 4px;
+      border-top: 1px dashed rgba(55,65,81,0.9);
+      font-size: 11px;
+    }
+    .card-footer-left {
+      max-width: 65%;
+      color: #fca5a5;
+      min-height: 1.2em;
+    }
+    .card-footer-right {
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #9ca3af;
     }
     .card-number {
-      font-weight: 700;
-      color: rgba(255,255,255,0.7);
+      font-size: 11px;
     }
     .card-set {
+      font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
+      letter-spacing: 0.16em;
+      color: #6ee7b7;
+    }
+
+    .contact-link a {
+      color: #22c55e;
+      text-decoration: none;
+    }
+    .contact-link a:hover {
+      text-decoration: underline;
     }
 
     /* Einheitliches Layout für alle Screens (wie auf dem Handy) */
-      .bg-video video {
-        object-fit: cover;
-        object-position: center top;
-      }
+    .bg-video video {
+      object-fit: cover;
+      object-position: center top;
+    }
 
-      .stage-wrap {
-        min-height: calc(var(--vh, 1vh) * 100);
-        padding: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+    .stage-wrap {
+      min-height: calc(var(--vh, 1vh) * 100);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-      .card-shell {
-        width: 100%;
-        max-width: 420px;
-        height: 900px;
-        border-radius: 18px;
-        padding: 4px;
-        box-sizing: border-box;
-      }
+    .card-shell {
+      width: 100%;
+      max-width: 420px;
+      height: 900px;
+      border-radius: 18px;
+      padding: 4px;
+      box-sizing: border-box;
+    }
 
-      .card {
-        width: 100%;
-        height: 100%;
-        border-radius: 14px;
-        padding: 10px 12px 9px;
-        overflow: hidden;
-        transform: none;
-      }
+    .card {
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      padding: 10px 12px 9px;
+      overflow: hidden;
+      transform: none;
+    }
 
-      .card-artist { font-size: 18px; }
-      .card-subline { font-size: 10px; }
-      .card-section-label { font-size: 9px; }
-      .card-text { font-size: 11px; max-height: none; }
-      .stat-pill { font-size: 10px; padding: 3px 6px; }
-      .collab-pill { font-size: 10px; padding: 2px 6px; }
-      .collect-btn { font-size: 11px; padding: 7px 12px; }
-      .collect-info { font-size: 10px; }
-      .card-footer { font-size: 10px; }
-      .card-number { font-size: 10px; }
-      .card-set { font-size: 9px; }
-      .card-photo { flex-basis: 52%; }
-    
+    .card-artist { font-size: 18px; }
+    .card-subline { font-size: 10px; }
+    .card-section-label { font-size: 9px; }
+    .card-text { font-size: 11px; max-height: none; }
+    .stat-pill { font-size: 10px; padding: 3px 6px; }
+    .collab-pill { font-size: 10px; padding: 2px 6px; }
+    .collect-btn { font-size: 11px; padding: 7px 12px; }
+    .collect-info { font-size: 10px; }
+    .card-footer { font-size: 10px; }
+    .card-number { font-size: 10px; }
+    .card-set { font-size: 9px; }
+    .card-photo { flex-basis: 52%; }
   </style>
 </head>
 <body>
-
-  <!-- Hintergrundvideo -->
+  <!-- Hintergrund-Video -->
   <div class="bg-video">
-    <video autoplay loop muted playsinline>
-      <source
-        src="https://raw.githubusercontent.com/Baury-hub/baurybot-hub/refs/heads/main/Videos/Background%20Video%20Stage.mp4"
-        type="video/mp4"
-      />
-    </video>
+    <video src="Stage.mp4" autoplay muted loop playsinline></video>
   </div>
-
-  <!-- Overlay -->
   <div class="overlay"></div>
 
-  <!-- Stage Wrapper -->
+  <!-- Sammelkarte -->
   <div class="stage-wrap">
-
-    <!-- Card Shell (Golden Border) -->
-    <div class="card-shell card-theme-sunset">
-
-      <!-- Inner Card -->
+    <div id="cardShell" class="card-shell card-theme-neon">
       <div class="card">
-
-        <!-- Header -->
         <div class="card-header">
-          <div class="card-header-left">
-            <div class="card-label">Untergrund Stage Karte</div>
-            <h1 class="card-artist">DOKTOR EULE</h1>
+          <div class="card-title-block">
+            <div class="card-label">UnterGrund Stage Karte</div>
+            <div id="artistName" class="card-artist">Artist</div>
+            <div class="card-subline">Von der UnterGrund‑Community auf die Stage gepusht.</div>
           </div>
-          <a href="#" class="back-btn">ZURÜCK</a>
+          <button id="backButton" class="back-btn">Zurück</button>
         </div>
 
-        <!-- Subline -->
-        <div class="card-subline">Von der UnterGrund-Community auf die Stage gewählt.</div>
-
-        <!-- Photo -->
         <div class="card-photo">
-          <img
-            src="https://i.scdn.co/image/ab6761610000e5eb4ef71ba0810a1e2e6a55dfc0"
-            alt="Doktor Eule"
-          />
-        </div>
-
-        <!-- Stats Row -->
-        <div class="stats-row">
-          <div class="stat-pill">
-            <span class="stat-pill-icon">🎵</span>
-            <span>Pop, Akustik, experimentell</span>
-          </div>
-          <div class="stat-pill">
-            <span class="stat-pill-icon">🌟</span>
-            <span>Untergrund-Ingenieur</span>
-          </div>
-          <div class="stat-pill">
-            <span class="stat-pill-icon">📅</span>
-            <span>2016</span>
+          <img id="cardPhoto" alt="Stage Foto" style="display:none;" />
+          <div id="cardPhotoPlaceholder" class="card-photo-placeholder">
+            Exklusives Stage‑Foto<br />
+            wird hier angezeigt,<br />
+            sobald du eines<br />
+            hochgeladen hast.
           </div>
         </div>
 
-        <!-- Was verbindet dich mit Musik? -->
-        <div class="card-section">
-          <div class="card-section-label">Was verbindet dich mit Musik?</div>
-          <div class="card-text">
-            Musik ist alles, ein Lebensgefühl, eine Energie, eine Entscheidung.
+        <div class="card-stats">
+          <div id="statSound" class="stat-pill" style="display:none;">
+            <span class="stat-label">Sound</span><span id="soundText"></span>
+          </div>
+          <div id="statSkill" class="stat-pill" style="display:none;">
+            <span class="stat-label">Skill</span><span id="skillText"></span>
+          </div>
+          <div id="statActive" class="stat-pill" style="display:none;">
+            <span class="stat-label">Seit</span><span id="activeText"></span>
           </div>
         </div>
 
-        <!-- Botschaft an die UnterGrund-Community -->
-        <div class="card-section">
-          <div class="card-section-label">Botschaft an die UnterGrund-Community</div>
-          <div class="card-text">
-            Jeder hat es verdient aus dem Untergrund nach oben gepusht zu werden. 
-            Bitte Abo auf Youtube da lassen. Verrückter Stuff kommt.
+        <div class="card-body">
+          <div>
+            <div class="card-section-label">Was verbindet dich mit Musik?</div>
+            <div id="musicConnection" class="card-text"></div>
+          </div>
+
+          <div>
+            <div class="card-section-label">Botschaft an die UnterGrund‑Community</div>
+            <div id="ugMessage" class="card-text"></div>
+          </div>
+
+          <div class="card-collabs">
+            <div class="card-section-label">Collab‑Wunsch</div>
+            <div class="collab-list" id="collabList"></div>
+          </div>
+
+          <div>
+            <div class="card-section-label">Kontakt</div>
+            <div id="contact" class="card-text contact-link"></div>
           </div>
         </div>
 
-        <!-- Collab-Wunsch -->
-        <div class="card-section">
-          <div class="card-section-label">Collab-Wunsch</div>
-          <div class="collab-list">
-            <div class="collab-pill">Samantha</div>
-            <div class="collab-pill">Alexander Marcus</div>
-            <div class="collab-pill">Tasséflow 1</div>
-          </div>
+        <!-- Sammeln-Button -->
+        <div class="collect-section">
+          <button id="collectButton" class="collect-btn" style="display:none;">Karte sammeln</button>
+          <div id="collectInfo" class="collect-info"></div>
         </div>
 
-        <!-- Kontakt -->
-        <div class="card-section">
-          <div class="card-section-label">Kontakt</div>
-          <div class="card-text">
-            <a href="https://youtube.com/@doktoreule" style="color:#4ade80; text-decoration:none;">
-              https://youtube.com/@doktoreule
-            </a>
-          </div>
-        </div>
-
-        <!-- CTA -->
-        <button class="collect-btn">In Sammlung ansehen</button>
-        <div class="collect-info">Diese Karte ist bereits in deinem Album.</div>
-
-        <!-- Footer -->
         <div class="card-footer">
-          <span class="card-number">ID-CARD: #0001</span>
-          <span class="card-set">Set: Untergrund Explorer • S1</span>
+          <div id="status" class="card-footer-left"></div>
+          <div class="card-footer-right">
+            <div id="cardNumber" class="card-number">UG‑CARD #0000</div>
+            <div class="card-set">Set: UnterGrund Explorer · S1</div>
+          </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-      </div><!-- .card -->
-    </div><!-- .card-shell -->
-
-  </div><!-- .stage-wrap -->
-
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const STORAGE_BUCKET = "stage-photos";
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const artistNameEl = document.getElementById("artistName");
+    const musicConnectionEl = document.getElementById("musicConnection");
+    const ugMessageEl = document.getElementById("ugMessage");
+    const contactEl = document.getElementById("contact");
+    const statusEl = document.getElementById("status");
+    const backButton = document.getElementById("backButton");
+    const cardNumberEl = document.getElementById("cardNumber");
+    const cardShellEl = document.getElementById("cardShell");
+
+    const cardPhotoImg = document.getElementById("cardPhoto");
+    const cardPhotoPlaceholder = document.getElementById("cardPhotoPlaceholder");
+
+    const statSound = document.getElementById("statSound");
+    const statSkill = document.getElementById("statSkill");
+    const statActive = document.getElementById("statActive");
+    const soundText = document.getElementById("soundText");
+    const skillText = document.getElementById("skillText");
+    const activeText = document.getElementById("activeText");
+
+    const collabListEl = document.getElementById("collabList");
+
+    const collectButton = document.getElementById("collectButton");
+    const collectInfo = document.getElementById("collectInfo");
+
+    let currentArtistId = null;
+
+    function setStatus(msg) {
+      statusEl.textContent = msg || "";
+    }
+
+    function getArtistIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("artist_id");
+    }
+
+    function goBackToExplorer(artistId) {
+      if (artistId) {
+        window.location.href = `index.html?artist=${encodeURIComponent(artistId)}`;
+      } else {
+        window.location.href = "index.html";
+      }
+    }
+
+    function applyPalette(palette) {
+      const baseClass = "card-theme-";
+      const themes = [
+        "neon",
+        "electric-blue",
+        "warm-orange",
+        "deep-purple",
+        "rose-magenta",
+        "aqua",
+        "gold",
+        "ice",
+        "dark"
+      ];
+      themes.forEach(t => cardShellEl.classList.remove(baseClass + t));
+      const selected = themes.includes(palette) ? palette : "neon";
+      cardShellEl.classList.add(baseClass + selected);
+    }
+
+    function setCardNumber(id) {
+      if (!id) {
+        cardNumberEl.textContent = "UG‑CARD #0000";
+        return;
+      }
+      const num = String(id).padStart(4, "0");
+      cardNumberEl.textContent = "UG‑CARD #" + num;
+    }
+
+    function fillCollabs(c1, c2, c3) {
+      collabListEl.innerHTML = "";
+      const values = [c1, c2, c3].map(v => (v || "").trim()).filter(Boolean);
+      if (values.length === 0) {
+        const span = document.createElement("span");
+        span.textContent = "Noch kein Collab‑Wunsch hinterlegt.";
+        span.style.fontSize = "11px";
+        span.style.color = "#e5e7eb";
+        collabListEl.appendChild(span);
+        return;
+      }
+      values.forEach(v => {
+        const pill = document.createElement("div");
+        pill.className = "collab-pill";
+        pill.textContent = v;
+        collabListEl.appendChild(pill);
+      });
+    }
+
     function updateViewportScale() {
       const vh = window.innerHeight * 0.01;
       document.documentElement.style.setProperty('--vh', `${vh}px`);
@@ -484,10 +606,252 @@
       shell.style.transform = `scale(${scale})`;
     }
 
-    updateViewportScale();
     window.addEventListener('resize', updateViewportScale);
     window.addEventListener('orientationchange', updateViewportScale);
-  </script>
 
+    async function checkIfAlreadyCollected(artistId) {
+      const { data: sessionData } = await client.auth.getSession();
+      if (!sessionData.session) return false;
+
+      const userId = sessionData.session.user.id;
+
+      const { data, error } = await client
+        .from('user_collections')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('artist_id', artistId)
+        .limit(1);
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+
+      return data && data.length > 0;
+    }
+
+    async function handleCollectButton(artist) {
+      const { data: sessionData } = await client.auth.getSession();
+      
+      if (!artist.can_be_collected) {
+        collectButton.style.display = 'none';
+        collectInfo.textContent = 'Dieser Artist ist noch im Untergrund. Sammle Focus Points, um ihn auf die Stage zu bringen.';
+        return;
+      }
+
+      if (!artist.has_stage_card) {
+        collectButton.style.display = 'inline-block';
+        collectButton.disabled = true;
+        collectButton.textContent = 'Bald sammelbar';
+        collectInfo.textContent = 'Der Artist wurde eingeladen, seine Stage-Karte zu gestalten. Bald kannst du ihn sammeln.';
+        return;
+      }
+
+      // Nicht eingeloggt → zum Login mit from=stage
+      if (!sessionData.session) {
+        collectButton.style.display = 'inline-block';
+        collectButton.disabled = false;
+        collectButton.textContent = 'Karte sammeln';
+        collectInfo.textContent = 'Melde dich an, um diese Karte zu deinem Album hinzuzufügen.';
+        
+        collectButton.onclick = () => {
+          window.location.href = `Login.html?from=stage&artist_id=${artist.id}`;
+        };
+        return;
+      }
+
+      const alreadyCollected = await checkIfAlreadyCollected(artist.id);
+
+      if (alreadyCollected) {
+  collectButton.style.display = 'inline-block';
+  collectButton.disabled = false;
+  collectButton.textContent = 'In Sammlung ansehen';
+  collectInfo.textContent = 'Diese Karte ist bereits in deinem Album.';
+  collectButton.onclick = () => {
+    window.location.href = 'MeineSammlung.html';
+  };
+  return;
+}
+
+
+      collectButton.style.display = 'inline-block';
+      collectButton.disabled = false;
+      collectButton.textContent = 'Karte sammeln';
+      collectInfo.textContent = '';
+
+      collectButton.onclick = async () => {
+        collectButton.disabled = true;
+        collectInfo.textContent = 'Speichere Karte...';
+
+        const userId = sessionData.session.user.id;
+
+        const { error } = await client
+          .from('user_collections')
+          .insert({
+            user_id: userId,
+            artist_id: artist.id
+          });
+
+        if (error) {
+          console.error(error);
+          collectInfo.textContent = 'Fehler beim Sammeln. Versuch es nochmal.';
+          collectButton.disabled = false;
+          return;
+        }
+
+        collectButton.textContent = '✓ Gesammelt!';
+        collectInfo.textContent = 'Karte wurde zu deiner Sammlung hinzugefügt.';
+        
+        setTimeout(() => {
+          collectButton.textContent = 'Bereits gesammelt';
+          collectInfo.textContent = 'Diese Karte ist jetzt in deiner Sammlung.';
+        }, 2000);
+      };
+    }
+
+    async function loadStage() {
+      const artistId = getArtistIdFromUrl();
+      if (!artistId) {
+        setStatus("Keine artist_id in der URL gefunden.");
+        return;
+      }
+
+      currentArtistId = artistId;
+      backButton.addEventListener("click", () => goBackToExplorer(artistId));
+      setStatus("Stage‑Karte wird geladen …");
+
+      const { data, error } = await client
+        .from("artists")
+        .select(`
+          id,
+          name,
+          stage_unlocked,
+          can_be_collected,
+          has_stage_card,
+          stage_music_connection,
+          stage_ug_message,
+          stage_photo_path,
+          stage_sound,
+          stage_special_skill,
+          stage_active_since,
+          stage_collab_1,
+          stage_collab_2,
+          stage_collab_3,
+          stage_contact,
+          stage_palette
+        `)
+        .eq("id", artistId)
+        .single();
+
+      if (error || !data) {
+        console.error(error);
+        setStatus("Stage‑Karte konnte nicht geladen werden.");
+        return;
+      }
+
+      if (!data.stage_unlocked) {
+        setStatus("Dieser Artist ist noch nicht auf der Stage.");
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+        return;
+      }
+
+      artistNameEl.textContent = data.name || "Artist";
+      setCardNumber(data.id);
+      setStatus("");
+
+      musicConnectionEl.textContent =
+        data.stage_music_connection || "Noch nichts eingetragen.";
+      ugMessageEl.textContent =
+        data.stage_ug_message || "Noch keine Botschaft an die Community.";
+
+      if (data.stage_sound) {
+        soundText.textContent = " " + data.stage_sound;
+        statSound.style.display = "inline-flex";
+      }
+      if (data.stage_special_skill) {
+        skillText.textContent = " " + data.stage_special_skill;
+        statSkill.style.display = "inline-flex";
+      }
+      if (data.stage_active_since) {
+        activeText.textContent = " " + data.stage_active_since;
+        statActive.style.display = "inline-flex";
+      }
+
+      fillCollabs(data.stage_collab_1, data.stage_collab_2, data.stage_collab_3);
+
+      if (data.stage_contact) {
+        const link = document.createElement("a");
+        link.href = data.stage_contact;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = data.stage_contact;
+        contactEl.innerHTML = "";
+        contactEl.appendChild(link);
+      } else {
+        contactEl.textContent = "Noch kein Kontaktlink angegeben.";
+      }
+
+      applyPalette(data.stage_palette || "neon");
+
+      if (data.stage_photo_path) {
+        const { data: publicUrlData } = client
+          .storage
+          .from(STORAGE_BUCKET)
+          .getPublicUrl(data.stage_photo_path);
+
+        if (publicUrlData && publicUrlData.publicUrl) {
+          cardPhotoImg.src = publicUrlData.publicUrl + `?v=${Date.now()}`;
+          cardPhotoImg.style.display = "block";
+          cardPhotoPlaceholder.style.display = "none";
+        }
+      }
+
+      await handleCollectButton(data);
+
+      // Auto-Sammeln, wenn wir aus dem Login mit auto_collect=true zurückkommen
+      const params = new URLSearchParams(window.location.search);
+      const autoCollect = params.get('auto_collect') === 'true';
+
+      if (autoCollect) {
+        const { data: sessionData } = await client.auth.getSession();
+        if (sessionData.session) {
+          const alreadyCollected = await checkIfAlreadyCollected(data.id);
+
+          if (!alreadyCollected) {
+            const userId = sessionData.session.user.id;
+
+            const { error: insertError } = await client
+              .from('user_collections')
+              .insert({
+                user_id: userId,
+                artist_id: data.id
+              });
+
+            if (!insertError) {
+              collectButton.style.display = 'inline-block';
+              collectButton.disabled = true;
+              collectButton.textContent = '✓ Gesammelt!';
+              collectInfo.textContent = 'Karte wurde zu deiner Sammlung hinzugefügt.';
+
+              setTimeout(() => {
+                collectButton.textContent = 'Bereits gesammelt';
+                collectInfo.textContent = 'Diese Karte ist jetzt in deiner Sammlung.';
+              }, 2000);
+            }
+          }
+        }
+
+        // URL aufräumen: auto_collect wieder entfernen
+        const cleanUrl = `Stage.html?artist_id=${encodeURIComponent(data.id)}`;
+        window.history.replaceState(null, '', cleanUrl);
+      }
+
+      updateViewportScale();
+    }
+
+    loadStage();
+  </script>
 </body>
 </html>
