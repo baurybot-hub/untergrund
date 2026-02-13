@@ -513,20 +513,20 @@
       }
 
       const updatePayload = {
-        stage_music_connection: musicConnectionEl.value.trim() || null,
-        stage_ug_message: ugMessageEl.value.trim() || null,
-        stage_sound: soundEl.value.trim() || null,
-        stage_special_skill: specialSkillEl.value.trim() || null,
-        stage_active_since: activeSinceEl.value.trim() || null,
-        stage_collab_1: collab1El.value.trim() || null,
-        stage_collab_2: collab2El.value.trim() || null,
-        stage_collab_3: collab3El.value.trim() || null,
-        stage_contact: contactEl.value.trim() || null,
-        stage_palette: paletteEl.value || "neon",
-        has_stage_card: true,
-        owner_user_id: "claimed_" + artistId,
-        owner_claimed_at: new Date().toISOString()
-      };
+  stage_music_connection: musicConnectionEl.value.trim() || null,
+  stage_ug_message: ugMessageEl.value.trim() || null,
+  stage_sound: soundEl.value.trim() || null,
+  stage_special_skill: specialSkillEl.value.trim() || null,
+  stage_active_since: activeSinceEl.value.trim() || null,
+  stage_collab_1: collab1El.value.trim() || null,
+  stage_collab_2: collab2El.value.trim() || null,
+  stage_collab_3: collab3El.value.trim() || null,
+  stage_contact: contactEl.value.trim() || null,
+  stage_palette: paletteEl.value || "neon",
+  has_stage_card: true,
+  owner_claimed_at: new Date().toISOString()
+};
+
 
       if (photoPath) {
         updatePayload.stage_photo_path = photoPath;
@@ -544,7 +544,7 @@
         return;
       }
 
-      currentArtistData.owner_user_id = updatePayload.owner_user_id;
+    
       currentArtistData.owner_claimed_at = updatePayload.owner_claimed_at;
 
       setStatus("Stage‑Karte gespeichert. Du kannst sie jederzeit erneut anpassen.", "success");
