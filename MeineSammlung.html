@@ -150,6 +150,43 @@
       font-weight: 700;
       text-decoration: underline;
     }
+
+    /* Collab-Matches */
+    #collabMatchesSection {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(148, 163, 184, 0.4);
+    }
+    .collab-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px dashed rgba(55, 65, 81, 0.6);
+      font-size: 14px;
+    }
+    .collab-row:last-child {
+      border-bottom: none;
+    }
+    .collab-names {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .collab-name {
+      color: #9effc7;
+      cursor: pointer;
+    }
+    .collab-separator {
+      color: #a0a0a0;
+    }
+    .collab-tag {
+      font-size: 11px;
+      color: #a0a0a0;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(156, 163, 175, 0.6);
+    }
   </style>
 </head>
 <body>
@@ -182,6 +219,15 @@
       <p>Entdecke Artists auf der Stage und sammle deine erste Karte!</p>
       <a href="index.html">Zur Stage</a>
     </div>
+
+    <!-- Collab-Matches-Sektion -->
+    <div id="collabMatchesSection" style="display:none;">
+      <h2 style="font-size:20px; margin-bottom:8px;">🤝 Deine Collab‑Matches</h2>
+      <p style="font-size:13px; color:#a0a0a0; margin-top:0; margin-bottom:16px;">
+        Hier siehst du Artists, die sich gegenseitig als Collab‑Wunsch eingetragen haben.
+      </p>
+      <div id="collabMatchesList"></div>
+    </div>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
@@ -196,14 +242,12 @@
     }
 
     async function loadCollection() {
-      const { data, error } = await client.auth.getSession();
+      const { data, error } = await client.auth.getSession(); // [web:2620]
       if (error) {
         console.error('getSession error:', error);
       }
 
       const session = data?.session || null;
-      console.log('Session:', session);
-
       if (!session) {
         window.location.href = 'Login.html?from=collection';
         return;
@@ -220,8 +264,6 @@
         .select('artist_id, collected_at')
         .eq('user_id', userId)
         .order('collected_at', { ascending: false });
-
-      console.log('Collections:', collections, collError);
 
       const cardsGrid = document.getElementById('cardsGrid');
       const emptyState = document.getElementById('emptyState');
@@ -247,9 +289,7 @@
       const { data: artists, error: artistError } = await client
         .from('artists')
         .select('id, name, stage_photo_path, stage_sound')
-        .in('id', artistIds);
-
-      console.log('Artists:', artists, artistError);
+        .in('id', artistIds); // [web:2748][web:2752]
 
       if (artistError) {
         console.error('artists error:', artistError);
@@ -275,7 +315,7 @@
         if (artist.stage_photo_path) {
           const { data: photoData } = client.storage
             .from('stage-photos')
-            .getPublicUrl(artist.stage_photo_path);
+            .getPublicUrl(artist.stage_photo_path); // [web:2725]
           if (photoData?.publicUrl) {
             photoUrl = photoData.publicUrl;
           }
@@ -296,6 +336,63 @@
         `;
 
         cardsGrid.appendChild(card);
+      });
+
+      // 4) Collab-Matches für die gesammelten Artists holen
+      const { data: matches, error: matchError } = await client
+        .from('artist_collab_matches')
+        .select('*')
+        .or(`artist_a_id.in.(${artistIds.join(',')}),artist_b_id.in.(${artistIds.join(',')})`); // [web:2746][web:2751]
+
+      const collabSection = document.getElementById('collabMatchesSection');
+      const collabList = document.getElementById('collabMatchesList');
+
+      if (matchError) {
+        console.error('artist_collab_matches error:', matchError);
+        return;
+      }
+
+      if (!matches || matches.length === 0) {
+        // keine Matches für diese Sammlung
+        return;
+      }
+
+      collabSection.style.display = 'block';
+      collabList.innerHTML = '';
+
+      matches.forEach(m => {
+        const row = document.createElement('div');
+        row.className = 'collab-row';
+
+        const names = document.createElement('div');
+        names.className = 'collab-names';
+
+        const aSpan = document.createElement('span');
+        aSpan.className = 'collab-name';
+        aSpan.textContent = m.artist_a_name;
+        aSpan.onclick = () => window.location.href = `Stage.html?artist_id=${m.artist_a_id}`;
+
+        const sep = document.createElement('span');
+        sep.className = 'collab-separator';
+        sep.textContent = '×';
+
+        const bSpan = document.createElement('span');
+        bSpan.className = 'collab-name';
+        bSpan.textContent = m.artist_b_name;
+        bSpan.onclick = () => window.location.href = `Stage.html?artist_id=${m.artist_b_id}`;
+
+        names.appendChild(aSpan);
+        names.appendChild(sep);
+        names.appendChild(bSpan);
+
+        const tag = document.createElement('div');
+        tag.className = 'collab-tag';
+        tag.textContent = 'Collab‑Match';
+
+        row.appendChild(names);
+        row.appendChild(tag);
+
+        collabList.appendChild(row);
       });
     }
 
