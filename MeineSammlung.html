@@ -43,7 +43,7 @@
     }
     .header-left .subtitle {
       font-size: 14px;
-      color: #a0a0a0;
+      color: #e5e7eb;
       margin-top: 4px;
     }
     .header-right {
@@ -363,12 +363,12 @@
 
           const collectedDate = sticker.collected_at
             ? new Date(sticker.collected_at).toLocaleDateString('de-DE')
-            : '';
+            : 'Datum unbekannt';
 
           slot.innerHTML = `
-            <img class="sticker-image" src="${photoUrl}" alt="${sticker.name}" />
+            <img class="sticker-image" src="${photoUrl}" alt="${sticker.name || 'Artist'}" />
             <div class="sticker-info">
-              <div class="sticker-name">${sticker.name}</div>
+              <div class="sticker-name">${sticker.name || 'Unbekannt'}</div>
               <div class="sticker-date">${collectedDate}</div>
             </div>
           `;
@@ -410,12 +410,12 @@
 
       document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
 
-      // 1) eigene Collections holen
+      // 1) eigene Collections holen (älteste zuerst = erste gesammelte zuerst)
       const { data: collections, error: collError } = await client
         .from('user_collections')
         .select('artist_id, collected_at')
         .eq('user_id', userId)
-        .order('collected_at', { ascending: false });
+        .order('collected_at', { ascending: true });
 
       const albumContainer = document.getElementById('albumContainer');
       const emptyState = document.getElementById('emptyState');
