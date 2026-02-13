@@ -14,7 +14,10 @@
       color: #f5f5f5;
       padding: 20px;
     }
-    .container { max-width: 900px; margin: 0 auto; }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
     .user-info {
       background: rgba(0, 0, 0, 0.5);
       padding: 12px 16px;
@@ -43,7 +46,11 @@
       color: #e5e7eb;
       margin-top: 4px;
     }
-    .header-right { display: flex; gap: 10px; flex-wrap: wrap; }
+    .header-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
     .header-button {
       padding: 10px 16px;
       border-radius: 999px;
@@ -60,35 +67,38 @@
       background: rgba(28, 255, 136, 0.2);
       transform: translateY(-2px);
     }
-    .album-actions {
-      display: none;
-      gap: 12px;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-bottom: 24px;
-    }
+
+    /* Album Page Container */
     .album-page {
       background: rgba(0, 0, 0, 0.7);
       border-radius: 20px;
       border: 2px solid rgba(28, 255, 136, 0.3);
       padding: 24px;
       min-height: 600px;
+      position: relative;
     }
+
     .page-header {
       text-align: center;
       margin-bottom: 20px;
       font-size: 14px;
       color: #a0a0a0;
     }
+
+    /* Sticker Grid (6 slots) */
     .sticker-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       margin-bottom: 24px;
     }
+
     @media (min-width: 600px) {
-      .sticker-grid { grid-template-columns: repeat(3, 1fr); }
+      .sticker-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
+
     .sticker-slot {
       aspect-ratio: 3/4;
       background: rgba(0, 0, 0, 0.5);
@@ -99,22 +109,35 @@
       overflow: hidden;
       cursor: pointer;
       transition: all 0.2s;
+      position: relative;
     }
+
     .sticker-slot.filled {
       border: 1px solid rgba(28, 255, 136, 0.4);
       background: rgba(0, 0, 0, 0.88);
     }
+
     .sticker-slot.filled:hover {
       transform: translateY(-4px);
       box-shadow: 0 0 20px rgba(28, 255, 136, 0.4);
     }
-    .sticker-image { width: 100%; flex: 1; object-fit: cover; display: block; }
+
+    .sticker-image {
+      width: 100%;
+      flex: 1;
+      object-fit: cover;
+      display: block;
+    }
+
     .sticker-info {
       padding: 8px;
       background: rgba(0, 0, 0, 0.95);
       text-align: center;
+      position: relative;
+      z-index: 10;
       flex-shrink: 0;
     }
+
     .sticker-name {
       font-size: 13px;
       font-weight: 700;
@@ -124,7 +147,12 @@
       text-overflow: ellipsis;
       color: #f5f5f5;
     }
-    .sticker-date { font-size: 10px; color: #a0a0a0; }
+
+    .sticker-date {
+      font-size: 10px;
+      color: #a0a0a0;
+    }
+
     .empty-slot-content {
       width: 100%;
       height: 100%;
@@ -134,12 +162,15 @@
       font-size: 48px;
       color: rgba(148, 163, 184, 0.3);
     }
+
+    /* Page Navigation */
     .page-nav {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
     }
+
     .page-nav button {
       padding: 8px 16px;
       border-radius: 999px;
@@ -150,15 +181,36 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .page-nav button:disabled { opacity: 0.3; cursor: default; }
+
+    .page-nav button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
     .page-nav button:not(:disabled):hover {
       background: rgba(28, 255, 136, 0.2);
       transform: translateY(-1px);
     }
-    .page-indicator { font-size: 13px; color: #a0a0a0; }
-    .empty-state { text-align: center; padding: 60px 20px; color: #a0a0a0; }
-    .empty-state h2 { font-size: 24px; margin-bottom: 12px; color: #f5f5f5; }
-    .empty-state p { font-size: 14px; margin-bottom: 24px; }
+
+    .page-indicator {
+      font-size: 13px;
+      color: #a0a0a0;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a0a0a0;
+    }
+    .empty-state h2 {
+      font-size: 24px;
+      margin-bottom: 12px;
+      color: #f5f5f5;
+    }
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
     .empty-state a {
       display: inline-block;
       padding: 12px 24px;
@@ -173,6 +225,8 @@
       transform: translateY(-2px);
       box-shadow: 0 0 20px rgba(28, 255, 136, 0.5);
     }
+
+    /* Collab-Matches */
     #collabMatchesSection {
       margin-top: 40px;
       padding-top: 20px;
@@ -186,10 +240,21 @@
       border-bottom: 1px dashed rgba(55, 65, 81, 0.6);
       font-size: 14px;
     }
-    .collab-row:last-child { border-bottom: none; }
-    .collab-names { display: flex; align-items: center; gap: 6px; }
-    .collab-name { color: #9effc7; cursor: pointer; }
-    .collab-separator { color: #a0a0a0; }
+    .collab-row:last-child {
+      border-bottom: none;
+    }
+    .collab-names {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .collab-name {
+      color: #9effc7;
+      cursor: pointer;
+    }
+    .collab-separator {
+      color: #a0a0a0;
+    }
     .collab-tag {
       font-size: 11px;
       color: #a0a0a0;
@@ -201,7 +266,9 @@
 </head>
 <body>
   <div class="container">
-    <div class="user-info" id="userInfo">Lädt...</div>
+    <div class="user-info" id="userInfo">
+      Lädt...
+    </div>
 
     <div class="header">
       <div class="header-left">
@@ -214,15 +281,14 @@
       </div>
     </div>
 
-    <div class="album-actions" id="albumActions">
-      <button class="header-button" onclick="openPlaylist()" style="padding: 12px 20px;">💚 UnterGrund Playlist folgen</button>
-      <button class="header-button" onclick="copyMyArtists()" style="padding: 12px 20px;">📋 Meine Artists kopieren</button>
-    </div>
-
     <div id="albumContainer" style="display:none;">
       <div class="album-page">
-        <div class="page-header"><div id="pageTitle">Seite 1</div></div>
+        <div class="page-header">
+          <div id="pageTitle">Seite 1</div>
+        </div>
+
         <div class="sticker-grid" id="stickerGrid"></div>
+
         <div class="page-nav">
           <button id="prevPageBtn" onclick="changePage(-1)">← Vorherige</button>
           <div class="page-indicator" id="pageIndicator">Seite 1 von 1</div>
@@ -237,6 +303,7 @@
       <a href="index.html">Zur Stage</a>
     </div>
 
+    <!-- Collab-Matches-Sektion -->
     <div id="collabMatchesSection" style="display:none;">
       <h2 style="font-size:20px; margin-bottom:8px;">🤝 Deine Collab‑Matches</h2>
       <p style="font-size:13px; color:#a0a0a0; margin-top:0; margin-bottom:16px;">
@@ -247,12 +314,11 @@
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
-    <script>
+  <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const PLAYLIST_URL = 'https://open.spotify.com/playlist/2aaOMrGTYr08MfOhrtK4QF';
     const STICKERS_PER_PAGE = 6;
     let allStickers = [];
     let currentPage = 1;
@@ -260,29 +326,6 @@
     async function logout() {
       await client.auth.signOut();
       window.location.href = 'Login.html';
-    }
-
-    function openPlaylist() {
-      window.open(PLAYLIST_URL, '_blank');
-    }
-
-    function copyMyArtists() {
-      if (allStickers.length === 0) {
-        alert('Du hast noch keine Artists gesammelt.');
-        return;
-      }
-      const artistList = allStickers.map(s => s.name).join('
-');
-      const fullText = `🎴 Meine ${allStickers.length} UnterGrund-Artists:
-
-${artistList}
-
-🎵 Entdeckt auf untergrund.app`;
-      navigator.clipboard.writeText(fullText).then(() => {
-        alert('✅ Artists kopiert!');
-      }).catch(() => {
-        alert(fullText);
-      });
     }
 
     function getTotalPages() {
@@ -295,48 +338,71 @@ ${artistList}
       const pageIndicator = document.getElementById('pageIndicator');
       const prevBtn = document.getElementById('prevPageBtn');
       const nextBtn = document.getElementById('nextPageBtn');
+
       const totalPages = getTotalPages();
       const startIdx = (currentPage - 1) * STICKERS_PER_PAGE;
       const endIdx = startIdx + STICKERS_PER_PAGE;
       const pageStickers = allStickers.slice(startIdx, endIdx);
+
       grid.innerHTML = '';
+
+      // Render 6 slots (filled or empty)
       for (let i = 0; i < STICKERS_PER_PAGE; i++) {
         const sticker = pageStickers[i];
         const slot = document.createElement('div');
+
         if (sticker) {
           slot.className = 'sticker-slot filled';
           slot.onclick = () => window.location.href = `Stage.html?artist_id=${sticker.artist_id}`;
+
           let photoUrl = 'https://via.placeholder.com/300x400?text=No+Photo';
           if (sticker.stage_photo_path) {
-            const { data: photoData } = client.storage.from('stage-photos').getPublicUrl(sticker.stage_photo_path);
-            if (photoData?.publicUrl) photoUrl = photoData.publicUrl;
+            const { data: photoData } = client.storage
+              .from('stage-photos')
+              .getPublicUrl(sticker.stage_photo_path);
+            if (photoData?.publicUrl) {
+              photoUrl = photoData.publicUrl;
+            }
           }
+
           const artistName = sticker.name || 'Unbekannt';
-          const collectedDate = sticker.collected_at ? new Date(sticker.collected_at).toLocaleDateString('de-DE') : 'Datum unbekannt';
+          const collectedDate = sticker.collected_at
+            ? new Date(sticker.collected_at).toLocaleDateString('de-DE')
+            : 'Datum unbekannt';
+
+          // Wichtig: Nicht innerHTML während des Ladens überschreiben
           const img = document.createElement('img');
           img.className = 'sticker-image';
           img.src = photoUrl;
           img.alt = artistName;
+
           const info = document.createElement('div');
           info.className = 'sticker-info';
+
           const nameDiv = document.createElement('div');
           nameDiv.className = 'sticker-name';
           nameDiv.textContent = artistName;
+
           const dateDiv = document.createElement('div');
           dateDiv.className = 'sticker-date';
           dateDiv.textContent = collectedDate;
+
           info.appendChild(nameDiv);
           info.appendChild(dateDiv);
+
           slot.appendChild(img);
           slot.appendChild(info);
         } else {
           slot.className = 'sticker-slot';
           slot.innerHTML = '<div class="empty-slot-content">?</div>';
         }
+
         grid.appendChild(slot);
       }
+
       pageTitle.textContent = `Seite ${currentPage}`;
       pageIndicator.textContent = `Seite ${currentPage} von ${totalPages}`;
+
       prevBtn.disabled = currentPage === 1;
       nextBtn.disabled = currentPage === totalPages;
     }
@@ -349,78 +415,134 @@ ${artistList}
 
     async function loadCollection() {
       const { data, error } = await client.auth.getSession();
-      if (error) console.error('getSession error:', error);
+      if (error) {
+        console.error('getSession error:', error);
+      }
+
       const session = data?.session || null;
       if (!session) {
         window.location.href = 'Login.html?from=collection';
         return;
       }
+
       const userId = session.user.id;
       const userEmail = session.user.email;
+
       document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
-      const { data: collections, error: collError } = await client.from('user_collections').select('artist_id, collected_at').eq('user_id', userId).order('collected_at', { ascending: true });
+
+      // 1) eigene Collections holen (älteste zuerst = erste gesammelte zuerst)
+      const { data: collections, error: collError } = await client
+        .from('user_collections')
+        .select('artist_id, collected_at')
+        .eq('user_id', userId)
+        .order('collected_at', { ascending: true });
+
       const albumContainer = document.getElementById('albumContainer');
       const emptyState = document.getElementById('emptyState');
       const cardCount = document.getElementById('cardCount');
-      const albumActions = document.getElementById('albumActions');
-      if (collError || !collections || collections.length === 0) {
+
+      if (collError) {
+        console.error('user_collections error:', collError);
         emptyState.style.display = 'block';
         cardCount.textContent = '(0)';
         return;
       }
+
+      if (!collections || collections.length === 0) {
+        emptyState.style.display = 'block';
+        cardCount.textContent = '(0)';
+        return;
+      }
+
       cardCount.textContent = `(${collections.length})`;
+
+      // 2) korrespondierende Artists holen
       const artistIds = collections.map(c => c.artist_id);
-      const { data: artists, error: artistError } = await client.from('artists').select('id, name, stage_photo_path').in('id', artistIds);
-      if (artistError || !artists) {
+      const { data: artists, error: artistError } = await client
+        .from('artists')
+        .select('id, name, stage_photo_path')
+        .in('id', artistIds);
+
+      if (artistError) {
+        console.error('artists error:', artistError);
         emptyState.style.display = 'block';
         return;
       }
+
       const artistMap = new Map();
-      artists.forEach(a => artistMap.set(a.id, a));
+      (artists || []).forEach(a => artistMap.set(a.id, a));
+
+      // 3) Sticker-Daten zusammenbauen
       allStickers = collections.map(item => {
         const artist = artistMap.get(item.artist_id);
         if (!artist) return null;
-        return { artist_id: artist.id, name: artist.name, stage_photo_path: artist.stage_photo_path, collected_at: item.collected_at };
+        return {
+          artist_id: artist.id,
+          name: artist.name,
+          stage_photo_path: artist.stage_photo_path,
+          collected_at: item.collected_at
+        };
       }).filter(s => s !== null);
-      if (allStickers.length > 0) {
-        albumActions.style.display = 'flex';
-      }
+
       albumContainer.style.display = 'block';
       renderPage();
+
+      // 4) Collab-Matches für die gesammelten Artists holen
       if (artistIds.length > 0) {
-        const { data: matches } = await client.from('artist_collab_matches').select('*').or(`artist_a_id.in.(${artistIds.join(',')}),artist_b_id.in.(${artistIds.join(',')})`);
-        if (matches && matches.length > 0) {
-          const collabSection = document.getElementById('collabMatchesSection');
-          const collabList = document.getElementById('collabMatchesList');
-          collabSection.style.display = 'block';
-          collabList.innerHTML = '';
-          matches.forEach(m => {
-            const row = document.createElement('div');
-            row.className = 'collab-row';
-            const names = document.createElement('div');
-            names.className = 'collab-names';
-            const aSpan = document.createElement('span');
-            aSpan.className = 'collab-name';
-            aSpan.textContent = m.artist_a_name;
-            aSpan.onclick = () => window.location.href = `Stage.html?artist_id=${m.artist_a_id}`;
-            const sep = document.createElement('span');
-            sep.className = 'collab-separator';
-            sep.textContent = '×';
-            const bSpan = document.createElement('span');
-            bSpan.className = 'collab-name';
-            bSpan.textContent = m.artist_b_name;
-            bSpan.onclick = () => window.location.href = `Stage.html?artist_id=${m.artist_b_id}`;
-            names.appendChild(aSpan);
-            names.appendChild(sep);
-            names.appendChild(bSpan);
-            const tag = document.createElement('div');
-            tag.className = 'collab-tag';
-            tag.textContent = 'Collab‑Match';
-            row.appendChild(names);
-            row.appendChild(tag);
-            collabList.appendChild(row);
-          });
+        const { data: matches, error: matchError } = await client
+          .from('artist_collab_matches')
+          .select('*')
+          .or(`artist_a_id.in.(${artistIds.join(',')}),artist_b_id.in.(${artistIds.join(',')})`);
+
+        const collabSection = document.getElementById('collabMatchesSection');
+        const collabList = document.getElementById('collabMatchesList');
+
+        if (matchError) {
+          console.error('artist_collab_matches error:', matchError);
+          return;
         }
+
+        if (!matches || matches.length === 0) {
+          return;
+        }
+
+        collabSection.style.display = 'block';
+        collabList.innerHTML = '';
+
+        matches.forEach(m => {
+          const row = document.createElement('div');
+          row.className = 'collab-row';
+
+          const names = document.createElement('div');
+          names.className = 'collab-names';
+
+          const aSpan = document.createElement('span');
+          aSpan.className = 'collab-name';
+          aSpan.textContent = m.artist_a_name;
+          aSpan.onclick = () => window.location.href = `Stage.html?artist_id=${m.artist_a_id}`;
+
+          const sep = document.createElement('span');
+          sep.className = 'collab-separator';
+          sep.textContent = '×';
+
+          const bSpan = document.createElement('span');
+          bSpan.className = 'collab-name';
+          bSpan.textContent = m.artist_b_name;
+          bSpan.onclick = () => window.location.href = `Stage.html?artist_id=${m.artist_b_id}`;
+
+          names.appendChild(aSpan);
+          names.appendChild(sep);
+          names.appendChild(bSpan);
+
+          const tag = document.createElement('div');
+          tag.className = 'collab-tag';
+          tag.textContent = 'Collab‑Match';
+
+          row.appendChild(names);
+          row.appendChild(tag);
+
+          collabList.appendChild(row);
+        });
       }
     }
 
