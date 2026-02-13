@@ -68,6 +68,32 @@
       transform: translateY(-2px);
     }
 
+    /* Playlist Actions */
+    .album-actions {
+      display: none;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    /* Playlist Status Box */
+    .playlist-status {
+      margin: 0 auto 24px;
+      max-width: 500px;
+      text-align: center;
+      padding: 16px;
+      background: rgba(28, 255, 136, 0.1);
+      border-radius: 12px;
+      font-size: 14px;
+      color: #9effc7;
+      display: none;
+      border: 1px solid rgba(28, 255, 136, 0.3);
+    }
+    .playlist-status strong {
+      color: #1cff88;
+    }
+
     /* Album Page Container */
     .album-page {
       background: rgba(0, 0, 0, 0.7);
@@ -281,6 +307,19 @@
       </div>
     </div>
 
+    <!-- Playlist Actions (nur ab 3 Karten) -->
+    <div class="album-actions" id="albumActions">
+      <button class="header-button" onclick="followOfficialPlaylist()" style="padding: 12px 20px;">
+        💚 UnterGrund Playlist folgen
+      </button>
+      <button class="header-button" onclick="copyMyArtists()" style="padding: 12px 20px;">
+        📋 Meine Artists kopieren
+      </button>
+    </div>
+
+    <!-- Playlist Status (Unlock-Progress oder Success) -->
+    <div class="playlist-status" id="playlistStatus"></div>
+
     <div id="albumContainer" style="display:none;">
       <div class="album-page">
         <div class="page-header">
@@ -319,7 +358,10 @@
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const OFFICIAL_PLAYLIST_URL = 'https://open.spotify.com/playlist/2aaOMrGTYr08MfOhrtK4QF';
+    const UNLOCK_THRESHOLD = 3; // Anzahl Karten für Playlist-Unlock
     const STICKERS_PER_PAGE = 6;
+    
     let allStickers = [];
     let currentPage = 1;
 
@@ -330,6 +372,102 @@
 
     function getTotalPages() {
       return Math.ceil(allStickers.length / STICKERS_PER_PAGE);
+    }
+
+    function checkPlaylistUnlock() {
+      const albumActions = document.getElementById('albumActions');
+      const playlistStatus = document.getElementById('playlistStatus');
+      
+      if (allStickers.length === 0) {
+        playlistStatus.style.display = 'none';
+        return;
+      }
+      
+      if (allStickers.length >= UNLOCK_THRESHOLD) {
+        // 🎉 UNLOCKED
+        albumActions.style.display = 'flex';
+        
+        // Check ob User gerade die 3. Karte gesammelt hat
+        const justUnlocked = localStorage.getItem('playlist_unlocked') !== 'true';
+        
+        if (justUnlocked) {
+          localStorage.setItem('playlist_unlocked', 'true');
+          
+          // Achievement-Notification
+          playlistStatus.style.display = 'block';
+          playlistStatus.innerHTML = 
+            '🎉 <strong>Playlist freigeschaltet!</strong><br>' +
+            '<small style="color: #e5e7eb;">Du hast ' + allStickers.length + ' Karten gesammelt – die offizielle UnterGrund-Playlist ist jetzt verfügbar!</small>';
+          
+          // Nach 8 Sekunden ausblenden
+          setTimeout(() => {
+            playlistStatus.style.display = 'none';
+          }, 8000);
+        }
+        
+      } else {
+        // 🔒 LOCKED
+        const remaining = UNLOCK_THRESHOLD - allStickers.length;
+        
+        albumActions.style.display = 'none';
+        playlistStatus.style.display = 'block';
+        playlistStatus.innerHTML = 
+          '🔒 <strong>Playlist noch nicht freigeschaltet</strong><br>' +
+          '<small style="color: #e5e7eb;">Sammle noch ' + remaining + ' Karte' + (remaining > 1 ? 'n' : '') + 
+          ', um die offizielle UnterGrund-Playlist zu entsperren!</small>';
+      }
+    }
+
+    function followOfficialPlaylist() {
+      window.open(OFFICIAL_PLAYLIST_URL, '_blank');
+      
+      const status = document.getElementById('playlistStatus');
+      status.style.display = 'block';
+      status.innerHTML = 
+        '💚 <strong>Playlist geöffnet!</strong><br>' +
+        '<small style="color: #e5e7eb;">Klicke in Spotify auf "Folgen". Die Playlist wird regelmäßig mit neuen Artists aktualisiert.</small>';
+      
+      setTimeout(() => {
+        status.style.display = 'none';
+      }, 5000);
+    }
+
+    function copyMyArtists() {
+      const status = document.getElementById('playlistStatus');
+      
+      if (allStickers.length === 0) {
+        status.style.display = 'block';
+        status.innerHTML = '⚠️ <strong>Du hast noch keine Artists gesammelt.</strong>';
+        return;
+      }
+      
+      const artistList = allStickers
+        .map(s => s.name)
+        .join('
+');
+      
+      const fullText = 
+        `🎴 Meine ${allStickers.length} UnterGrund-Artists:
+
+` +
+        artistList +
+        `
+
+🎵 Entdeckt auf untergrund.app`;
+      
+      navigator.clipboard.writeText(fullText).then(() => {
+        status.style.display = 'block';
+        status.innerHTML = 
+          '✅ <strong>Artists kopiert!</strong><br>' +
+          '<small style="color: #e5e7eb;">Jetzt in Spotify einfügen und deine Playlist erstellen.</small>';
+        
+        setTimeout(() => {
+          status.style.display = 'none';
+        }, 5000);
+      }).catch(() => {
+        alert(fullText);
+        status.innerHTML = '📋 <strong>Artist-Liste angezeigt!</strong>';
+      });
     }
 
     function renderPage() {
@@ -346,7 +484,6 @@
 
       grid.innerHTML = '';
 
-      // Render 6 slots (filled or empty)
       for (let i = 0; i < STICKERS_PER_PAGE; i++) {
         const sticker = pageStickers[i];
         const slot = document.createElement('div');
@@ -370,7 +507,6 @@
             ? new Date(sticker.collected_at).toLocaleDateString('de-DE')
             : 'Datum unbekannt';
 
-          // Wichtig: Nicht innerHTML während des Ladens überschreiben
           const img = document.createElement('img');
           img.className = 'sticker-image';
           img.src = photoUrl;
@@ -430,7 +566,6 @@
 
       document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
 
-      // 1) eigene Collections holen (älteste zuerst = erste gesammelte zuerst)
       const { data: collections, error: collError } = await client
         .from('user_collections')
         .select('artist_id, collected_at')
@@ -456,7 +591,6 @@
 
       cardCount.textContent = `(${collections.length})`;
 
-      // 2) korrespondierende Artists holen
       const artistIds = collections.map(c => c.artist_id);
       const { data: artists, error: artistError } = await client
         .from('artists')
@@ -472,7 +606,6 @@
       const artistMap = new Map();
       (artists || []).forEach(a => artistMap.set(a.id, a));
 
-      // 3) Sticker-Daten zusammenbauen
       allStickers = collections.map(item => {
         const artist = artistMap.get(item.artist_id);
         if (!artist) return null;
@@ -484,10 +617,13 @@
         };
       }).filter(s => s !== null);
 
+      // ✅ Check Playlist-Unlock
+      checkPlaylistUnlock();
+
       albumContainer.style.display = 'block';
       renderPage();
 
-      // 4) Collab-Matches für die gesammelten Artists holen
+      // Collab-Matches
       if (artistIds.length > 0) {
         const { data: matches, error: matchError } = await client
           .from('artist_collab_matches')
