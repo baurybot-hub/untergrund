@@ -190,9 +190,15 @@
 
         setStatus("Zugang erfolgreich. Weiterleitung …", "success");
 
-        // Weiterleitung zu StageFormular.html mit artist_id
-        const targetUrl = `StageFormular.html?artist_id=${encodeURIComponent(data.id)}`;
-        window.location.href = targetUrl;
+// Login-Zeit + Artist-ID im Browser merken
+const now = Date.now();
+sessionStorage.setItem("stage_access_granted", "true");
+sessionStorage.setItem("stage_artist_id", String(data.id));
+sessionStorage.setItem("stage_login_time", String(now));
+
+// Ohne artist_id in der URL weiterleiten – ID kommt nur noch aus sessionStorage
+window.location.href = "StageFormular.html";
+
       } catch (e) {
         console.error(e);
         setStatus("Unerwarteter Fehler beim Login.", "error");
