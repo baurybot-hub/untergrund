@@ -345,7 +345,6 @@
 
       const session = data?.session || null;
       if (!session) {
-        // nicht eingeloggt -> zurück zum Login mit Hinweis
         window.location.href = 'Login.html?from=stats';
         return;
       }
@@ -356,8 +355,8 @@
         userInfo.textContent = `Eingeloggt als ${userEmail}`;
       }
 
-      // 1) Prüfen, wie viele Karten der User gesammelt hat
-      const {  collections, error: collError } = await client
+      // 1) Karten zählen
+      const { data: collections, error: collError } = await client
         .from('user_collections')
         .select('id')
         .eq('user_id', userId);
@@ -370,21 +369,21 @@
       }
 
       const cardCount = collections ? collections.length : 0;
+      console.log('Stats: cardCount =', cardCount);
 
       if (cardCount < 12) {
-        // Stats noch gesperrt
         lockedState.style.display = 'block';
         return;
       }
 
-      // 2) Stats sind freigeschaltet -> Highscore laden
+      // 2) Stats freigeschaltet -> Highscore laden
       lockedState.style.display = 'none';
       statsCard.style.display = 'block';
 
-      const {  topArtists, error: artistError } = await client
+      const { data: topArtists, error: artistError } = await client
         .from('artists')
         .select('id, name, focusscore')
-        .order('focusscore', { ascending: false, nullsFirst: false })
+        .order('focusscore', { ascending: false })
         .limit(10);
 
       if (artistError) {
@@ -393,6 +392,7 @@
         return;
       }
 
+      console.log('Stats: topArtists =', topArtists);
       renderHighscore(topArtists || []);
     }
 
