@@ -285,15 +285,28 @@
 
 <!-- HIER: Playlist-Embed über dem Album -->
     <div id="playlistEmbedWrapper" style="display:none; margin-bottom:24px;">
-      <iframe
-        style="border-radius:12px"
-        src="https://open.spotify.com/embed/playlist/2aaOMrGTYr08MfOhrtK4QF?utm_source=generator&theme=0"
-        width="100%"
-        height="352"
-        frameborder="0"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-        loading="lazy">
-      </iframe>
+      <div style="
+        border-radius:12px;
+        background:rgba(0,0,0,0.6);
+        border:1px solid rgba(28,255,136,0.4);
+        padding:16px;
+        text-align:center;
+        font-size:14px;
+      ">
+        Eine kuratierte UnterGrund‑Playlist mit Artists,
+        die hier im Album auftauchen können.
+        <br><br>
+        <button onclick="openPlaylist()" style="
+          padding:8px 16px;
+          border-radius:999px;
+          border:1px solid rgba(28,255,136,0.4);
+          background:rgba(28,255,136,0.15);
+          color:#9effc7;
+          cursor:pointer;
+        ">
+          UnterGrund‑Playlist auf Spotify öffnen
+        </button>
+      </div>
     </div>
     
     <div id="albumContainer" style="display:none;">
@@ -333,6 +346,12 @@
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    function openPlaylist() {
+      window.open(
+        'https://open.spotify.com/playlist/2aaOMrGTYr08MfOhrtK4QF',
+        '_blank'
+      );
+    }
 
     const STICKERS_PER_PAGE = 6;
     let allStickers = [];
@@ -513,8 +532,8 @@ allStickers = collections.map(item => {
   };
 });
 
-      // Embed nur anzeigen, wenn Karten vorhanden sind
-      if (allStickers.length > 1) {
+     // Playlist‑Hinweis erst ab z.B. 3 Karten zeigen
+      if (allStickers.length >= 2) {
         const embed = document.getElementById('playlistEmbedWrapper');
         if (embed) embed.style.display = 'block';
       }
