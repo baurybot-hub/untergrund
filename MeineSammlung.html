@@ -472,17 +472,28 @@
       const artistMap = new Map();
       (artists || []).forEach(a => artistMap.set(a.id, a));
 
-      // 3) Sticker-Daten zusammenbauen
-      allStickers = collections.map(item => {
-        const artist = artistMap.get(item.artist_id);
-        if (!artist) return null;
-        return {
-          artist_id: artist.id,
-          name: artist.name,
-          stage_photo_path: artist.stage_photo_path,
-          collected_at: item.collected_at
-        };
-      }).filter(s => s !== null);
+      // 3) Sticker-Daten zusammenbauen (mit Fallback)
+allStickers = collections.map(item => {
+  const artist = artistMap.get(item.artist_id);
+
+  if (!artist) {
+    console.warn('Artist nicht gefunden für artist_id:', item.artist_id, 'collection:', item);
+    return {
+      artist_id: item.artist_id,
+      name: 'Unbekannter Artist',
+      stage_photo_path: null,
+      collected_at: item.collected_at
+    };
+  }
+
+  return {
+    artist_id: artist.id,
+    name: artist.name,
+    stage_photo_path: artist.stage_photo_path,
+    collected_at: item.collected_at
+  };
+});
+
 
       albumContainer.style.display = 'block';
       renderPage();
