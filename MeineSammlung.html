@@ -343,6 +343,8 @@
       const startIdx = (currentPage - 1) * STICKERS_PER_PAGE;
       const endIdx = startIdx + STICKERS_PER_PAGE;
       const pageStickers = allStickers.slice(startIdx, endIdx);
+      console.log('pageStickers', pageStickers);
+
 
       grid.innerHTML = '';
 
