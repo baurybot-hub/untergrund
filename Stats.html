@@ -319,7 +319,7 @@
 
         const scoreTd = document.createElement('td');
         scoreTd.className = 'score-col';
-        const score = artist.focusscore ?? 0;
+        const score = artist.focus_score ?? 0;
         scoreTd.textContent = score;
 
         tr.appendChild(posTd);
@@ -382,8 +382,8 @@
 
       const { data: topArtists, error: artistError } = await client
         .from('artists')
-        .select('id, name, focusscore')
-        .order('focusscore', { ascending: false })
+        .select('id, name, focus_score')
+        .order('focus_score', { ascending: false })
         .limit(10);
 
       if (artistError) {
