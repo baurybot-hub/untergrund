@@ -125,6 +125,12 @@
       font-size: 12px;
       color: #a0a0a0;
     }
+    .save-hint {
+      font-size: 12px;
+      color: #fbbf24;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -132,7 +138,7 @@
     <div class="logo">UnterGrund Gate</div>
     <h1>Secret Gate öffnen</h1>
     <div class="subtitle">
-      Knack den Code, beschreibe dein Gate-Artwork und gestalte deine erste Gate-Karte.
+      Knack den Code und gestalte eine Gate-Karte, die sich in den UnterGrund mischen kann.
     </div>
 
     <div class="field">
@@ -145,10 +151,14 @@
     <div id="gateStatus" class="status"></div>
 
     <div id="gateContent" style="display:none; margin-top:24px;">
+      <!-- Story / Lore zur Karte -->
       <div class="field">
-        <label for="gatePrompt">Beschreibe dein Gate-Artwork</label>
+        <label for="gatePrompt">Erzähl uns etwas über die Karte</label>
         <textarea id="gatePrompt" rows="3" maxlength="240"
-          placeholder="Z.B. düsterer Tunnel, Neonlichter, verzerrte Gesichter ..."></textarea>
+          placeholder="Was ist ihre Rolle, Funktion oder ihr Skill im UnterGrund?"></textarea>
+        <div class="hint">
+          Kein KI-Prompt. Beschreib in 2–3 Sätzen, was diese Karte ausmacht.
+        </div>
         <div id="gatePromptCounter" class="char-counter">0 / 240</div>
       </div>
 
@@ -157,40 +167,49 @@
 
         <div class="field">
           <label for="gateCardName">Name der Karte</label>
-          <input id="gateCardName" type="text" maxlength="50"
+          <input id="gateCardName" type="text" maxlength="30"
                  placeholder="Name deiner Gate-Karte">
+          <div class="hint">Max. 30 Zeichen. Kurz, prägnant, merkbar.</div>
         </div>
 
         <div class="field">
-          <label for="gateCardDescription">Kurzbeschreibung</label>
+          <label for="gateCardDescription">Kurzbeschreibung (kein KI-Prompt)</label>
           <textarea id="gateCardDescription" maxlength="140" rows="2"
-            placeholder="Ein Satz, der deine Karte beschreibt."></textarea>
+            placeholder="Ein Satz, wie sich die Karte anfühlt oder was sie kann."></textarea>
           <div id="gateDescCounter" class="char-counter">0 / 140</div>
         </div>
 
         <div class="field">
-          <label>Mood / Vibe (3 Wörter, optional)</label>
-          <input id="gateMood1" type="text" maxlength="20" placeholder="Mood / Vibe 1">
-          <input id="gateMood2" type="text" maxlength="20" placeholder="Mood / Vibe 2">
-          <input id="gateMood3" type="text" maxlength="20" placeholder="Mood / Vibe 3">
+          <label>Vibes / Mood (3 kurze Wörter)</label>
+          <div class="hint">
+            Drei Vibes, die die Karte beschreiben (1–2 Wörter). Beispiele: neon, melancholisch, dreckig, hopeful.
+          </div>
+          <input id="gateMood1" type="text" maxlength="18" placeholder="Vibe 1 (z.B. neon)">
+          <input id="gateMood2" type="text" maxlength="18" placeholder="Vibe 2 (z.B. melancholisch)">
+          <input id="gateMood3" type="text" maxlength="18" placeholder="Vibe 3 (z.B. dreckig)">
         </div>
 
         <div class="field">
           <label for="gateCity">Herkunft / City (optional)</label>
-          <input id="gateCity" type="text" maxlength="30"
-                 placeholder="z.B. Berlin oder Neonhafen">
+          <input id="gateCity" type="text" maxlength="24"
+                 placeholder="z.B. Berlin, Ruhrpott oder Neonhafen">
+          <div class="hint">Echte City oder Fantasie-Ort, max. 24 Zeichen.</div>
         </div>
 
         <div class="field">
-          <button id="generateImageButton">Bild generieren (Mock)</button>
+          <button id="generateImageButton">Bild generieren – Vorschau 1/3 (Mock)</button>
         </div>
 
         <div id="gateImagePreview" class="image-preview">
-          Hier wird später dein KI-Bild angezeigt.
+          Hier wird später dein KI-Bild angezeigt. Du hast später maximal 3 Bild-Vorschauen.
         </div>
 
         <div class="field">
-          <button id="saveGateCardButton">Gate-Karte testen/speichern (Mock)</button>
+          <div class="save-hint">
+            Diese Karte könnte sich morgen im UnterGrund mischen und gesammelt werden.<br>
+            Du kannst pro Tag nur eine Gate-Karte fest speichern. Kein erneutes Erstellen.
+          </div>
+          <button id="saveGateCardButton">Gate-Karte endgültig festlegen (Mock)</button>
         </div>
 
         <div id="saveStatus" class="status"></div>
@@ -220,6 +239,9 @@
     const gateImagePreview = document.getElementById('gateImagePreview');
     const saveGateCardButton = document.getElementById('saveGateCardButton');
     const saveStatus = document.getElementById('saveStatus');
+
+    let previewCount = 0;
+    const maxPreviews = 3;
 
     function setGateStatus(msg, type = '') {
       gateStatus.textContent = msg;
@@ -267,19 +289,32 @@
       gateDescCounter.textContent = gateCardDescription.value.length + ' / 140';
     });
 
-    // Mock: Bild generieren
+    // Mock: Bild generieren mit 1/3 Vorschau-Logik
     generateImageButton.addEventListener('click', () => {
+      if (previewCount >= maxPreviews) {
+        gateImagePreview.textContent = 'Du hast alle 3 Bild-Vorschauen genutzt (Mock).';
+        return;
+      }
+
+      previewCount += 1;
       generateImageButton.disabled = true;
-      gateImagePreview.textContent = 'Generiere Mock-Gate-Bild ...';
+      generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount}/${maxPreviews} (Mock)`;
+      gateImagePreview.textContent = `Generiere Mock-Gate-Bild (${previewCount}/${maxPreviews}) ...`;
 
       setTimeout(() => {
-        const promptText = gatePrompt.value.trim() || 'kein Prompt angegeben';
-        gateImagePreview.textContent = 'MOCK: [Gate-Artwork basierend auf deinem Prompt: "' + promptText + '"]';
-        generateImageButton.disabled = false;
+        const promptText = gatePrompt.value.trim() || 'kein Lore-Text angegeben';
+        gateImagePreview.textContent =
+          `MOCK: [Gate-Artwork Vorschau ${previewCount}/${maxPreviews} basierend auf deiner Beschreibung: "` +
+          promptText + '"]';
+
+        generateImageButton.disabled = previewCount >= maxPreviews;
+        if (previewCount >= maxPreviews) {
+          generateImageButton.textContent = `Keine weiteren Vorschauen möglich (${previewCount}/${maxPreviews})`;
+        }
       }, 1200);
     });
 
-    // Simple Validierung und Mock-Speichern
+    // Simple Validierung und Mock-Speichern (endgültig)
     saveGateCardButton.addEventListener('click', () => {
       const name = gateCardName.value.trim();
       const desc = gateCardDescription.value.trim();
@@ -292,13 +327,18 @@
       const cardData = {
         name,
         description: desc,
-        prompt: gatePrompt.value.trim(),
+        lore: gatePrompt.value.trim(),
         moods: [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean),
-        city: gateCity.value.trim()
+        city: gateCity.value.trim(),
+        previewsUsed: previewCount
       };
 
-      console.log('Gate Card Mock:', cardData);
-      setSaveStatus('Gate-Karte (Mock) gespeichert. Check die Console.', 'success');
+      console.log('Gate Card FINAL Mock:', cardData);
+      setSaveStatus(
+        'Gate-Karte fest gespeichert (Mock). Stell dir vor, sie kann sich ab jetzt im UnterGrund mischen.',
+        'success'
+      );
+      saveGateCardButton.disabled = true;
     });
   </script>
 </body>
