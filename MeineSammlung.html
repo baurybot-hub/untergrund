@@ -351,6 +351,8 @@
       // Render 6 slots (filled or empty)
       for (let i = 0; i < STICKERS_PER_PAGE; i++) {
         const sticker = pageStickers[i];
+        console.log('slot', i, sticker);
+
         const slot = document.createElement('div');
 
         if (sticker) {
