@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>UnterGrund Stats</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #0f172a 0%, #020617 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #e5e7eb;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header-left h1 {
+      margin: 0;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .header-left .subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pill-btn:hover {
+      border-color: #22c55e;
+      color: #bbf7d0;
+      transform: translateY(-1px);
+    }
+
+    .stats-card {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 18px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+      padding: 18px 18px 16px;
+    }
+
+    .stats-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .stats-title {
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #9ca3af;
+    }
+
+    .stats-meta {
+      font-size: 12px;
+      color: #6b7280;
+      text-align: right;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(34, 197, 94, 0.6);
+      background: rgba(22, 163, 74, 0.12);
+      font-size: 11px;
+      color: #bbf7d0;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    /* Highscore-Tabelle */
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 13px;
+    }
+
+    .score-table thead {
+      background: linear-gradient(90deg, rgba(15,23,42,0.9), rgba(22,163,74,0.18));
+    }
+
+    .score-table th,
+    .score-table td {
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    .score-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9ca3af;
+    }
+
+    .score-table tbody tr:nth-child(2n) {
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    .score-table tbody tr:nth-child(2n+1) {
+      background: rgba(17, 24, 39, 0.9);
+    }
+
+    .score-table tbody tr:first-child {
+      background: radial-gradient(circle at left, rgba(34,197,94,0.35), rgba(17,24,39,0.95));
+      border-top: 1px solid rgba(34,197,94,0.6);
+    }
+
+    .score-table tbody tr:nth-child(2) {
+      background: radial-gradient(circle at left, rgba(96,165,250,0.3), rgba(17,24,39,0.95));
+    }
+
+    .score-table tbody tr:nth-child(3) {
+      background: radial-gradient(circle at left, rgba(249,115,22,0.3), rgba(17,24,39,0.95));
+    }
+
+    .pos-col {
+      width: 48px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #9ca3af;
+    }
+
+    .pos-col span {
+      display: inline-block;
+      min-width: 30px;
+    }
+
+    .artist-col {
+      font-weight: 500;
+      color: #e5e7eb;
+    }
+
+    .artist-link {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .artist-link:hover {
+      color: #22c55e;
+      text-decoration: underline;
+    }
+
+    .score-col {
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #a5b4fc;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    .empty-state strong {
+      color: #e5e7eb;
+    }
+
+    .error-box {
+      margin-top: 16px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(127,29,29,0.2);
+      border: 1px solid rgba(248,113,113,0.6);
+      color: #fecaca;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="header-left">
+        <div>
+          <h1>📊 UnterGrund Stats</h1>
+          <div class="subtitle">Highscore der beliebtesten Artists nach Focus‑Points</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <a href="MeineSammlung.html" class="pill-btn">← Zurück zum Album</a>
+        <button class="pill-btn" onclick="logout()">Abmelden</button>
+      </div>
+    </div>
+
+    <div id="statsCard" class="stats-card" style="display:none;">
+      <div class="stats-header">
+        <div class="stats-title">Top 10 Focus‑Ranking</div>
+        <div class="stats-meta">
+          <div class="badge">Freigeschaltet ab 12 Karten</div>
+          <div id="userInfo" style="margin-top:4px;"></div>
+        </div>
+      </div>
+
+      <table class="score-table">
+        <thead>
+          <tr>
+            <th class="pos-col">Platz</th>
+            <th>Artist</th>
+            <th class="score-col">Focus‑Score</th>
+          </tr>
+        </thead>
+        <tbody id="scoreBody">
+          <!-- dynamic rows -->
+        </tbody>
+      </table>
+
+      <div id="errorBox" class="error-box" style="display:none;"></div>
+    </div>
+
+    <div id="lockedState" class="empty-state" style="display:none;">
+      <strong>UnterGrund Stats sind noch gesperrt.</strong>
+      <br><br>
+      Sammle mindestens 12 Karten in deinem Album, um die Highscore‑Ansicht freizuschalten.
+      <br><br>
+      <a href="MeineSammlung.html" class="pill-btn" style="text-decoration:none;">Mein Album ansehen</a>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+  <script>
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function logout() {
+      await client.auth.signOut();
+      window.location.href = 'Login.html';
+    }
+
+    function showError(message) {
+      const box = document.getElementById('errorBox');
+      if (!box) return;
+      box.textContent = message;
+      box.style.display = 'block';
+    }
+
+    function renderHighscore(artists) {
+      const tbody = document.getElementById('scoreBody');
+      tbody.innerHTML = '';
+
+      if (!artists || artists.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 3;
+        td.style.textAlign = 'center';
+        td.style.padding = '18px 10px';
+        td.textContent = 'Noch keine Focus‑Daten vorhanden.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      artists.forEach((artist, index) => {
+        const tr = document.createElement('tr');
+
+        const posTd = document.createElement('td');
+        posTd.className = 'pos-col';
+        const posSpan = document.createElement('span');
+        posSpan.textContent = '#' + (index + 1);
+        posTd.appendChild(posSpan);
+
+        const nameTd = document.createElement('td');
+        nameTd.className = 'artist-col';
+        const link = document.createElement('a');
+        link.className = 'artist-link';
+        link.textContent = artist.name || 'Unbekannter Artist';
+        link.href = `Stage.html?artist_id=${artist.id}`;
+        nameTd.appendChild(link);
+
+        const scoreTd = document.createElement('td');
+        scoreTd.className = 'score-col';
+        const score = artist.focusscore ?? 0;
+        scoreTd.textContent = score;
+
+        tr.appendChild(posTd);
+        tr.appendChild(nameTd);
+        tr.appendChild(scoreTd);
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function initStats() {
+      const { data, error } = await client.auth.getSession();
+      const lockedState = document.getElementById('lockedState');
+      const statsCard = document.getElementById('statsCard');
+      const userInfo = document.getElementById('userInfo');
+
+      if (error) {
+        console.error('getSession error:', error);
+        showError('Fehler beim Prüfen der Session.');
+        lockedState.style.display = 'block';
+        return;
+      }
+
+      const session = data?.session || null;
+      if (!session) {
+        // nicht eingeloggt -> zurück zum Login mit Hinweis
+        window.location.href = 'Login.html?from=stats';
+        return;
+      }
+
+      const userId = session.user.id;
+      const userEmail = session.user.email;
+      if (userInfo) {
+        userInfo.textContent = `Eingeloggt als ${userEmail}`;
+      }
+
+      // 1) Prüfen, wie viele Karten der User gesammelt hat
+      const {  collections, error: collError } = await client
+        .from('user_collections')
+        .select('id')
+        .eq('user_id', userId);
+
+      if (collError) {
+        console.error('user_collections error:', collError);
+        showError('Fehler beim Laden deiner Sammlung.');
+        lockedState.style.display = 'block';
+        return;
+      }
+
+      const cardCount = collections ? collections.length : 0;
+
+      if (cardCount < 12) {
+        // Stats noch gesperrt
+        lockedState.style.display = 'block';
+        return;
+      }
+
+      // 2) Stats sind freigeschaltet -> Highscore laden
+      lockedState.style.display = 'none';
+      statsCard.style.display = 'block';
+
+      const {  topArtists, error: artistError } = await client
+        .from('artists')
+        .select('id, name, focusscore')
+        .order('focusscore', { ascending: false, nullsFirst: false })
+        .limit(10);
+
+      if (artistError) {
+        console.error('artists highscore error:', artistError);
+        showError('Fehler beim Laden der UnterGrund‑Stats.');
+        return;
+      }
+
+      renderHighscore(topArtists || []);
+    }
+
+    initStats();
+  </script>
+</body>
+</html>
