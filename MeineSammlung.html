@@ -331,6 +331,9 @@
         <button id="themeButton" class="header-button" style="display:none;" onclick="openThemeModal()">
           🎨 Album-Design
         </button>
+        <a id="statsLink" href="Stats.html" class="header-button" style="display:none;">
+          📊 UnterGrund Stats
+        </a>
         <button class="header-button" onclick="logout()">Ausloggen</button>
       </div>
     </div>
@@ -726,7 +729,7 @@
         };
       });
 
-      // Playlist‑Hinweis erst ab z.B. 2 Karten zeigen
+            // Playlist‑Hinweis erst ab z.B. 2 Karten zeigen
       if (allStickers.length >= 2) {
         const embed = document.getElementById('playlistEmbedWrapper');
         if (embed) embed.style.display = 'block';
@@ -749,6 +752,20 @@
           }
         }
       }
+
+      // UnterGrund Stats ab 12 Karten freischalten
+      if (allStickers.length >= 12) {
+        const statsLink = document.getElementById('statsLink');
+        if (statsLink) statsLink.style.display = 'inline-block';
+
+        const hasSeenStatsUnlock = localStorage.getItem('untergrund-unlock-stats');
+        if (!hasSeenStatsUnlock) {
+          alert('Glückwunsch! Du hast die UnterGrund Stats freigespielt.');
+          throwConfetti();
+          localStorage.setItem('untergrund-unlock-stats', 'true');
+        }
+      }
+
 
       // 4) Collab-Matches für die gesammelten Artists holen
       if (artistIds.length > 0) {
