@@ -6,7 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; }
-    body {
+
+    /* Theme-Varianten */
+    body.theme-standard {
       margin: 0;
       min-height: 100vh;
       background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
@@ -14,6 +16,23 @@
       color: #f5f5f5;
       padding: 20px;
     }
+    body.theme-neon-pink {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #ec4899 0%, #1e0a2e 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+      padding: 20px;
+    }
+    body.theme-dark-gold {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #f59e0b 0%, #1c0f05 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+      padding: 20px;
+    }
+
     .container {
       max-width: 900px;
       margin: 0 auto;
@@ -94,51 +113,49 @@
     }
 
     @media (min-width: 600px) {
-  .sticker-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+      .sticker-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
 
-.sticker-slot {
-  aspect-ratio: 3/4;
-  background: rgba(0, 0, 0, 0.5);
-  border-radius: 12px;
-  border: 1px dashed rgba(148, 163, 184, 0.4);
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.2s;
-}
+    .sticker-slot {
+      aspect-ratio: 3/4;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-.sticker-slot.filled {
-  border: 1px solid rgba(28, 255, 136, 0.4);
-  background: rgba(0, 0, 0, 0.88);
-}
+    .sticker-slot.filled {
+      border: 1px solid rgba(28, 255, 136, 0.4);
+      background: rgba(0, 0, 0, 0.88);
+    }
 
-.sticker-slot.filled:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 0 20px rgba(28, 255, 136, 0.4);
-}
+    .sticker-slot.filled:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 20px rgba(28, 255, 136, 0.4);
+    }
 
-.sticker-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
+    .sticker-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
 
-.sticker-info {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: 8px;
-  background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.4));
-  text-align: center;
-  z-index: 5;
-}
-
-
+    .sticker-info {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 8px;
+      background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.4));
+      text-align: center;
+      z-index: 5;
+    }
 
     .sticker-name {
       font-size: 13px;
@@ -264,6 +281,38 @@
       border-radius: 999px;
       border: 1px solid rgba(156, 163, 175, 0.6);
     }
+
+    /* Konfetti-Animation */
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background: #1cff88;
+      animation: confetti-fall 3s linear forwards;
+      z-index: 250;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+      }
+    }
+
+    .confetti:nth-child(2n) { background: #ec4899; animation-duration: 3.5s; }
+    .confetti:nth-child(3n) { background: #f59e0b; animation-duration: 2.8s; }
+    .confetti:nth-child(4n) { background: #3b82f6; animation-duration: 3.2s; }
+    .confetti:nth-child(5n) { width: 8px; height: 8px; }
+    .confetti:nth-child(7n) { width: 12px; height: 12px; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -279,12 +328,13 @@
       </div>
       <div class="header-right">
         <a href="index.html" class="header-button">← Zurück zum UnterGrund-Explorer</a>
+        <button id="themeButton" class="header-button" style="display:none;" onclick="openThemeModal()">
+          🎨 Album-Design
+        </button>
         <button class="header-button" onclick="logout()">Ausloggen</button>
       </div>
     </div>
 
-
-    
     <div id="albumContainer" style="display:none;">
       <div class="album-page">
         <div class="page-header">
@@ -315,7 +365,8 @@
       </p>
       <div id="collabMatchesList"></div>
     </div>
-  <!-- HIER Playlist-Hinweis unter den Collabs -->
+
+    <!-- Playlist-Hinweis unter den Collabs -->
     <div id="playlistEmbedWrapper" style="display:none; margin-top:24px;">
       <div style="
         border-radius:12px;
@@ -326,8 +377,8 @@
         font-size:14px;
       ">
         Du hast dir mit deinen Karten die UnterGrund‑Playlist freigespielt.
-<br>
-Füg sie am besten direkt deiner Spotify‑Bibliothek hinzu.
+        <br>
+        Füg sie am besten direkt deiner Spotify Bibliothek hinzu.
         <br><br>
         <button onclick="openPlaylist()" style="
           padding:8px 16px;
@@ -342,6 +393,94 @@ Füg sie am besten direkt deiner Spotify‑Bibliothek hinzu.
       </div>
     </div>
 
+    <!-- Unlock-Modal (erste Seite voll) -->
+    <div id="unlockModal" style="
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.9);
+      z-index:200;
+      align-items:center;
+      justify-content:center;
+      animation:fadeIn 0.3s;
+    ">
+      <div style="
+        background:rgba(15,23,42,0.98);
+        border-radius:20px;
+        padding:28px 24px;
+        max-width:400px;
+        width:90%;
+        border:2px solid rgba(28,255,136,0.6);
+        box-shadow:0 0 40px rgba(28,255,136,0.4);
+        text-align:center;
+      ">
+        <div style="font-size:48px; margin-bottom:12px;">🎉</div>
+        <h2 style="margin:0 0 8px; font-size:22px; color:#1cff88;">
+          Glückwunsch!
+        </h2>
+        <p style="font-size:15px; color:#e5e7eb; margin:0 0 16px;">
+          Du hast deine erste Album‑Seite voll gesammelt und damit
+          <strong style="color:#9effc7;">3 exklusive Designs</strong> freigeschaltet.
+        </p>
+        <button class="header-button" style="
+          width:100%;
+          padding:12px;
+          background:linear-gradient(90deg, #1cff88, #16a34a);
+          color:#020202;
+          font-weight:600;
+          margin-bottom:8px;
+        " onclick="openThemeModalFromUnlock()">
+          Designs ansehen
+        </button>
+        <button class="header-button" style="
+          width:100%;
+          padding:10px;
+          background:rgba(55,65,81,0.6);
+        " onclick="closeUnlockModal()">
+          Später
+        </button>
+      </div>
+    </div>
+
+    <!-- Theme-Auswahl-Modal -->
+    <div id="themeModal" style="
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.8);
+      z-index:100;
+      align-items:center;
+      justify-content:center;
+    ">
+      <div style="
+        background:rgba(15,23,42,0.95);
+        border-radius:16px;
+        padding:20px;
+        max-width:360px;
+        width:90%;
+        border:1px solid rgba(28,255,136,0.4);
+      ">
+        <h3 style="margin:0 0 12px; font-size:18px;">Wähle dein Album‑Design</h3>
+        <p style="font-size:13px; color:#a0a0a0; margin:0 0 16px;">
+          Du hast die erste Seite gefüllt und damit 3 Designs freigeschaltet.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <button class="header-button" style="width:100%;" onclick="setTheme('standard')">
+            Standard (Grün)
+          </button>
+          <button class="header-button" style="width:100%;" onclick="setTheme('neon-pink')">
+            Neon Pink
+          </button>
+          <button class="header-button" style="width:100%;" onclick="setTheme('dark-gold')">
+            Dark Gold
+          </button>
+        </div>
+        <button class="header-button" style="width:100%; margin-top:12px; background:rgba(55,65,81,0.6);" onclick="closeThemeModal()">
+          Schließen
+        </button>
+      </div>
+    </div>
+
   </div> <!-- Ende .container -->
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
@@ -349,11 +488,65 @@ Füg sie am besten direkt deiner Spotify‑Bibliothek hinzu.
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     function openPlaylist() {
       window.open(
         'https://open.spotify.com/playlist/2aaOMrGTYr08MfOhrtK4QF',
         '_blank'
       );
+    }
+
+    // Theme-Funktionen
+    function openThemeModal() {
+      const modal = document.getElementById('themeModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeThemeModal() {
+      const modal = document.getElementById('themeModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setTheme(themeName) {
+      document.body.className = 'theme-' + themeName;
+      localStorage.setItem('untergrund-theme', themeName);
+      closeThemeModal();
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem('untergrund-theme') || 'standard';
+      document.body.className = 'theme-' + saved;
+    }
+
+    // Unlock-Modal-Funktionen
+    function closeUnlockModal() {
+      const modal = document.getElementById('unlockModal');
+      if (modal) modal.style.display = 'none';
+      localStorage.setItem('untergrund-unlock-page1', 'true');
+    }
+
+    function openThemeModalFromUnlock() {
+      closeUnlockModal();
+      openThemeModal();
+    }
+
+    // Konfetti-Funktion
+    function throwConfetti() {
+      const colors = ['#1cff88', '#ec4899', '#f59e0b', '#3b82f6', '#a855f7'];
+      const container = document.body;
+
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 0.3 + 's';
+        confetti.style.animationDuration = (2.5 + Math.random() * 1) + 's';
+
+        container.appendChild(confetti);
+
+        setTimeout(() => confetti.remove(), 4000);
+      }
     }
 
     const STICKERS_PER_PAGE = 6;
@@ -381,7 +574,6 @@ Füg sie am besten direkt deiner Spotify‑Bibliothek hinzu.
       const endIdx = startIdx + STICKERS_PER_PAGE;
       const pageStickers = allStickers.slice(startIdx, endIdx);
       console.log('pageStickers', pageStickers);
-
 
       grid.innerHTML = '';
 
@@ -411,7 +603,6 @@ Füg sie am besten direkt deiner Spotify‑Bibliothek hinzu.
             ? new Date(sticker.collected_at).toLocaleDateString('de-DE')
             : 'Datum unbekannt';
 
-          // Wichtig: Nicht innerHTML während des Ladens überschreiben
           const img = document.createElement('img');
           img.className = 'sticker-image';
           img.src = photoUrl;
@@ -514,28 +705,28 @@ Füg sie am besten direkt deiner Spotify‑Bibliothek hinzu.
       (artists || []).forEach(a => artistMap.set(a.id, a));
 
       // 3) Sticker-Daten zusammenbauen (mit Fallback)
-allStickers = collections.map(item => {
-  const artist = artistMap.get(item.artist_id);
+      allStickers = collections.map(item => {
+        const artist = artistMap.get(item.artist_id);
 
-  if (!artist) {
-    console.warn('Artist nicht gefunden für artist_id:', item.artist_id, 'collection:', item);
-    return {
-      artist_id: item.artist_id,
-      name: 'Unbekannter Artist',
-      stage_photo_path: null,
-      collected_at: item.collected_at
-    };
-  }
+        if (!artist) {
+          console.warn('Artist nicht gefunden für artist_id:', item.artist_id, 'collection:', item);
+          return {
+            artist_id: item.artist_id,
+            name: 'Unbekannter Artist',
+            stage_photo_path: null,
+            collected_at: item.collected_at
+          };
+        }
 
-  return {
-    artist_id: artist.id,
-    name: artist.name,
-    stage_photo_path: artist.stage_photo_path,
-    collected_at: item.collected_at
-  };
-});
+        return {
+          artist_id: artist.id,
+          name: artist.name,
+          stage_photo_path: artist.stage_photo_path,
+          collected_at: item.collected_at
+        };
+      });
 
-     // Playlist‑Hinweis erst ab z.B. 3 Karten zeigen
+      // Playlist‑Hinweis erst ab z.B. 2 Karten zeigen
       if (allStickers.length >= 2) {
         const embed = document.getElementById('playlistEmbedWrapper');
         if (embed) embed.style.display = 'block';
@@ -543,6 +734,21 @@ allStickers = collections.map(item => {
 
       albumContainer.style.display = 'block';
       renderPage();
+
+      // Theme-Button & Unlock-Modal ab 6 Karten
+      if (allStickers.length >= 6) {
+        const themeBtn = document.getElementById('themeButton');
+        if (themeBtn) themeBtn.style.display = 'inline-block';
+
+        const hasSeenUnlock = localStorage.getItem('untergrund-unlock-page1');
+        if (!hasSeenUnlock) {
+          const unlockModal = document.getElementById('unlockModal');
+          if (unlockModal) {
+            unlockModal.style.display = 'flex';
+            throwConfetti();
+          }
+        }
+      }
 
       // 4) Collab-Matches für die gesammelten Artists holen
       if (artistIds.length > 0) {
@@ -603,6 +809,7 @@ allStickers = collections.map(item => {
       }
     }
 
+    loadTheme();
     loadCollection();
   </script>
 </body>
