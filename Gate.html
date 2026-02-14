@@ -151,13 +151,13 @@
     <div id="gateStatus" class="status"></div>
 
     <div id="gateContent" style="display:none; margin-top:24px;">
-      <!-- Story / Lore zur Karte -->
+      <!-- KI-Prompt fürs Bild -->
       <div class="field">
-        <label for="gatePrompt">Erzähl uns etwas über die Karte</label>
+        <label for="gatePrompt">Beschreibe dein Gate-Artwork (KI-Prompt)</label>
         <textarea id="gatePrompt" rows="3" maxlength="240"
-          placeholder="Was ist ihre Rolle, Funktion oder ihr Skill im UnterGrund?"></textarea>
+          placeholder="Dunkler U-Bahn-Tunnel, grüne Neonlichter, flackernde Werbetafeln, Nebel, einsame Gestalt mit Kapuze, körniger Filmlook."></textarea>
         <div class="hint">
-          Kein KI-Prompt. Beschreib in 2–3 Sätzen, was diese Karte ausmacht.
+          Beschreib das Bild, das du vor dir siehst: Stil, Farben, Umgebung, Stimmung. Dieser Text steuert später das KI-Bild.
         </div>
         <div id="gatePromptCounter" class="char-counter">0 / 240</div>
       </div>
@@ -173,9 +173,9 @@
         </div>
 
         <div class="field">
-          <label for="gateCardDescription">Kurzbeschreibung (kein KI-Prompt)</label>
+          <label for="gateCardDescription">Kurzbeschreibung</label>
           <textarea id="gateCardDescription" maxlength="140" rows="2"
-            placeholder="Ein Satz, wie sich die Karte anfühlt oder was sie kann."></textarea>
+            placeholder="Was machst du hier im UnterGrund? Welche Funktion hast du? Was willst du uns sagen?"></textarea>
           <div id="gateDescCounter" class="char-counter">0 / 140</div>
         </div>
 
@@ -302,9 +302,9 @@
       gateImagePreview.textContent = `Generiere Mock-Gate-Bild (${previewCount}/${maxPreviews}) ...`;
 
       setTimeout(() => {
-        const promptText = gatePrompt.value.trim() || 'kein Lore-Text angegeben';
+        const promptText = gatePrompt.value.trim() || 'kein KI-Prompt angegeben';
         gateImagePreview.textContent =
-          `MOCK: [Gate-Artwork Vorschau ${previewCount}/${maxPreviews} basierend auf deiner Beschreibung: "` +
+          `MOCK: [Gate-Artwork Vorschau ${previewCount}/${maxPreviews} basierend auf deinem Prompt: "` +
           promptText + '"]';
 
         generateImageButton.disabled = previewCount >= maxPreviews;
@@ -327,7 +327,7 @@
       const cardData = {
         name,
         description: desc,
-        lore: gatePrompt.value.trim(),
+        prompt: gatePrompt.value.trim(),
         moods: [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean),
         city: gateCity.value.trim(),
         previewsUsed: previewCount
