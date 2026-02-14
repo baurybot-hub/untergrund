@@ -283,31 +283,7 @@
       </div>
     </div>
 
-<!-- HIER: Playlist-Embed über dem Album -->
-    <div id="playlistEmbedWrapper" style="display:none; margin-bottom:24px;">
-      <div style="
-        border-radius:12px;
-        background:rgba(0,0,0,0.6);
-        border:1px solid rgba(28,255,136,0.4);
-        padding:16px;
-        text-align:center;
-        font-size:14px;
-      ">
-        Eine kuratierte UnterGrund‑Playlist mit Artists,
-        die hier im Album auftauchen können.
-        <br><br>
-        <button onclick="openPlaylist()" style="
-          padding:8px 16px;
-          border-radius:999px;
-          border:1px solid rgba(28,255,136,0.4);
-          background:rgba(28,255,136,0.15);
-          color:#9effc7;
-          cursor:pointer;
-        ">
-          UnterGrund‑Playlist auf Spotify öffnen
-        </button>
-      </div>
-    </div>
+
     
     <div id="albumContainer" style="display:none;">
       <div class="album-page">
@@ -339,7 +315,33 @@
       </p>
       <div id="collabMatchesList"></div>
     </div>
-  </div>
+  <!-- HIER Playlist-Hinweis unter den Collabs -->
+    <div id="playlistEmbedWrapper" style="display:none; margin-top:24px;">
+      <div style="
+        border-radius:12px;
+        background:rgba(0,0,0,0.6);
+        border:1px solid rgba(28,255,136,0.4);
+        padding:16px;
+        text-align:center;
+        font-size:14px;
+      ">
+        Eine kuratierte UnterGrund‑Playlist mit Artists,
+        die hier im Album auftauchen können.
+        <br><br>
+        <button onclick="openPlaylist()" style="
+          padding:8px 16px;
+          border-radius:999px;
+          border:1px solid rgba(28,255,136,0.4);
+          background:rgba(28,255,136,0.15);
+          color:#9effc7;
+          cursor:pointer;
+        ">
+          UnterGrund‑Playlist auf Spotify öffnen
+        </button>
+      </div>
+    </div>
+
+  </div> <!-- Ende .container -->
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
