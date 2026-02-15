@@ -340,34 +340,32 @@ checkCodeButton.addEventListener('click', async () => {
   }
 
   // Ab hier: Code ist gültig – jetzt prüfen wir, ob der User heute schon eine Gate-Karte hat
-try {
-  const {  sessionData, error: sessionError } = await supa.auth.getSession();
-  console.log('Gate getSession:', sessionData, sessionError); // Debug
+  try {
+    const {  sessionData, error: sessionError } = await supa.auth.getSession();
+    console.log('Gate getSession:', sessionData, sessionError); // Debug
 
-  if (sessionError) {
-    setGateStatus('Fehler beim Prüfen deiner Session.', 'error');
-    gateContent.style.display = 'none';
-    return;
-  }
+    if (sessionError) {
+      setGateStatus('Fehler beim Prüfen deiner Session.', 'error');
+      gateContent.style.display = 'none';
+      return;
+    }
 
-  if (!sessionData || !sessionData.session) {
-    setGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
-    gateContent.style.display = 'none';
-    return;
-  }
+    if (!sessionData || !sessionData.session) {
+      setGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
+      gateContent.style.display = 'none';
+      return;
+    }
 
-  const userId = sessionData.session.user.id;
-  const todayStart = new Date();
+    const userId = sessionData.session.user.id;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
 
-  todayStart.setHours(0, 0, 0, 0);
-
-  const {  existingCards, error: existingError } = await supa
-    .from('gate_cards')
-    .select('id, created_at')
-    .gte('created_at', todayStart.toISOString())
-    .eq('user_id', userId)
-    .limit(1);
-
+    const {  existingCards, error: existingError } = await supa
+      .from('gate_cards')
+      .select('id, created_at')
+      .gte('created_at', todayStart.toISOString())
+      .eq('user_id', userId)
+      .limit(1);
 
     if (existingError) {
       console.error(existingError);
@@ -391,6 +389,7 @@ try {
     gateContent.style.display = 'none';
   }
 });
+
 
 
     // Enter-Key Support für Gate-Code
