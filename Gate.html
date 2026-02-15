@@ -112,15 +112,6 @@
       color: #a0a0a0;
       text-align: right;
     }
-    .image-preview {
-      border-radius: 12px;
-      border: 1px dashed rgba(148,163,184,0.7);
-      padding: 16px;
-      font-size: 13px;
-      color: #a0a0a0;
-      text-align: center;
-      min-height: 80px;
-    }
     .hint {
       font-size: 12px;
       color: #a0a0a0;
@@ -130,6 +121,54 @@
       color: #fbbf24;
       line-height: 1.5;
       margin-bottom: 4px;
+    }
+
+    /* NEU: Mehrere Previews */
+    .gate-previews {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    .gate-preview-slot {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px dashed rgba(148,163,184,0.7);
+      padding: 8px;
+      font-size: 12px;
+      color: #a0a0a0;
+      text-align: center;
+      min-height: 90px;
+      cursor: pointer;
+      background: rgba(10,10,10,0.9);
+      transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+    }
+    .gate-preview-slot.loading {
+      opacity: 0.7;
+      cursor: progress;
+    }
+    .gate-preview-slot.selected {
+      border-style: solid;
+      border-color: #fbbf24;
+      box-shadow: 0 0 12px rgba(251,191,36,0.55);
+      transform: translateY(-1px);
+    }
+    .gate-preview-label {
+      margin-bottom: 4px;
+      color: #e5e7eb;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .gate-preview-image img {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+    }
+    .preview-hint {
+      font-size: 12px;
+      color: #a0a0a0;
+      margin-top: 4px;
     }
   </style>
 </head>
@@ -200,8 +239,23 @@
           <button id="generateImageButton">Bild generieren – Vorschau 1/3 (Mock)</button>
         </div>
 
-        <div id="gateImagePreview" class="image-preview">
-          Hier wird später dein KI-Bild angezeigt. Du hast später maximal 3 Bild-Vorschauen.
+        <!-- NEU: 3 Preview-Slots -->
+        <div class="gate-previews" id="gatePreviews">
+          <div class="gate-preview-slot" data-index="1">
+            <div class="gate-preview-label">Vorschau 1</div>
+            <div class="gate-preview-image">Noch kein Bild.</div>
+          </div>
+          <div class="gate-preview-slot" data-index="2">
+            <div class="gate-preview-label">Vorschau 2</div>
+            <div class="gate-preview-image">Noch kein Bild.</div>
+          </div>
+          <div class="gate-preview-slot" data-index="3">
+            <div class="gate-preview-label">Vorschau 3</div>
+            <div class="gate-preview-image">Noch kein Bild.</div>
+          </div>
+        </div>
+        <div class="preview-hint" id="previewHint">
+          Du kannst maximal 3 Bilder erstellen. Such dir eines deiner erstellten Bilder aus und mach einen endgültigen Save – vielleicht wird deine Karte morgen im UnterGrund reingemischt.
         </div>
 
         <div class="field">
@@ -236,12 +290,16 @@
     const gateCity = document.getElementById('gateCity');
 
     const generateImageButton = document.getElementById('generateImageButton');
-    const gateImagePreview = document.getElementById('gateImagePreview');
     const saveGateCardButton = document.getElementById('saveGateCardButton');
     const saveStatus = document.getElementById('saveStatus');
 
+    const previewContainer = document.getElementById('gatePreviews');
+    const previewSlots = previewContainer.querySelectorAll('.gate-preview-slot');
+    const previewHint = document.getElementById('previewHint');
+
     let previewCount = 0;
     const maxPreviews = 3;
+    let selectedPreviewIndex = null;
 
     function setGateStatus(msg, type = '') {
       gateStatus.textContent = msg;
@@ -251,6 +309,10 @@
     function setSaveStatus(msg, type = '') {
       saveStatus.textContent = msg;
       saveStatus.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function showMessage(msg) {
+      previewHint.textContent = msg;
     }
 
     // Mock: gültiger Code = "UG-GATE"
@@ -289,47 +351,138 @@
       gateDescCounter.textContent = gateCardDescription.value.length + ' / 140';
     });
 
-    // Mock: Bild generieren mit 1/3 Vorschau-Logik
-    generateImageButton.addEventListener('click', () => {
+    // Hilfsfunktion: Pflichtfelder prüfen (Name, Beschreibung, Prompt, mind. 1 Vibe)
+    function validateFormForPreview() {
+      const name = gateCardName.value.trim();
+      const desc = gateCardDescription.value.trim();
+      const lore = gatePrompt.value.trim();
+      const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+
+      if (!lore || !name || !desc) {
+        showMessage('Bitte Name, Kurzbeschreibung und Prompt ausfüllen, bevor du ein Bild generierst.');
+        return false;
+      }
+      if (moods.length === 0) {
+        showMessage('Trag mindestens einen Vibe ein, bevor du ein Bild generierst.');
+        return false;
+      }
+      return true;
+    }
+
+    // Mock-Funktion für Bildgenerierung – später durch echte API ersetzt
+    async function generateGateImage(promptText, previewIndex) {
+      // später: echter API-Call
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const url = `https://via.placeholder.com/480x640.png?text=Gate+Preview+${previewIndex}`;
+          resolve({ imageUrl: url });
+        }, 900);
+      });
+    }
+
+    // Klick auf "Bild generieren – Vorschau"
+    generateImageButton.addEventListener('click', async () => {
+      if (!validateFormForPreview()) {
+        return;
+      }
+
       if (previewCount >= maxPreviews) {
-        gateImagePreview.textContent = 'Du hast alle 3 Bild-Vorschauen genutzt (Mock).';
+        showMessage('Du hast heute schon 3 Bild-Vorschauen erstellt. Such dir eines der Bilder aus und speichere deine Gate-Karte.');
         return;
       }
 
       previewCount += 1;
+      const currentIndex = previewCount; // 1,2,3
+      const slot = [...previewSlots].find(s => s.dataset.index === String(currentIndex));
+      const imgContainer = slot.querySelector('.gate-preview-image');
+
       generateImageButton.disabled = true;
       generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount}/${maxPreviews} (Mock)`;
-      gateImagePreview.textContent = `Generiere Mock-Gate-Bild (${previewCount}/${maxPreviews}) ...`;
+      slot.classList.add('loading');
+      imgContainer.textContent = `Generiere Mock-Gate-Bild (${previewCount}/${maxPreviews}) ...`;
 
-      setTimeout(() => {
+      try {
         const promptText = gatePrompt.value.trim() || 'kein KI-Prompt angegeben';
-        gateImagePreview.textContent =
-          `MOCK: [Gate-Artwork Vorschau ${previewCount}/${maxPreviews} basierend auf deinem Prompt: "` +
-          promptText + '"]';
+        const { imageUrl } = await generateGateImage(promptText, currentIndex);
 
-        generateImageButton.disabled = previewCount >= maxPreviews;
-        if (previewCount >= maxPreviews) {
-          generateImageButton.textContent = `Keine weiteren Vorschauen möglich (${previewCount}/${maxPreviews})`;
+        imgContainer.innerHTML = `<img src="${imageUrl}" alt="Gate Vorschau ${currentIndex}">`;
+
+        if (selectedPreviewIndex === null) {
+          selectedPreviewIndex = currentIndex;
+          slot.classList.add('selected');
         }
-      }, 1200);
+
+        const triesLeft = maxPreviews - previewCount;
+        if (triesLeft > 0) {
+          showMessage(`Vorschau ${previewCount}/${maxPreviews} erstellt. Du hast noch ${triesLeft} Versuch(e) für heute.`);
+        } else {
+          showMessage('Du hast alle 3 Bild-Vorschauen genutzt. Such dir jetzt eines der Bilder aus und mach einen endgültigen Save – vielleicht wird deine Karte morgen im UnterGrund reingemischt.');
+        }
+      } catch (e) {
+        console.error(e);
+        imgContainer.textContent = 'Fehler bei der Bildgenerierung (Mock).';
+      } finally {
+        slot.classList.remove('loading');
+        if (previewCount >= maxPreviews) {
+          generateImageButton.disabled = true;
+          generateImageButton.textContent = `Keine weiteren Vorschauen möglich (${previewCount}/${maxPreviews})`;
+        } else {
+          generateImageButton.disabled = false;
+        }
+      }
     });
 
-    // Simple Validierung und Mock-Speichern (endgültig)
+    // Bildauswahl durch Klick
+    previewSlots.forEach(slot => {
+      slot.addEventListener('click', () => {
+        const img = slot.querySelector('img');
+        if (!img) return;
+
+        previewSlots.forEach(s => s.classList.remove('selected'));
+        slot.classList.add('selected');
+        selectedPreviewIndex = Number(slot.dataset.index);
+        showMessage(`Vorschau ${selectedPreviewIndex} ist ausgewählt. Du kannst jetzt deine Gate-Karte fest speichern.`);
+      });
+    });
+
+    // Mock-Speichern (endgültig) mit Auswahl eines Bildes
     saveGateCardButton.addEventListener('click', () => {
       const name = gateCardName.value.trim();
       const desc = gateCardDescription.value.trim();
+      const lore = gatePrompt.value.trim();
+      const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+      const city = gateCity.value.trim();
 
-      if (!name || !desc) {
-        setSaveStatus('Name und Kurzbeschreibung müssen ausgefüllt sein.', 'error');
+      if (!name || !desc || !lore) {
+        setSaveStatus('Bitte Name, Kurzbeschreibung und Prompt ausfüllen, bevor du speicherst.', 'error');
         return;
       }
+      if (moods.length === 0) {
+        setSaveStatus('Trag mindestens einen Vibe ein, bevor du speicherst.', 'error');
+        return;
+      }
+      if (!selectedPreviewIndex) {
+        setSaveStatus('Bitte wähle eines deiner generierten Bilder aus.', 'error');
+        return;
+      }
+
+      const selectedSlot = [...previewSlots].find(s => Number(s.dataset.index) === selectedPreviewIndex);
+      const img = selectedSlot.querySelector('img');
+      if (!img || !img.src) {
+        setSaveStatus('Fehler: Kein Bild in der ausgewählten Vorschau gefunden.', 'error');
+        return;
+      }
+
+      const imagePath = img.src; // später: Pfad aus Storage / echter API-URL
 
       const cardData = {
         name,
         description: desc,
-        prompt: gatePrompt.value.trim(),
-        moods: [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean),
-        city: gateCity.value.trim(),
+        prompt: lore,
+        moods,
+        city,
+        selectedPreviewIndex,
+        imagePath,
         previewsUsed: previewCount
       };
 
