@@ -323,24 +323,65 @@
       previewHint.textContent = msg;
     }
 
-    // Mock: gültiger Code = "UG-GATE"
-    checkCodeButton.addEventListener('click', () => {
-      const code = gateCodeInput.value.trim();
+    // Gate öffnen: Code prüfen + Tageslimit checken
+checkCodeButton.addEventListener('click', async () => {
+  const code = gateCodeInput.value.trim();
 
-      if (!code) {
-        setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
-        gateContent.style.display = 'none';
-        return;
-      }
+  if (!code) {
+    setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
+    gateContent.style.display = 'none';
+    return;
+  }
 
-      if (code === 'UG-GATE') {
-        setGateStatus('Gate geöffnet. Gestalte jetzt deine Gate-Karte.', 'success');
-        gateContent.style.display = 'block';
-      } else {
-        setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
-        gateContent.style.display = 'none';
-      }
-    });
+  if (code !== 'UG-GATE') {
+    setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
+    gateContent.style.display = 'none';
+    return;
+  }
+
+  // Ab hier: Code ist gültig – jetzt prüfen wir, ob der User heute schon eine Gate-Karte hat
+  try {
+    const {  sessionData, error: sessionError } = await supa.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      setGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
+      gateContent.style.display = 'none';
+      return;
+    }
+
+    const userId = sessionData.session.user.id;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const {  existingCards, error: existingError } = await supa
+      .from('gate_cards')
+      .select('id, created_at')
+      .gte('created_at', todayStart.toISOString())
+      .eq('user_id', userId)
+      .limit(1);
+
+    if (existingError) {
+      console.error(existingError);
+      setGateStatus('Fehler beim Prüfen deines Gate-Status. Versuch es später nochmal.', 'error');
+      gateContent.style.display = 'none';
+      return;
+    }
+
+    if (existingCards && existingCards.length > 0) {
+      setGateStatus('Du hast heute bereits eine Gate-Karte gespeichert. Komm morgen wieder ans Gate.', 'error');
+      gateContent.style.display = 'none';
+      return;
+    }
+
+    // Alles gut: Gate darf geöffnet werden
+    setGateStatus('Gate geöffnet. Gestalte jetzt deine Gate-Karte.', 'success');
+    gateContent.style.display = 'block';
+  } catch (e) {
+    console.error(e);
+    setGateStatus('Unerwarteter Fehler beim Öffnen des Gates.', 'error');
+    gateContent.style.display = 'none';
+  }
+});
+
 
     // Enter-Key Support für Gate-Code
     gateCodeInput.addEventListener('keydown', (ev) => {
