@@ -272,8 +272,7 @@
   </div>
 
   <!-- Supabase Client -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.min.js"></script>
 
   <script>
     const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
@@ -323,77 +322,24 @@
       previewHint.textContent = msg;
     }
 
-    // Gate öffnen: Code prüfen + Tageslimit checken
-checkCodeButton.addEventListener('click', async () => {
-  const code = gateCodeInput.value.trim();
+    // Mock: gültiger Code = "UG-GATE"
+    checkCodeButton.addEventListener('click', () => {
+      const code = gateCodeInput.value.trim();
 
-  if (!code) {
-    setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
-    gateContent.style.display = 'none';
-    return;
-  }
+      if (!code) {
+        setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
+        gateContent.style.display = 'none';
+        return;
+      }
 
-  if (code !== 'UG-GATE') {
-    setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
-    gateContent.style.display = 'none';
-    return;
-  }
-
-  // Ab hier: Code ist gültig – jetzt prüfen wir, ob der User heute schon eine Gate-Karte hat
-  try {
-    const { data, error: sessionError } = await supa.auth.getSession();
-console.log('Gate getSession raw:', data, sessionError);
-
-const sessionData = data; // hier liegt das session-Objekt wirklich
-
-
-    if (sessionError) {
-      setGateStatus('Fehler beim Prüfen deiner Session.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
-
-    if (!sessionData || !sessionData.session) {
-      setGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
-
-    const userId = sessionData.session.user.id;
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
-
-    const {  existingCards, error: existingError } = await supa
-      .from('gate_cards')
-      .select('id, created_at')
-      .gte('created_at', todayStart.toISOString())
-      .eq('user_id', userId)
-      .limit(1);
-
-    if (existingError) {
-      console.error(existingError);
-      setGateStatus('Fehler beim Prüfen deines Gate-Status. Versuch es später nochmal.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
-
-    if (existingCards && existingCards.length > 0) {
-      setGateStatus('Du hast heute bereits eine Gate-Karte gespeichert. Komm morgen wieder ans Gate.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
-
-    // Alles gut: Gate darf geöffnet werden
-    setGateStatus('Gate geöffnet. Gestalte jetzt deine Gate-Karte.', 'success');
-    gateContent.style.display = 'block';
-  } catch (e) {
-    console.error(e);
-    setGateStatus('Unerwarteter Fehler beim Öffnen des Gates.', 'error');
-    gateContent.style.display = 'none';
-  }
-});
-
-
+      if (code === 'UG-GATE') {
+        setGateStatus('Gate geöffnet. Gestalte jetzt deine Gate-Karte.', 'success');
+        gateContent.style.display = 'block';
+      } else {
+        setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
+        gateContent.style.display = 'none';
+      }
+    });
 
     // Enter-Key Support für Gate-Code
     gateCodeInput.addEventListener('keydown', (ev) => {
@@ -430,98 +376,67 @@ const sessionData = data; // hier liegt das session-Objekt wirklich
       return true;
     }
 
-   // Bildgenerierung über Edge Function (mit Tageslimit)
-async function generateGateImage(promptText, previewIndex) {
-  const { data: sessionData, error: sessionError } = await supa.auth.getSession();
-  if (sessionError || !sessionData || !sessionData.session) {
-    throw new Error('not_logged_in');
-  }
-
-  const accessToken = sessionData.session.access_token;
-
-  const resp = await fetch('https://tyflhzwrwzfakwedipig.supabase.co/functions/v1/generate_gate_image', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`
-    },
-    body: JSON.stringify({
-      prompt: promptText,
-      previewIndex
-    })
-  });
-
-  const json = await resp.json();
-
-  if (!resp.ok) {
-    if (json?.error === 'limit_reached' || resp.status === 429) {
-      throw new Error('limit_reached');
-    }
-    throw new Error('generation_failed');
-  }
-
-  return { imageUrl: json.imageUrl };
-}
-
-
-    // Bild generieren – Vorschau (über Edge Function mit Tageslimit)
-generateImageButton.addEventListener('click', async () => {
-  if (!validateFormForPreview()) {
-    return;
-  }
-
-  if (previewCount >= maxPreviews) {
-    showMessage('Du hast heute schon 3 Bild-Vorschauen erstellt. Such dir eines der Bilder aus und speichere deine Gate-Karte.');
-    return;
-  }
-
-  previewCount += 1;
-  const currentIndex = previewCount;
-  const slot = [...previewSlots].find(s => s.dataset.index === String(currentIndex));
-  const imgContainer = slot.querySelector('.gate-preview-image');
-
-  generateImageButton.disabled = true;
-  generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount}/${maxPreviews}`;
-  slot.classList.add('loading');
-  imgContainer.textContent = `Generiere Gate-Bild (${previewCount}/${maxPreviews}) ...`;
-
-  try {
-    const promptText = gatePrompt.value.trim() || 'kein KI-Prompt angegeben';
-    const { imageUrl } = await generateGateImage(promptText, currentIndex);
-
-    imgContainer.innerHTML = `<img src="${imageUrl}" alt="Gate Vorschau ${currentIndex}">`;
-
-    if (selectedPreviewIndex === null) {
-      selectedPreviewIndex = currentIndex;
-      slot.classList.add('selected');
+    // Mock-Bildgenerierung – später echte Bild-KI
+    async function generateGateImage(promptText, previewIndex) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          const url = `https://via.placeholder.com/480x640.png?text=Gate+Preview+${previewIndex}`;
+          resolve({ imageUrl: url });
+        }, 900);
+      });
     }
 
-    const triesLeft = maxPreviews - previewCount;
-    if (triesLeft > 0) {
-      showMessage(`Vorschau ${previewCount}/${maxPreviews} erstellt. Du hast noch ${triesLeft} Versuch(e) für heute.`);
-    } else {
-      showMessage('Du hast alle 3 Bild-Vorschauen für heute genutzt. Such dir jetzt eines der Bilder aus und mach einen endgültigen Save – vielleicht wird deine Karte morgen im UnterGrund reingemischt.');
-    }
-  } catch (e) {
-    console.error(e);
-    if (e.message === 'not_logged_in') {
-      showMessage('Bitte melde dich zuerst an, um Gate-Bilder zu generieren.');
-    } else if (e.message === 'limit_reached') {
-      showMessage('Du hast deine 3 Gate-Bilder für heute schon genutzt. Komm morgen wieder.');
-      previewCount = maxPreviews;
+    // Bild generieren – Vorschau
+    generateImageButton.addEventListener('click', async () => {
+      if (!validateFormForPreview()) {
+        return;
+      }
+
+      if (previewCount >= maxPreviews) {
+        showMessage('Du hast heute schon 3 Bild-Vorschauen erstellt. Such dir eines der Bilder aus und speichere deine Gate-Karte.');
+        return;
+      }
+
+      previewCount += 1;
+      const currentIndex = previewCount;
+      const slot = [...previewSlots].find(s => s.dataset.index === String(currentIndex));
+      const imgContainer = slot.querySelector('.gate-preview-image');
+
       generateImageButton.disabled = true;
-      generateImageButton.textContent = `Keine weiteren Vorschauen möglich (${previewCount}/${maxPreviews})`;
-    } else {
-      showMessage('Fehler bei der Bildgenerierung. Versuch es später nochmal.');
-    }
-  } finally {
-    slot.classList.remove('loading');
-    if (previewCount < maxPreviews && !generateImageButton.disabled) {
-      generateImageButton.disabled = false;
-    }
-  }
-});
+      generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount}/${maxPreviews} (Mock)`;
+      slot.classList.add('loading');
+      imgContainer.textContent = `Generiere Mock-Gate-Bild (${previewCount}/${maxPreviews}) ...`;
 
+      try {
+        const promptText = gatePrompt.value.trim() || 'kein KI-Prompt angegeben';
+        const { imageUrl } = await generateGateImage(promptText, currentIndex);
+
+        imgContainer.innerHTML = `<img src="${imageUrl}" alt="Gate Vorschau ${currentIndex}">`;
+
+        if (selectedPreviewIndex === null) {
+          selectedPreviewIndex = currentIndex;
+          slot.classList.add('selected');
+        }
+
+        const triesLeft = maxPreviews - previewCount;
+        if (triesLeft > 0) {
+          showMessage(`Vorschau ${previewCount}/${maxPreviews} erstellt. Du hast noch ${triesLeft} Versuch(e) für heute.`);
+        } else {
+          showMessage('Du hast alle 3 Bild-Vorschauen genutzt. Such dir jetzt eines der Bilder aus und mach einen endgültigen Save – vielleicht wird deine Karte morgen im UnterGrund reingemischt.');
+        }
+      } catch (e) {
+        console.error(e);
+        imgContainer.textContent = 'Fehler bei der Bildgenerierung (Mock).';
+      } finally {
+        slot.classList.remove('loading');
+        if (previewCount >= maxPreviews) {
+          generateImageButton.disabled = true;
+          generateImageButton.textContent = `Keine weiteren Vorschauen möglich (${previewCount}/${maxPreviews})`;
+        } else {
+          generateImageButton.disabled = false;
+        }
+      }
+    });
 
     // Bildauswahl durch Klick
     previewSlots.forEach(slot => {
