@@ -340,14 +340,13 @@
 
   try {
     // 1. Session holen
-    const {  sessionData, error: sessionError } = await supa.auth.getSession();
-    if (sessionError || !sessionData || !sessionData.session) {
-      console.error(sessionError);
-      setGateStatus('Bitte melde dich zuerst an, um das Gate zu öffnen.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
+ const {  sessionData, error: sessionError } = await supa.auth.getSession();
 
+  if (sessionError || !sessionData || !sessionData.session) {
+    const currentUrl = encodeURIComponent(window.location.href);
+    window.location.href = `Login.html?redirect=${currentUrl}`;
+    return;
+  }
     const userId = sessionData.session.user.id;
 
     // 2. Heute-Start berechnen (00:00)
