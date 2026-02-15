@@ -72,10 +72,13 @@
   <script>
     const { createClient } = supabase;
 
+    // GitHub-Pages Basis-URL (wie im Rest der App)
     const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
 
-    // aktuelle Query-Parameter (z.B. ?from=collection&artist_id=1)
+    // aktuelle Query-Parameter (z.B. ?from=collection&artist_id=1 oder ?from=gate)
     const CURRENT_SEARCH = window.location.search || '';
+
+    // OAuth-Redirect-Ziel (Supabase leitet nach Provider-Login hierher zurück)
     const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
 
     const client = createClient(
@@ -89,12 +92,20 @@
       const artistId = params.get('artist_id');
 
       if (from === 'collection') {
+        // nach Login in die persönliche Sammlung
         return BASE_URL + 'MeineSammlung.html';
       }
 
       if (from === 'stage' && artistId) {
-        // zurück zur Stage, mit Flag für Auto-Sammeln
-        return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(artistId)}&auto_collect=true`;
+        // zurück zur Stage, mit Auto-Collect
+        return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
+          artistId
+        )}&auto_collect=true`;
+      }
+
+      if (from === 'gate') {
+        // zurück zum Gate nach erfolgreichem Login
+        return BASE_URL + 'Gate.html';
       }
 
       // Standard: zurück zum Explorer
@@ -110,6 +121,8 @@
         hintEl.textContent = 'Melde dich an, um deine gesammelten Stage-Karten zu sehen.';
       } else if (from === 'stage') {
         hintEl.textContent = 'Melde dich an, um diese Stage-Karte zu deiner Sammlung hinzuzufügen.';
+      } else if (from === 'gate') {
+        hintEl.textContent = 'Melde dich an, um das Gate zu öffnen und eine Gate-Karte zu erstellen.';
       } else {
         hintEl.textContent = '';
       }
@@ -122,16 +135,21 @@
           redirectTo: REDIRECT
         }
       });
-      if (error) console.error(provider + ' login error:', error);
+      if (error) {
+        console.error(provider + ' login error:', error);
+      }
     }
 
+    // Supabase wertet den Hash aus (access_token etc.) und legt Session im Browser an
     async function handleAuthFromHash() {
       if (window.location.hash.includes('access_token')) {
-        // Hash auswerten (Session anlegen)
         await client.auth.getUser();
 
-        // URL bereinigen, Query-Parameter behalten
-        const cleanUrl = window.location.origin + window.location.pathname + window.location.search;
+        // URL bereinigen, Query-Parameter (from, artist_id, etc.) behalten
+        const cleanUrl =
+          window.location.origin +
+          window.location.pathname +
+          window.location.search;
         history.replaceState(null, '', cleanUrl);
       }
     }
