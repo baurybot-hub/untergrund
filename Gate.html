@@ -341,8 +341,11 @@ checkCodeButton.addEventListener('click', async () => {
 
   // Ab hier: Code ist gültig – jetzt prüfen wir, ob der User heute schon eine Gate-Karte hat
   try {
-    const {  sessionData, error: sessionError } = await supa.auth.getSession();
-    console.log('Gate getSession:', sessionData, sessionError); // Debug
+    const { data, error: sessionError } = await supa.auth.getSession();
+console.log('Gate getSession raw:', data, sessionError);
+
+const sessionData = data; // hier liegt das session-Objekt wirklich
+
 
     if (sessionError) {
       setGateStatus('Fehler beim Prüfen deiner Session.', 'error');
