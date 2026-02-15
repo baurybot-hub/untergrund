@@ -338,16 +338,19 @@
     return;
   }
 
-  try {
-    // 1. Session holen
- const {  sessionData, error: sessionError } = await supa.auth.getSession();
+  // Session holen
+  const {  sessionData, error: sessionError } = await supa.auth.getSession();
 
   if (sessionError || !sessionData || !sessionData.session) {
-    const currentUrl = encodeURIComponent(window.location.href);
-    window.location.href = `Login.html?redirect=${currentUrl}`;
+    // nicht eingeloggt → auf Login schicken, mit from=gate
+    const params = new URLSearchParams();
+    params.set('from', 'gate');
+    window.location.href = `${BASE_URL}Login.html?${params.toString()}`;
     return;
   }
-    const userId = sessionData.session.user.id;
+
+  const userId = sessionData.session.user.id;
+
 
     // 2. Heute-Start berechnen (00:00)
     const todayStart = new Date();
