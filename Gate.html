@@ -342,7 +342,15 @@ checkCodeButton.addEventListener('click', async () => {
   // Ab hier: Code ist gültig – jetzt prüfen wir, ob der User heute schon eine Gate-Karte hat
 try {
   const {  sessionData, error: sessionError } = await supa.auth.getSession();
-  if (sessionError || !sessionData?.session) {
+  console.log('Gate getSession:', sessionData, sessionError); // Debug
+
+  if (sessionError) {
+    setGateStatus('Fehler beim Prüfen deiner Session.', 'error');
+    gateContent.style.display = 'none';
+    return;
+  }
+
+  if (!sessionData || !sessionData.session) {
     setGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
     gateContent.style.display = 'none';
     return;
@@ -350,6 +358,7 @@ try {
 
   const userId = sessionData.session.user.id;
   const todayStart = new Date();
+
   todayStart.setHours(0, 0, 0, 0);
 
   const {  existingCards, error: existingError } = await supa
