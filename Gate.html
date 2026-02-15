@@ -340,24 +340,25 @@ checkCodeButton.addEventListener('click', async () => {
   }
 
   // Ab hier: Code ist gültig – jetzt prüfen wir, ob der User heute schon eine Gate-Karte hat
-  try {
-    const {  sessionData, error: sessionError } = await supa.auth.getSession();
-    if (sessionError || !sessionData.session) {
-      setGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
+try {
+  const {  sessionData, error: sessionError } = await supa.auth.getSession();
+  if (sessionError || !sessionData?.session) {
+    setGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
+    gateContent.style.display = 'none';
+    return;
+  }
 
-    const userId = sessionData.session.user.id;
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+  const userId = sessionData.session.user.id;
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
 
-    const {  existingCards, error: existingError } = await supa
-      .from('gate_cards')
-      .select('id, created_at')
-      .gte('created_at', todayStart.toISOString())
-      .eq('user_id', userId)
-      .limit(1);
+  const {  existingCards, error: existingError } = await supa
+    .from('gate_cards')
+    .select('id, created_at')
+    .gte('created_at', todayStart.toISOString())
+    .eq('user_id', userId)
+    .limit(1);
+
 
     if (existingError) {
       console.error(existingError);
