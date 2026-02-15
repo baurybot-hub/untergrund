@@ -429,28 +429,26 @@
     }
 
     // KI-Bildgenerierung über Puter (gpt-image-1, realistisch, nicht abstrakt)
-    async function generateGateImage(promptText, previewIndex) {
-      // Optional: Vibes leicht mit in den Prompt mischen
-      const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
-      const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
-      const fullPrompt = `${promptText}.${moodText}`;
+async function generateGateImage(promptText, previewIndex) {
+  const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+  const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
+  const fullPrompt = `${promptText}.${moodText}`;
 
-      const result = await puter.ai.generateImage({
-        model: 'gpt-image-1',      // realistisches GPT-Image-Modell
-        prompt: fullPrompt,
-        size: '512x768'
-      });
+  // puter.ai.txt2img gibt ein HTMLImageElement zurück
+  const imgEl = await puter.ai.txt2img(fullPrompt, {
+    model: 'gpt-image-1',   // GPT Image-1, realistisch [web:3044]
+    quality: 'low'          // für schnelle, günstige Generierung
+  });
 
-      // Laut Puter-Doku: images[0].url oder images[0].dataUrl nutzbar
-      const image = result?.images?.[0] || null;
-      const imageUrl = image?.url || image?.dataUrl || null;
+  // Wir nutzen die src als URL in deinem bestehenden Flow
+  const imageUrl = imgEl.src;
+  if (!imageUrl) {
+    throw new Error('Keine Bild-URL von der KI erhalten.');
+  }
 
-      if (!imageUrl) {
-        throw new Error('Keine Bild-URL von der KI erhalten.');
-      }
+  return { imageUrl };
+}
 
-      return { imageUrl };
-    }
 
     // Bild generieren – Vorschau
     generateImageButton.addEventListener('click', async () => {
