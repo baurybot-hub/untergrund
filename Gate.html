@@ -274,11 +274,13 @@
   <!-- Supabase Client -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-
   <script>
     const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
     const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Gleich wie in Login.html
+    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
 
     const gateCodeInput = document.getElementById('gateCode');
     const checkCodeButton = document.getElementById('checkCodeButton');
@@ -323,72 +325,71 @@
       previewHint.textContent = msg;
     }
 
+    // Gate-Code prüfen + Login + Tages-Check
     checkCodeButton.addEventListener('click', async () => {
-  const code = gateCodeInput.value.trim();
+      const code = gateCodeInput.value.trim();
 
-  if (!code) {
-    setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
-    gateContent.style.display = 'none';
-    return;
-  }
+      if (!code) {
+        setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
+        gateContent.style.display = 'none';
+        return;
+      }
 
-  if (code !== 'UG-GATE') {
-    setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
-    gateContent.style.display = 'none';
-    return;
-  }
+      if (code !== 'UG-GATE') {
+        setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
+        gateContent.style.display = 'none';
+        return;
+      }
 
-  // Session holen
-  const {  sessionData, error: sessionError } = await supa.auth.getSession();
+      try {
+        // 1. Session holen
+        const { data: sessionData, error: sessionError } = await supa.auth.getSession();
 
-  if (sessionError || !sessionData || !sessionData.session) {
-    // nicht eingeloggt → auf Login schicken, mit from=gate
-    const params = new URLSearchParams();
-    params.set('from', 'gate');
-    window.location.href = `${BASE_URL}Login.html?${params.toString()}`;
-    return;
-  }
+        if (sessionError || !sessionData || !sessionData.session) {
+          const params = new URLSearchParams();
+          params.set('from', 'gate');
+          window.location.href = `${BASE_URL}Login.html?${params.toString()}`;
+          return;
+        }
 
-  const userId = sessionData.session.user.id;
+        const userId = sessionData.session.user.id;
 
+        // 2. Heute-Start berechnen (00:00)
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
 
-    // 2. Heute-Start berechnen (00:00)
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
+        // 3. Prüfen, ob heute schon eine Gate-Karte existiert
+        const { data: existingCards, error: existingError } = await supa
+          .from('gate_cards')
+          .select('id, created_at')
+          .gte('created_at', todayStart.toISOString())
+          .eq('user_id', userId)
+          .limit(1);
 
-    // 3. Prüfen, ob heute schon eine Gate-Karte existiert
-    const {  existingCards, error: existingError } = await supa
-      .from('gate_cards')
-      .select('id, created_at')
-      .gte('created_at', todayStart.toISOString())
-      .eq('user_id', userId)
-      .limit(1);
+        if (existingError) {
+          console.error(existingError);
+          setGateStatus('Fehler beim Prüfen, ob du heute schon eine Gate-Karte gespeichert hast.', 'error');
+          gateContent.style.display = 'none';
+          return;
+        }
 
-    if (existingError) {
-      console.error(existingError);
-      setGateStatus('Fehler beim Prüfen, ob du heute schon eine Gate-Karte gespeichert hast.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
+        const hasCardToday = existingCards && existingCards.length > 0;
 
-    const hasCardToday = existingCards && existingCards.length > 0;
+        if (hasCardToday) {
+          setGateStatus('Du hast heute bereits eine Gate-Karte gespeichert. Das Gate bleibt zu – komm morgen wieder.', 'error');
+          gateContent.style.display = 'none';
+          return;
+        }
 
-    if (hasCardToday) {
-      setGateStatus('Du hast heute bereits eine Gate-Karte gespeichert. Das Gate bleibt zu – komm morgen wieder.', 'error');
-      gateContent.style.display = 'none';
-      return;
-    }
-
-    // 4. Gate darf auf
-    setGateStatus('Gate geöffnet. Gestalte jetzt deine Gate-Karte.', 'success');
-    gateContent.style.display = 'block';
-  } catch (e) {
-    console.error(e);
-    setGateStatus('Unerwarteter Fehler beim Öffnen des Gates.', 'error');
-    gateContent.style.display = 'none';
-  }
-});
-
+        // 4. Gate darf auf
+        setGateStatus('Gate geöffnet. Gestalte jetzt deine Gate-Karte.', 'success');
+        gateContent.style.display = 'block';
+      } catch (e) {
+        console.error(e);
+        setGateStatus('Unerwarteter Fehler beim Öffnen des Gates.', 'error');
+        gateContent.style.display = 'none';
+      }
+    });
 
     // Enter-Key Support für Gate-Code
     gateCodeInput.addEventListener('keydown', (ev) => {
@@ -500,7 +501,7 @@
       });
     });
 
-    // Echt: in gate_cards speichern (mit Mock-Bildpfad)
+    // Speichern in gate_cards (Mock-Bildpfad)
     saveGateCardButton.addEventListener('click', async () => {
       const name = gateCardName.value.trim();
       const desc = gateCardDescription.value.trim();
