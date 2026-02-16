@@ -17,6 +17,7 @@
       display: flex;
       justify-content: center;
       padding: 32px 12px;
+      font-size: 16px;
     }
 
     .gate-wrap {
@@ -49,7 +50,7 @@
       width: 100%;
       height: 100%;
       border-radius: 14px;
-      padding: 10px 12px 9px;
+      padding: 12px 14px 11px;
       background: radial-gradient(circle at top,
                   rgba(15,23,42,0.96) 0,
                   rgba(15,23,42,0.98) 40%,
@@ -60,6 +61,7 @@
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
       overflow: hidden;
+      font-size: 14px;
     }
 
     .card::before {
@@ -86,7 +88,7 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .card-title-block {
@@ -94,14 +96,14 @@
     }
 
     .card-label {
-      font-size: 10px;
+      font-size: 11px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: #9ca3af;
     }
 
     .card-name {
-      font-size: 18px;
+      font-size: clamp(20px, 2.6vw, 26px); /* fluid type [web:3171][web:3172] */
       letter-spacing: 0.06em;
       text-transform: uppercase;
       margin-top: 2px;
@@ -110,9 +112,9 @@
     }
 
     .card-subline {
-      font-size: 10px;
+      font-size: 11px;
       color: #9ca3af;
-      margin-top: 2px;
+      margin-top: 4px;
     }
 
     .back-btn {
@@ -120,8 +122,8 @@
       border: 1px solid rgba(148,163,184,0.75);
       background: rgba(15,23,42,0.95);
       color: #e5e7eb;
-      padding: 6px 11px;
-      font-size: 10px;
+      padding: 7px 12px;
+      font-size: 11px;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
@@ -136,7 +138,7 @@
       overflow: hidden;
       border: 1px solid rgba(55,65,81,0.9);
       background: radial-gradient(circle,#020617 0,#020617 60%,#000 100%);
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .card-photo img {
@@ -152,20 +154,20 @@
       flex: 1 1 auto;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      font-size: 12px;
+      gap: 8px;
+      font-size: 13px;
     }
 
     .card-section-label {
-      font-size: 9px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
       color: #9effc7;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
 
     .card-text {
-      font-size: 11px;
+      font-size: 13px;
       line-height: 1.5;
       color: #e5e7eb;
     }
@@ -173,22 +175,22 @@
     .card-vibes {
       display: flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: 5px;
       margin-top: 4px;
     }
 
     .vibe-pill {
       display: inline-block;
-      padding: 2px 6px;
+      padding: 3px 8px;
       background: rgba(28,255,136,0.15);
       border: 1px solid rgba(28,255,136,0.3);
       border-radius: 4px;
-      font-size: 10px;
+      font-size: 11px;
       color: #9effc7;
     }
 
     .card-city {
-      font-size: 11px;
+      font-size: 12px;
       color: #9ca3af;
       margin-top: 4px;
     }
@@ -196,10 +198,10 @@
     .collect-section {
       position: relative;
       z-index: 1;
-      margin-top: 8px;
+      margin-top: 10px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
     }
 
     .collect-btn,
@@ -208,8 +210,8 @@
       border: 1px solid rgba(34,197,94,0.8);
       background: linear-gradient(90deg, #22c55e, #16a34a);
       color: #020617;
-      padding: 7px 12px;
-      font-size: 11px;
+      padding: 9px 14px;
+      font-size: 12px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -241,7 +243,7 @@
     }
 
     .collect-info {
-      font-size: 10px;
+      font-size: 11px;
       color: #9ca3af;
       text-align: center;
       min-height: 1em;
@@ -253,10 +255,10 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 6px;
-      padding-top: 4px;
+      margin-top: 8px;
+      padding-top: 6px;
       border-top: 1px dashed rgba(55,65,81,0.9);
-      font-size: 10px;
+      font-size: 11px;
     }
 
     .card-footer-left {
@@ -272,11 +274,11 @@
     }
 
     .card-number {
-      font-size: 10px;
+      font-size: 11px;
     }
 
     .card-set {
-      font-size: 9px;
+      font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
       color: #6ee7b7;
@@ -284,7 +286,7 @@
 
     .status {
       text-align: center;
-      font-size: 12px;
+      font-size: 13px;
       margin-top: 8px;
       color: #fca5a5;
     }
@@ -422,7 +424,7 @@
     }
 
     async function checkGateAlreadyCollected(gateCardId) {
-      const { data: sessionData } = await supa.auth.getSession();
+      const {  sessionData } = await supa.auth.getSession();
       if (!sessionData || !sessionData.session) return false;
 
       const userId = sessionData.session.user.id;
@@ -443,7 +445,7 @@
     }
 
     async function handleCollectClick() {
-      const { data: sessionData, error: sessionError } = await supa.auth.getSession();
+      const {  sessionData, error: sessionError } = await supa.auth.getSession();
 
       if (sessionError || !sessionData || !sessionData.session) {
         collectInfo.textContent = 'Melde dich an, um Gate-Karten zu sammeln.';
