@@ -770,7 +770,7 @@
       }
 
       // Gate öffnen ab 18 Karten
-      if (allStickers.length >= 18) {
+      if (allStickers.length >= 13) {
         const gateLink = document.getElementById('gateLink');
         if (gateLink) gateLink.style.display = 'inline-block';
 
@@ -840,17 +840,18 @@
         });
       }
 
-      // Gate-Album freischalten, sobald es mind. 1 Gate gibt
-      const { data: gateRows, error: gateError } = await client
-        .from('gate_collection')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', userId);
+      // Gate-Album freischalten, sobald mind. 1 Gate gesammelt wurde
+const {  gateEntries, error: gateError } = await client
+  .from('gate_collection')
+  .select('id')
+  .eq('user_id', userId)
+  .limit(1);
 
-      if (!gateError && gateRows !== null) {
-        // count kommt im Header, bei head: true liefert supabase-js data=null, count separat [web:3374][web:3380]
-        const gateAlbumLink = document.getElementById('gateAlbumLink');
-        if (gateAlbumLink) gateAlbumLink.style.display = 'inline-block';
-      }
+if (!gateError && gateEntries && gateEntries.length > 0) {
+  const gateAlbumLink = document.getElementById('gateAlbumLink');
+  if (gateAlbumLink) gateAlbumLink.style.display = 'inline-block';
+}
+
     }
 
     loadTheme();
