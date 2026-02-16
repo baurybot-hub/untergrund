@@ -35,7 +35,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
       flex-wrap: wrap;
       gap: 16px;
     }
@@ -84,72 +84,45 @@
       border-radius: 20px;
       border: 2px solid rgba(129,140,248,0.4);
       padding: 24px;
-      min-height: 480px;
+      min-height: 600px;
       position: relative;
       box-shadow: 0 20px 80px rgba(0,0,0,0.9);
     }
 
-    .album-page::before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background: radial-gradient(circle at 0% 0%, rgba(168,85,247,0.22), transparent 55%),
-                  radial-gradient(circle at 100% 100%, rgba(56,189,248,0.2), transparent 55%);
-      mix-blend-mode: screen;
-      opacity: 0.6;
-      pointer-events: none;
-    }
-
-    .album-inner {
-      position: relative;
-      z-index: 1;
-    }
-
     .page-header {
       text-align: center;
-      margin-bottom: 16px;
-    }
-
-    .page-header-title {
-      font-size: 18px;
-      margin-bottom: 6px;
-      color: #e5e7eb;
-    }
-
-    .page-header-subtitle {
-      font-size: 13px;
-      color: #a5b4fc;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: #a0a0a0;
     }
 
     .gate-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(2, 1fr);
       gap: 16px;
-      margin-top: 16px;
+      margin-bottom: 24px;
     }
 
-    @media (min-width: 700px) {
+    @media (min-width: 600px) {
       .gate-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(3, 1fr);
       }
     }
 
     .gate-slot {
-      background: rgba(15,23,42,0.92);
-      border-radius: 14px;
+      aspect-ratio: 3/4;
+      background: rgba(15,23,42,0.9);
+      border-radius: 12px;
       border: 1px dashed rgba(148,163,184,0.5);
-      display: flex;
-      flex-direction: column;
+      position: relative;
       overflow: hidden;
       cursor: pointer;
       transition: all 0.2s;
-      position: relative;
     }
 
     .gate-slot.filled {
-      border-style: solid;
-      border-color: rgba(129,140,248,0.8);
-      background: radial-gradient(circle at top, rgba(15,23,42,0.96), rgba(15,23,42,0.99));
+      border: 1px solid rgba(129,140,248,0.8);
+      background: rgba(15,23,42,0.98);
     }
 
     .gate-slot.filled:hover {
@@ -159,16 +132,20 @@
 
     .gate-image {
       width: 100%;
-      height: 150px;
+      height: 100%;
       object-fit: cover;
       display: block;
-      background: rgba(15,23,42,0.95);
     }
 
     .gate-info {
-      padding: 8px 9px 9px;
-      background: rgba(15,23,42,0.98);
-      text-align: left;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 8px;
+      background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.4));
+      text-align: center;
+      z-index: 5;
     }
 
     .gate-name {
@@ -178,12 +155,55 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      color: #f9fafb;
+      color: #f5f5f5;
     }
 
-    .gate-meta {
-      font-size: 11px;
-      color: #a5b4fc;
+    .gate-date {
+      font-size: 10px;
+      color: #a0a0a0;
+    }
+
+    .empty-slot-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: rgba(148,163,184,0.35);
+    }
+
+    .page-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    .page-nav button {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(129,140,248,0.5);
+      background: rgba(15,23,42,0.9);
+      color: #c7d2fe;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .page-nav button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+
+    .page-nav button:not(:disabled):hover {
+      background: rgba(79,70,229,0.25);
+      transform: translateY(-1px);
+    }
+
+    .page-indicator {
+      font-size: 13px;
+      color: #a0a0a0;
     }
 
     .empty-state {
@@ -193,14 +213,14 @@
     }
 
     .empty-state h2 {
-      font-size: 22px;
-      margin-bottom: 10px;
+      font-size: 24px;
+      margin-bottom: 12px;
       color: #f5f5f5;
     }
 
     .empty-state p {
       font-size: 14px;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
     }
 
     .empty-state a {
@@ -226,169 +246,202 @@
 
     <div class="header">
       <div class="header-left">
-        <h1>Gate-Album <span id="gateCount" style="font-size:18px;color:#a5b4fc;">0</span></h1>
+        <h1>Gate-Album <span id="cardCount" style="font-size:18px;color:#a5b4fc;">(0)</span></h1>
         <div class="subtitle">Deine geheimen Gates, die du im UnterGrund gefunden hast.</div>
       </div>
       <div class="header-right">
         <a href="MeineSammlung.html" class="header-button">Zurück zum Album</a>
-        <a href="index.html" class="header-button">Zur Stage</a>
+        <a href="index.html" class="header-button">Zurück in den UnterGrund</a>
       </div>
     </div>
 
-    <div class="album-page">
-      <div class="album-inner">
+    <div id="albumContainer" style="display:none;">
+      <div class="album-page">
         <div class="page-header">
-          <div id="albumTitle" class="page-header-title">Dein geheimes Gate-Album</div>
-          <div id="albumSubtitle" class="page-header-subtitle">
-            Sammle Gate-Karten durch geteilte Links und sie landen hier.
-          </div>
+          <div id="pageTitle">Seite 1</div>
         </div>
 
-        <div id="gateGrid" class="gate-grid" style="display:none;"></div>
+        <div class="gate-grid" id="gateGrid"></div>
 
-        <div id="emptyState" class="empty-state" style="display:none;">
-          <h2>Noch kein Gate gefunden</h2>
-          <p>Sobald du deine erste Gate-Karte über einen geteilten Link sammelst, erscheint sie hier.</p>
-          <a href="index.html">Zur Stage & Artists entdecken</a>
+        <div class="page-nav">
+          <button id="prevPageBtn" onclick="changePage(-1)">← Vorherige</button>
+          <div class="page-indicator" id="pageIndicator">Seite 1 von 1</div>
+          <button id="nextPageBtn" onclick="changePage(1)">Nächste →</button>
         </div>
       </div>
+    </div>
+
+    <div id="emptyState" class="empty-state" style="display:none;">
+      <h2>🎴 Dein Gate-Album ist noch leer</h2>
+      <p>Finde oder erhalte eine Gate-Karte, dann landet sie hier im Album.</p>
+      <a href="index.html">Zurück in den UnterGrund</a>
     </div>
   </div>
 
-  <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
-  <!-- Konfetti -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
   <script>
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    const BASE_URL = "https://baurybot-hub.github.io/untergrund/";
+    const STICKERS_PER_PAGE = 6;
+    let allGates = [];
+    let currentPage = 1;
 
-    function fireConfetti() {
-      confetti({
-        particleCount: 180,
-        spread: 70,
-        origin: { y: 0.3 }
-      });
+    function getTotalPages() {
+      return Math.ceil(allGates.length / STICKERS_PER_PAGE) || 1;
     }
 
-    function getQueryParam(name) {
-      const params = new URLSearchParams(window.location.search);
-      return params.get(name);
+    function renderPage() {
+      const grid = document.getElementById('gateGrid');
+      const pageTitle = document.getElementById('pageTitle');
+      const pageIndicator = document.getElementById('pageIndicator');
+      const prevBtn = document.getElementById('prevPageBtn');
+      const nextBtn = document.getElementById('nextPageBtn');
+
+      const totalPages = getTotalPages();
+      const startIdx = (currentPage - 1) * STICKERS_PER_PAGE;
+      const endIdx = startIdx + STICKERS_PER_PAGE;
+      const pageGates = allGates.slice(startIdx, endIdx);
+
+      grid.innerHTML = '';
+
+      for (let i = 0; i < STICKERS_PER_PAGE; i++) {
+        const gate = pageGates[i];
+        const slot = document.createElement('div');
+
+        if (gate) {
+          slot.className = 'gate-slot filled';
+          // optional: später Link zurück zur GateShare-Ansicht
+          // slot.onclick = () => window.location.href = `GateShare.html?s=${gate.share_slug}`;
+
+          const img = document.createElement('img');
+          img.className = 'gate-image';
+          img.src = gate.image_path || 'https://via.placeholder.com/300x400?text=Gate';
+          img.alt = gate.name || 'Gate';
+
+          const info = document.createElement('div');
+          info.className = 'gate-info';
+
+          const nameDiv = document.createElement('div');
+          nameDiv.className = 'gate-name';
+          nameDiv.textContent = gate.name || 'Unbenanntes Gate';
+
+          const dateDiv = document.createElement('div');
+          dateDiv.className = 'gate-date';
+          dateDiv.textContent = gate.collected_at
+            ? new Date(gate.collected_at).toLocaleDateString('de-DE')
+            : 'Datum unbekannt';
+
+          info.appendChild(nameDiv);
+          info.appendChild(dateDiv);
+
+          slot.appendChild(img);
+          slot.appendChild(info);
+        } else {
+          slot.className = 'gate-slot';
+          slot.innerHTML = '<div class="empty-slot-content">?</div>';
+        }
+
+        grid.appendChild(slot);
+      }
+
+      pageTitle.textContent = `Seite ${currentPage}`;
+      pageIndicator.textContent = `Seite ${currentPage} von ${totalPages}`;
+
+      prevBtn.disabled = currentPage === 1;
+      nextBtn.disabled = currentPage === totalPages;
     }
 
-    async function loadGateAlbum() {
+    function changePage(direction) {
+      const totalPages = getTotalPages();
+      currentPage = Math.max(1, Math.min(totalPages, currentPage + direction));
+      renderPage();
+    }
+
+    async function loadGateCollection() {
       const { data, error } = await client.auth.getSession();
       if (error || !data || !data.session) {
-        window.location.href = "Login.html?from=gate_album";
+        window.location.href = 'Login.html?from=gate_album';
         return;
       }
 
       const session = data.session;
       const userId = session.user.id;
       const userEmail = session.user.email;
-      document.getElementById("userInfo").textContent = "Eingeloggt als " + userEmail;
 
-      // 1) Gate-Collection für den User holen
-      const {  collections, error: collError } = await client
-        .from("gate_collection")
-        .select("gate_card_id, collected_at")
-        .eq("user_id", userId)
-        .order("collected_at", { ascending: true });
+      document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
 
-      const gateGrid = document.getElementById("gateGrid");
-      const emptyState = document.getElementById("emptyState");
-      const gateCountEl = document.getElementById("gateCount");
+      // 1) eigene Gate-Collections holen (älteste zuerst)
+      const { data: collections, error: collError } = await client
+        .from('gate_collection')
+        .select('gate_card_id, collected_at')
+        .eq('user_id', userId)
+        .order('collected_at', { ascending: true });
+
+      const albumContainer = document.getElementById('albumContainer');
+      const emptyState = document.getElementById('emptyState');
+      const cardCount = document.getElementById('cardCount');
 
       if (collError) {
-        console.error(collError);
-        emptyState.style.display = "block";
-        gateGrid.style.display = "none";
-        gateCountEl.textContent = "0";
+        console.error('gate_collection error:', collError);
+        emptyState.style.display = 'block';
+        cardCount.textContent = '(0)';
         return;
       }
 
       if (!collections || collections.length === 0) {
-        emptyState.style.display = "block";
-        gateGrid.style.display = "none";
-        gateCountEl.textContent = "0";
-      } else {
-        // 2) Alle Gate-IDs sammeln
-        const gateIds = collections.map(c => c.gate_card_id);
+        emptyState.style.display = 'block';
+        cardCount.textContent = '(0)';
+        return;
+      }
 
-        // 3) Passende gate_cards holen
-        const {  gates, error: gatesError } = await client
-          .from("gate_cards")
-          .select("id, name, image_path")
-          .in("id", gateIds);
+      cardCount.textContent = `(${collections.length})`;
 
-        if (gatesError) {
-          console.error(gatesError);
-          emptyState.style.display = "block";
-          gateGrid.style.display = "none";
-          gateCountEl.textContent = "0";
-          return;
+      // 2) korrespondierende Gate-Karten holen
+      const gateIds = collections.map(c => c.gate_card_id);
+      const { data: gates, error: gatesError } = await client
+        .from('gate_cards')
+        .select('id, name, image_path')
+        .in('id', gateIds);
+
+      if (gatesError) {
+        console.error('gate_cards error:', gatesError);
+        emptyState.style.display = 'block';
+        return;
+      }
+
+      const gateMap = new Map();
+      (gates || []).forEach(g => gateMap.set(g.id, g));
+
+      // 3) Daten zusammenbauen (ähnlich wie in MeineSammlung)
+      allGates = collections.map(item => {
+        const gate = gateMap.get(item.gate_card_id);
+
+        if (!gate) {
+          console.warn('Gate nicht gefunden für gate_card_id:', item.gate_card_id, 'collection:', item);
+          return {
+            id: item.gate_card_id,
+            name: 'Unbekanntes Gate',
+            image_path: null,
+            collected_at: item.collected_at
+          };
         }
 
-        // Map für schnellen Zugriff
-        const gateMap = new Map();
-        (gates || []).forEach(g => gateMap.set(g.id, g));
+        return {
+          id: gate.id,
+          name: gate.name,
+          image_path: gate.image_path,
+          collected_at: item.collected_at
+        };
+      });
 
-        emptyState.style.display = "none";
-        gateGrid.style.display = "grid";
-        gateGrid.innerHTML = "";
-        gateCountEl.textContent = collections.length.toString();
-
-        collections.forEach(item => {
-          const gate = gateMap.get(item.gate_card_id);
-          if (!gate) return;
-
-          const slot = document.createElement("div");
-          slot.className = "gate-slot filled";
-
-          const img = document.createElement("img");
-          img.className = "gate-image";
-          img.src = gate.image_path || "https://via.placeholder.com/300x400?text=Gate";
-          img.alt = gate.name || "Gate";
-
-          const info = document.createElement("div");
-          info.className = "gate-info";
-
-          const nameDiv = document.createElement("div");
-          nameDiv.className = "gate-name";
-          nameDiv.textContent = gate.name || "Unbenanntes Gate";
-
-          const metaDiv = document.createElement("div");
-          metaDiv.className = "gate-meta";
-          const date = item.collected_at
-            ? new Date(item.collected_at).toLocaleDateString("de-DE")
-            : "Unbekanntes Datum";
-          metaDiv.textContent = "gefunden am " + date;
-
-          info.appendChild(nameDiv);
-          info.appendChild(metaDiv);
-
-          slot.appendChild(img);
-          slot.appendChild(info);
-
-          gateGrid.appendChild(slot);
-        });
-      }
-
-      // Freischalt-Moment mit Konfetti
-      const first = getQueryParam("first");
-      if (first === "1") {
-        const titleEl = document.getElementById("albumTitle");
-        const subtitleEl = document.getElementById("albumSubtitle");
-        titleEl.textContent = "Gate-Album freigeschaltet!";
-        subtitleEl.textContent = "Du hast deine erste Gate-Karte gefunden – ab jetzt landen alle weiteren hier.";
-        fireConfetti();
-      }
+      albumContainer.style.display = 'block';
+      emptyState.style.display = 'none';
+      renderPage();
     }
 
-    loadGateAlbum();
+    loadGateCollection();
   </script>
 </body>
 </html>
