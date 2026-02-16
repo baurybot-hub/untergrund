@@ -523,22 +523,44 @@
       return true;
     }
 
+    // KI-Bildgenerierung + Upload zu Supabase Storage
     async function generateGateImage(promptText, previewIndex) {
       const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
       const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
       const fullPrompt = `${promptText}.${moodText}`;
 
+      // Puter.ai txt2img
       const imgEl = await puter.ai.txt2img(fullPrompt, {
         model: 'gpt-image-1',
         quality: 'low'
       });
 
-      const imageUrl = imgEl.src;
-      if (!imageUrl) {
-        throw new Error('Keine Bild-URL von der KI erhalten.');
+      const imageUrl = imgEl.src; // Base64-DataURL
+
+      // Base64 → Blob
+      const blob = await fetch(imageUrl).then(r => r.blob());
+
+      // Upload zu Supabase Storage
+      const fileName = `gate_${Date.now()}_${Math.random().toString(36).substring(7)}.png`;
+      const { data: uploadData, error: uploadError } = await supa.storage
+        .from('gate-images')
+        .upload(fileName, blob, {
+          contentType: 'image/png',
+          cacheControl: '3600'
+        });
+
+      if (uploadError) {
+        throw new Error(`Upload fehlgeschlagen: ${uploadError.message}`);
       }
 
-      return { imageUrl };
+      // Public URL holen
+      const { data: publicUrlData } = supa.storage
+        .from('gate-images')
+        .getPublicUrl(fileName);
+
+      const persistentUrl = publicUrlData.publicUrl;
+
+      return { imageUrl: persistentUrl };
     }
 
     generateImageButton.addEventListener('click', async () => {
@@ -559,7 +581,7 @@
       generateImageButton.disabled = true;
       generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount}/${maxPreviews} (KI)`;
       slot.classList.add('loading');
-      imgContainer.textContent = `Generiere KI-Gate-Bild (${previewCount}/${maxPreviews}) ...`;
+      imgContainer.textContent = `Generiere & lade KI-Bild hoch (${previewCount}/${maxPreviews}) ...`;
 
       try {
         const promptText = gatePrompt.value.trim();
@@ -572,6 +594,7 @@
         slot.dataset.mood1 = gateMood1.value.trim();
         slot.dataset.mood2 = gateMood2.value.trim();
         slot.dataset.mood3 = gateMood3.value.trim();
+        slot.dataset.imageUrl = imageUrl; // Persistente URL merken
 
         if (selectedPreviewIndex === null) {
           selectedPreviewIndex = currentIndex;
@@ -587,8 +610,8 @@
         }
       } catch (e) {
         console.error(e);
-        imgContainer.textContent = 'Fehler bei der KI-Bildgenerierung.';
-        showMessage('Die KI konnte das Bild gerade nicht erstellen. Versuch es gleich nochmal.');
+        imgContainer.textContent = 'Fehler bei KI-Bild oder Upload.';
+        showMessage(`Fehler: ${e.message}. Versuch es gleich nochmal.`);
       } finally {
         slot.classList.remove('loading');
         if (previewCount >= maxPreviews) {
@@ -680,13 +703,12 @@
       }
 
       const selectedSlot = [...previewSlots].find(s => Number(s.dataset.index) === selectedPreviewIndex);
-      const img = selectedSlot.querySelector('img');
-      if (!img || !img.src) {
-        setSaveStatus('Fehler: Kein Bild in der ausgewählten Vorschau gefunden.', 'error');
+      const imagePath = selectedSlot.dataset.imageUrl; // Persistente Storage-URL
+
+      if (!imagePath) {
+        setSaveStatus('Fehler: Kein Bild-URL in der ausgewählten Vorschau gefunden.', 'error');
         return;
       }
-
-      const imagePath = img.src;
 
       try {
         saveGateCardButton.disabled = true;
