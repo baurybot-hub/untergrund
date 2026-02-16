@@ -523,78 +523,56 @@
       return true;
     }
 
-    // KI-Bildgenerierung + Upload zu Supabase Storage (WebP, hohe Qualität)
-async function generateGateImage(promptText, previewIndex) {
-  const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
-  const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
-  const fullPrompt = `${promptText}.${moodText}`;
+    // KI-Bildgenerierung NUR im Browser (WebP-Blob), KEIN Upload
+    async function generateGateImage(promptText, previewIndex) {
+      const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+      const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
+      const fullPrompt = `${promptText}.${moodText}`;
 
-  // Puter.ai txt2img
-  const imgEl = await puter.ai.txt2img(fullPrompt, {
-    model: 'gpt-image-1',
-    quality: 'low'
-  });
+      const imgEl = await puter.ai.txt2img(fullPrompt, {
+        model: 'gpt-image-1',
+        quality: 'low'
+      }); // [web:3129]
 
-  const imageUrl = imgEl.src; // Base64-DataURL
+      const imageUrl = imgEl.src;
+      const pngBlob = await fetch(imageUrl).then(r => r.blob()); [web:3128]
 
-  // Base64 → Blob
-  const pngBlob = await fetch(imageUrl).then(r => r.blob());
+      const webpBlob = await convertToWebP(pngBlob, 0.92);
 
-  // PNG → WebP konvertieren (Canvas-basiert, Qualität 0.92 = sehr gut)
-  const webpBlob = await convertToWebP(pngBlob, 0.92);
+      const blobUrl = URL.createObjectURL(webpBlob); [web:3134]
 
-  // Upload zu Supabase Storage
-  const fileName = `gate_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
-  const { data: uploadData, error: uploadError } = await supa.storage
-    .from('gate-images')
-    .upload(fileName, webpBlob, {
-      contentType: 'image/webp',
-      cacheControl: '3600'
-    });
+      return { blobUrl, webpBlob };
+    }
 
-  if (uploadError) {
-    throw new Error(`Upload fehlgeschlagen: ${uploadError.message}`);
-  }
+    // Blob → WebP (Canvas)
+    async function convertToWebP(blob, quality = 0.92) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-  // Public URL holen
-  const { data: publicUrlData } = supa.storage
-    .from('gate-images')
-    .getPublicUrl(fileName);
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
 
-  const persistentUrl = publicUrlData.publicUrl;
+          canvas.toBlob(
+            (webpBlob) => {
+              if (webpBlob) {
+                resolve(webpBlob);
+              } else {
+                reject(new Error('WebP-Konvertierung fehlgeschlagen'));
+              }
+            },
+            'image/webp',
+            quality
+          );
+        };
 
-  return { imageUrl: persistentUrl };
-}
-
-// Hilfsfunktion: Blob → WebP mit Canvas (hohe Qualität)
-async function convertToWebP(blob, quality = 0.92) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    img.onload = () => {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
-
-      canvas.toBlob(
-        (webpBlob) => {
-          if (webpBlob) {
-            resolve(webpBlob);
-          } else {
-            reject(new Error('WebP-Konvertierung fehlgeschlagen'));
-          }
-        },
-        'image/webp',
-        quality // 0.92 = sehr hohe Qualität, trotzdem ~30% kleiner als PNG
-      );
-    };
-
-    img.onerror = () => reject(new Error('Bild konnte nicht geladen werden'));
-    img.src = URL.createObjectURL(blob);
-  });
-}
+        img.onerror = () => reject(new Error('Bild konnte nicht geladen werden'));
+        img.src = URL.createObjectURL(blob);
+      });
+    }
 
     generateImageButton.addEventListener('click', async () => {
       if (!validateFormForPreview()) {
@@ -614,20 +592,20 @@ async function convertToWebP(blob, quality = 0.92) {
       generateImageButton.disabled = true;
       generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount}/${maxPreviews} (KI)`;
       slot.classList.add('loading');
-      imgContainer.textContent = `Generiere & lade KI-Bild hoch (${previewCount}/${maxPreviews}) ...`;
+      imgContainer.textContent = `Generiere KI-Bild (${previewCount}/${maxPreviews}) ...`;
 
       try {
         const promptText = gatePrompt.value.trim();
-        const { imageUrl } = await generateGateImage(promptText, currentIndex);
+        const { blobUrl } = await generateGateImage(promptText, currentIndex);
 
-        imgContainer.innerHTML = `<img src="${imageUrl}" alt="Gate Vorschau ${currentIndex}">`;
+        imgContainer.innerHTML = `<img src="${blobUrl}" alt="Gate Vorschau ${currentIndex}">`;
 
-        // Snapshot: Prompt + Vibes im Slot speichern
         slot.dataset.prompt = promptText;
         slot.dataset.mood1 = gateMood1.value.trim();
         slot.dataset.mood2 = gateMood2.value.trim();
         slot.dataset.mood3 = gateMood3.value.trim();
-        slot.dataset.imageUrl = imageUrl; // Persistente URL merken
+        slot.dataset.blobUrl = blobUrl;
+        delete slot.dataset.imageUrl;
 
         if (selectedPreviewIndex === null) {
           selectedPreviewIndex = currentIndex;
@@ -643,7 +621,7 @@ async function convertToWebP(blob, quality = 0.92) {
         }
       } catch (e) {
         console.error(e);
-        imgContainer.textContent = 'Fehler bei KI-Bild oder Upload.';
+        imgContainer.textContent = 'Fehler bei KI-Bild.';
         showMessage(`Fehler: ${e.message}. Versuch es gleich nochmal.`);
       } finally {
         slot.classList.remove('loading');
@@ -680,17 +658,14 @@ async function convertToWebP(blob, quality = 0.92) {
       const img = selectedSlot.querySelector('img');
       if (!img) return;
 
-      // Prompt + Vibes aus Snapshot laden
       gatePrompt.value = selectedSlot.dataset.prompt || '';
       gateMood1.value = selectedSlot.dataset.mood1 || '';
       gateMood2.value = selectedSlot.dataset.mood2 || '';
       gateMood3.value = selectedSlot.dataset.mood3 || '';
       gatePromptCounter.textContent = gatePrompt.value.length + ' / 240';
 
-      // Phase 2 aufklappen
       phase2Content.style.display = 'block';
 
-      // Kartenvorschau initialisieren
       cardPreviewImg.src = img.src;
       updateCardPreview();
     }
@@ -736,10 +711,10 @@ async function convertToWebP(blob, quality = 0.92) {
       }
 
       const selectedSlot = [...previewSlots].find(s => Number(s.dataset.index) === selectedPreviewIndex);
-      const imagePath = selectedSlot.dataset.imageUrl; // Persistente Storage-URL
+      const blobUrl = selectedSlot?.dataset.blobUrl;
 
-      if (!imagePath) {
-        setSaveStatus('Fehler: Kein Bild-URL in der ausgewählten Vorschau gefunden.', 'error');
+      if (!blobUrl) {
+        setSaveStatus('Fehler: Kein Bild in der ausgewählten Vorschau gefunden.', 'error');
         return;
       }
 
@@ -778,6 +753,31 @@ async function convertToWebP(blob, quality = 0.92) {
           return;
         }
 
+        // Blob aus Blob-URL holen
+        const imageBlob = await fetch(blobUrl).then(r => r.blob()); [web:3128]
+
+        // JETZT erst Upload zu Supabase
+        const fileName = `gate_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+        const { data: uploadData, error: uploadError } = await supa.storage
+          .from('gate-images')
+          .upload(fileName, imageBlob, {
+            contentType: 'image/webp',
+            cacheControl: '3600'
+          }); [web:3133][web:3136]
+
+        if (uploadError) {
+          console.error(uploadError);
+          setSaveStatus('Fehler beim Hochladen deines Gate-Bildes.', 'error');
+          saveGateCardButton.disabled = false;
+          return;
+        }
+
+        const { data: publicUrlData } = supa.storage
+          .from('gate-images')
+          .getPublicUrl(fileName); [web:3130]
+
+        const imagePath = publicUrlData.publicUrl;
+
         const { error: insertError } = await supa.from('gate_cards').insert({
           user_id: userId,
           image_path: imagePath,
@@ -797,6 +797,17 @@ async function convertToWebP(blob, quality = 0.92) {
           saveGateCardButton.disabled = false;
           return;
         }
+
+        // Nach dem Speichern: alles sperren
+        generateImageButton.disabled = true;
+        generateImageButton.textContent = 'Karte gespeichert – keine weiteren Bilder möglich';
+        gatePrompt.disabled = true;
+        gateMood1.disabled = true;
+        gateMood2.disabled = true;
+        gateMood3.disabled = true;
+        gateCardName.disabled = true;
+        gateCardDescription.disabled = true;
+        gateCity.disabled = true;
 
         setSaveStatus('Gate-Karte fest gespeichert. Vielleicht mischt sie sich morgen in den UnterGrund.', 'success');
       } catch (e) {
