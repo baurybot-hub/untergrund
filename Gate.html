@@ -535,7 +535,8 @@
       }); // [web:3129]
 
       const imageUrl = imgEl.src;
-      const pngBlob = await fetch(imageUrl).then(r => r.blob()); [web:3128]
+      const pngBlob = await fetch(imageUrl).then(r => r.blob());
+
 
       const webpBlob = await convertToWebP(pngBlob, 0.92);
 
@@ -754,7 +755,8 @@
         }
 
         // Blob aus Blob-URL holen
-        const imageBlob = await fetch(blobUrl).then(r => r.blob()); [web:3128]
+        const imageBlob = await fetch(blobUrl).then(r => r.blob());
+
 
         // JETZT erst Upload zu Supabase
         const fileName = `gate_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
