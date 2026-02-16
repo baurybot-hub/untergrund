@@ -2,620 +2,719 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
+  <title>UnterGrund Gate</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Gate – UnterGrund</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * {
-      margin: 0;
-      padding: 0;
       box-sizing: border-box;
     }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #e0e0e0;
-      padding: 20px;
+      margin: 0;
       min-height: 100vh;
+      background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      padding: 32px 12px;
     }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
+    .gate-wrap {
+      width: 100%;
+      max-width: 640px;
+      background: rgba(0,0,0,0.88);
+      border-radius: 20px;
+      border: 1px solid rgba(28,255,136,0.35);
+      box-shadow: 0 0 30px rgba(28,255,136,0.25);
+      padding: 24px 22px 20px;
+    }
+    .logo {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #9effc7;
+      margin-bottom: 4px;
     }
     h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      margin-top: 0;
+      margin-bottom: 6px;
+      font-size: 24px;
     }
     .subtitle {
-      font-size: 1rem;
-      color: #b0b0b0;
-      margin-bottom: 30px;
+      font-size: 14px;
+      color: #c4c4c4;
+      margin-bottom: 18px;
     }
-    .gate-check {
-      background: rgba(255,255,255,0.05);
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 30px;
-    }
-    .gate-check input {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      border: 2px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      background: rgba(0,0,0,0.3);
-      color: #e0e0e0;
+    h2 {
+      font-size: 18px;
+      margin-top: 20px;
       margin-bottom: 10px;
     }
-    .gate-check input:focus {
-      outline: none;
-      border-color: #ff6b6b;
-    }
-    .gate-check button {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .gate-check button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .gate-status {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: 500;
-    }
-    .gate-status.error {
-      background: rgba(255,0,0,0.2);
-      color: #ff6b6b;
-    }
-    .gate-status.success {
-      background: rgba(0,255,0,0.2);
-      color: #5fff5f;
-    }
-    .gate-content {
-      display: none;
-    }
-    .gate-content.active {
-      display: block;
-    }
-    .section {
-      background: rgba(255,255,255,0.05);
-      padding: 25px;
-      border-radius: 12px;
-      margin-bottom: 25px;
-    }
-    .section h2 {
-      font-size: 1.5rem;
-      margin-bottom: 15px;
-      color: #ff6b6b;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-      color: #c0c0c0;
-    }
-    .form-group input,
-    .form-group textarea {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      border: 2px solid rgba(255,255,255,0.1);
-      border-radius: 8px;
-      background: rgba(0,0,0,0.3);
-      color: #e0e0e0;
-      font-family: inherit;
-    }
-    .form-group input:focus,
-    .form-group textarea:focus {
-      outline: none;
-      border-color: #ff6b6b;
-    }
-    .form-group textarea {
-      resize: vertical;
-      min-height: 100px;
-    }
-    .mood-inputs {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-    .generate-btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 1.1rem;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    .generate-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .preview-slots {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-      margin-top: 20px;
-    }
-    .preview-slot {
-      aspect-ratio: 1;
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
+    .field {
+      margin-bottom: 16px;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      border: 3px solid transparent;
-      overflow: hidden;
-      position: relative;
+      flex-direction: column;
+      gap: 6px;
     }
-    .preview-slot img {
+    label {
+      font-size: 14px;
+    }
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(15,15,15,0.9);
+      color: #f5f5f5;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: #1cff88;
+      box-shadow: 0 0 0 1px rgba(28,255,136,0.45);
+    }
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: linear-gradient(90deg, #1cff88, #00b35c);
+      color: #020202;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(28,255,136,0.45);
+      filter: brightness(1.05);
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+    .status {
+      font-size: 13px;
+      min-height: 18px;
+    }
+    .status.error {
+      color: #ff6b6b;
+    }
+    .status.success {
+      color: #9effc7;
+    }
+    .char-counter {
+      font-size: 11px;
+      color: #a0a0a0;
+      text-align: right;
+    }
+    .hint {
+      font-size: 12px;
+      color: #a0a0a0;
+    }
+    .save-hint {
+      font-size: 12px;
+      color: #fbbf24;
+      line-height: 1.5;
+      margin-bottom: 4px;
+    }
+
+    /* Mehrere Previews */
+    .gate-previews {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+      margin-bottom: 8px;
+    }
+    .gate-preview-slot {
+      flex: 1;
+      border-radius: 12px;
+      border: 1px dashed rgba(148,163,184,0.7);
+      padding: 8px;
+      font-size: 12px;
+      color: #a0a0a0;
+      text-align: center;
+      min-height: 90px;
+      cursor: pointer;
+      background: rgba(10,10,10,0.9);
+      transition: border-color 0.12s ease, box-shadow 0.12s ease, transform 0.08s ease;
+    }
+    .gate-preview-slot.loading {
+      opacity: 0.7;
+      cursor: progress;
+    }
+    .gate-preview-slot.selected {
+      border-style: solid;
+      border-color: #fbbf24;
+      box-shadow: 0 0 12px rgba(251,191,36,0.55);
+      transform: translateY(-1px);
+    }
+    .gate-preview-label {
+      margin-bottom: 4px;
+      color: #e5e7eb;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .gate-preview-image img {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+    }
+    .preview-hint {
+      font-size: 12px;
+      color: #a0a0a0;
+      margin-top: 4px;
+    }
+
+    /* Live-Kartenvorschau */
+    .card-preview {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(15,15,15,0.9);
+      border-radius: 14px;
+      border: 1px solid rgba(28,255,136,0.25);
+    }
+    .card-preview h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: #9effc7;
+    }
+    .card-preview-inner {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .card-preview-img {
+      flex-shrink: 0;
+      width: 120px;
+      height: 160px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+    .card-preview-img img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-    .preview-slot.selected {
-      border-color: #ff6b6b;
+    .card-preview-text {
+      flex: 1;
+      min-width: 0;
     }
-    .preview-slot .slot-number {
-      font-size: 2rem;
-      color: rgba(255,255,255,0.2);
-      font-weight: bold;
+    .card-preview-text h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #f5f5f5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .preview-slot.loading {
-      background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 100%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
+    .card-preview-text p {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: #c0c0c0;
+      line-height: 1.4;
     }
-    @keyframes loading {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    .card-preview {
-      background: rgba(0,0,0,0.4);
-      padding: 20px;
-      border-radius: 12px;
-      margin-top: 20px;
-    }
-    .card-preview h3 {
-      font-size: 1.3rem;
-      margin-bottom: 10px;
-      color: #ff6b6b;
-    }
-    .card-preview p {
-      margin-bottom: 8px;
-      color: #b0b0b0;
-    }
-    .card-preview .vibes {
+    .card-preview-vibes {
       display: flex;
-      gap: 8px;
+      gap: 4px;
       flex-wrap: wrap;
-      margin-top: 10px;
+      margin-bottom: 6px;
     }
-    .card-preview .vibe-tag {
-      background: rgba(255,107,107,0.2);
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      color: #ff6b6b;
+    .card-preview-vibe {
+      display: inline-block;
+      padding: 2px 6px;
+      background: rgba(28,255,136,0.15);
+      border: 1px solid rgba(28,255,136,0.3);
+      border-radius: 4px;
+      font-size: 10px;
+      color: #9effc7;
     }
-    .save-btn {
-      width: 100%;
-      padding: 14px;
-      font-size: 1.1rem;
-      background: linear-gradient(135deg, #11998e, #38ef7d);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 600;
-      margin-top: 20px;
-    }
-    .save-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .save-status {
-      margin-top: 15px;
-      padding: 12px;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: 500;
-    }
-    .save-status.error {
-      background: rgba(255,0,0,0.2);
-      color: #ff6b6b;
-    }
-    .save-status.success {
-      background: rgba(0,255,0,0.2);
-      color: #5fff5f;
+    .card-preview-city {
+      font-size: 11px;
+      color: #9ca3af;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🚪 Gate</h1>
-    <p class="subtitle">Zugang nur mit Code – erstelle deine einzigartige Gate-Karte für den UnterGrund</p>
-
-    <!-- Gate-Code Check -->
-    <div class="gate-check">
-      <input type="text" id="gateCodeInput" placeholder="Gate-Code eingeben (z.B. UG-GATE)" />
-      <button id="gateCheckButton">Prüfen & Eintreten</button>
-      <div id="gateStatus" class="gate-status" style="display:none;"></div>
+  <div class="gate-wrap">
+    <div class="logo">UnterGrund Gate</div>
+    <h1>Secret Gate öffnen</h1>
+    <div class="subtitle">
+      Knack den Code und gestalte eine Gate-Karte, die sich in den UnterGrund mischen kann.
     </div>
 
-    <!-- Gate Content (nur nach erfolgreicher Code-Prüfung) -->
-    <div id="gateContent" class="gate-content">
-      <!-- Lore & Vibes -->
-      <div class="section">
-        <h2>🌌 Lore & Vibes</h2>
-        <div class="form-group">
-          <label>Prompt (Beschreibe die Atmosphäre, Lore, Gefühl)</label>
-          <textarea id="gatePrompt" placeholder="z.B. Ein vergessener Club unter einer alten Brücke, wo die Zeit stillsteht und Neonlichter in Pfützen tanzen..."></textarea>
+    <div class="field">
+      <label for="gateCode">Gate-Code eingeben</label>
+      <input id="gateCode" type="text" placeholder="Dein Einladungscode">
+      <div class="hint">Zum Testen: Code <strong>UG-GATE</strong> verwenden.</div>
+    </div>
+
+    <button id="checkCodeButton">Gate öffnen</button>
+    <div id="gateStatus" class="status"></div>
+
+    <!-- Phase 1: Nur Prompt + Vibes + Bilder erstellen -->
+    <div id="phase1Content" style="display:none; margin-top:24px;">
+      <h2>Erstelle 3 Bild-Varianten</h2>
+
+      <div class="field">
+        <label for="gatePrompt">Beschreibe dein Gate-Artwork (KI-Prompt)</label>
+        <textarea id="gatePrompt" rows="3" maxlength="240"
+          placeholder="Dunkler U-Bahn-Tunnel, grüne Neonlichter, flackernde Werbetafeln, Nebel, einsame Gestalt mit Kapuze, körniger Filmlook."></textarea>
+        <div class="hint">
+          Beschreib das Bild, das du vor dir siehst: Stil, Farben, Umgebung, Stimmung.
         </div>
-        <div class="form-group">
-          <label>3 Vibes (Stimmung, Mood, Genre)</label>
-          <div class="mood-inputs">
-            <input type="text" id="gateMood1" placeholder="z.B. mystisch" />
-            <input type="text" id="gateMood2" placeholder="z.B. urban" />
-            <input type="text" id="gateMood3" placeholder="z.B. melancholisch" />
-          </div>
-        </div>
-        <button id="generateImageButton" class="generate-btn">🎨 Bild generieren (3 Varianten)</button>
+        <div id="gatePromptCounter" class="char-counter">0 / 240</div>
       </div>
 
-      <!-- Bild-Vorschau -->
-      <div class="section">
-        <h2>🖼️ Wähle dein Bild</h2>
-        <div class="preview-slots">
-          <div class="preview-slot" data-index="1">
-            <span class="slot-number">1</span>
+      <div class="field">
+        <label>Vibes / Mood (3 kurze Wörter)</label>
+        <div class="hint">
+          Drei Vibes, die deine Karte beschreiben (1–2 Wörter). Beispiele: neon, melancholisch, dreckig, hopeful.
+        </div>
+        <input id="gateMood1" type="text" maxlength="18" placeholder="Vibe 1 (z.B. neon)">
+        <input id="gateMood2" type="text" maxlength="18" placeholder="Vibe 2 (z.B. melancholisch)">
+        <input id="gateMood3" type="text" maxlength="18" placeholder="Vibe 3 (z.B. dreckig)">
+      </div>
+
+      <div class="field">
+        <button id="generateImageButton">Bild generieren – Vorschau 1/3 (KI)</button>
+      </div>
+
+      <!-- 3 Preview-Slots -->
+      <div class="gate-previews" id="gatePreviews">
+        <div class="gate-preview-slot" data-index="1">
+          <div class="gate-preview-label">Vorschau 1</div>
+          <div class="gate-preview-image">Noch kein Bild.</div>
+        </div>
+        <div class="gate-preview-slot" data-index="2">
+          <div class="gate-preview-label">Vorschau 2</div>
+          <div class="gate-preview-image">Noch kein Bild.</div>
+        </div>
+        <div class="gate-preview-slot" data-index="3">
+          <div class="gate-preview-label">Vorschau 3</div>
+          <div class="gate-preview-image">Noch kein Bild.</div>
+        </div>
+      </div>
+      <div class="preview-hint" id="previewHint">
+        Du kannst maximal 3 Bilder erstellen. Klick auf ein Bild, um es auszuwählen.
+      </div>
+    </div>
+
+    <!-- Phase 2: Formular + Kartenvorschau (klappt nach Bildauswahl auf) -->
+    <div id="phase2Content" style="display:none; margin-top:24px;">
+      <h2>Vervollständige deine Gate-Karte</h2>
+
+      <div class="field">
+        <label for="gateCardName">Name der Karte</label>
+        <input id="gateCardName" type="text" maxlength="30"
+               placeholder="Name deiner Gate-Karte">
+        <div class="hint">Max. 30 Zeichen. Kurz, prägnant, merkbar.</div>
+      </div>
+
+      <div class="field">
+        <label for="gateCardDescription">Kurzbeschreibung</label>
+        <textarea id="gateCardDescription" maxlength="140" rows="2"
+          placeholder="Was machst du hier im UnterGrund? Welche Funktion hast du? Was willst du uns sagen?"></textarea>
+        <div id="gateDescCounter" class="char-counter">0 / 140</div>
+      </div>
+
+      <div class="field">
+        <label for="gateCity">Herkunft / City (optional)</label>
+        <input id="gateCity" type="text" maxlength="24"
+               placeholder="z.B. Berlin, Ruhrpott oder Neonhafen">
+        <div class="hint">Echte City oder Fantasie-Ort, max. 24 Zeichen.</div>
+      </div>
+
+      <!-- Live-Kartenvorschau -->
+      <div class="card-preview">
+        <h3>Deine Karte (Vorschau)</h3>
+        <div class="card-preview-inner">
+          <div class="card-preview-img">
+            <img id="cardPreviewImg" src="" alt="">
           </div>
-          <div class="preview-slot" data-index="2">
-            <span class="slot-number">2</span>
-          </div>
-          <div class="preview-slot" data-index="3">
-            <span class="slot-number">3</span>
+          <div class="card-preview-text">
+            <h4 id="cardPreviewName">Name deiner Karte</h4>
+            <p id="cardPreviewDesc">Beschreibung erscheint hier ...</p>
+            <div class="card-preview-vibes" id="cardPreviewVibes"></div>
+            <div class="card-preview-city" id="cardPreviewCity"></div>
           </div>
         </div>
       </div>
 
-      <!-- Karten-Details -->
-      <div class="section">
-        <h2>📝 Karten-Details</h2>
-        <div class="form-group">
-          <label>Name der Gate-Karte</label>
-          <input type="text" id="gateCardName" placeholder="z.B. Neon Abyss" />
+      <div class="field">
+        <div class="save-hint">
+          Diese Karte könnte sich morgen im UnterGrund mischen und gesammelt werden.<br>
+          Du kannst pro Tag nur eine Gate-Karte fest speichern. Kein erneutes Erstellen.
         </div>
-        <div class="form-group">
-          <label>Kurzbeschreibung</label>
-          <textarea id="gateCardDescription" placeholder="Ein Ort, wo die Stadt schläft und die Schatten tanzen." style="min-height: 80px;"></textarea>
-        </div>
-        <div class="form-group">
-          <label>Stadt (optional)</label>
-          <input type="text" id="gateCity" placeholder="z.B. Dresden" />
-        </div>
-
-        <!-- Live-Vorschau -->
-        <div class="card-preview">
-          <h3 id="previewName">Noch kein Name</h3>
-          <p id="previewDescription">Noch keine Beschreibung</p>
-          <p><strong>Stadt:</strong> <span id="previewCity">–</span></p>
-          <div class="vibes" id="previewVibes"></div>
-        </div>
-
-        <button id="saveGateCardButton" class="save-btn">💾 Gate-Karte fest speichern</button>
-        <div id="saveStatus" class="save-status" style="display:none;"></div>
+        <button id="saveGateCardButton">Gate-Karte endgültig festlegen</button>
       </div>
+
+      <div id="saveStatus" class="status"></div>
     </div>
   </div>
 
+  <!-- Puter.js für kostenlose Bild-KI -->
+  <script src="https://js.puter.com/v2/"></script>
+  <!-- Supabase Client -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
   <script>
-    // Supabase Setup
     const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR5Zmxoendyd3pmYWt3ZWRpcGlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3ODA1MzcsImV4cCI6MjA1MjM1NjUzN30.hxWRU3SBdGi9M5DlmqDkXp9zAVCYLcBQkxH6RXsm7Ro';
+    const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
     const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // DOM Elements
-    const gateCodeInput = document.getElementById('gateCodeInput');
-    const gateCheckButton = document.getElementById('gateCheckButton');
+    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
+
+    const gateCodeInput = document.getElementById('gateCode');
+    const checkCodeButton = document.getElementById('checkCodeButton');
     const gateStatus = document.getElementById('gateStatus');
-    const gateContent = document.getElementById('gateContent');
+
+    const phase1Content = document.getElementById('phase1Content');
+    const phase2Content = document.getElementById('phase2Content');
+
     const gatePrompt = document.getElementById('gatePrompt');
+    const gatePromptCounter = document.getElementById('gatePromptCounter');
+
     const gateMood1 = document.getElementById('gateMood1');
     const gateMood2 = document.getElementById('gateMood2');
     const gateMood3 = document.getElementById('gateMood3');
-    const generateImageButton = document.getElementById('generateImageButton');
-    const previewSlots = document.querySelectorAll('.preview-slot');
+
     const gateCardName = document.getElementById('gateCardName');
     const gateCardDescription = document.getElementById('gateCardDescription');
+    const gateDescCounter = document.getElementById('gateDescCounter');
     const gateCity = document.getElementById('gateCity');
+
+    const generateImageButton = document.getElementById('generateImageButton');
     const saveGateCardButton = document.getElementById('saveGateCardButton');
     const saveStatus = document.getElementById('saveStatus');
-    const previewName = document.getElementById('previewName');
-    const previewDescription = document.getElementById('previewDescription');
-    const previewCity = document.getElementById('previewCity');
-    const previewVibes = document.getElementById('previewVibes');
 
+    const previewContainer = document.getElementById('gatePreviews');
+    const previewSlots = previewContainer.querySelectorAll('.gate-preview-slot');
+    const previewHint = document.getElementById('previewHint');
+
+    const cardPreviewImg = document.getElementById('cardPreviewImg');
+    const cardPreviewName = document.getElementById('cardPreviewName');
+    const cardPreviewDesc = document.getElementById('cardPreviewDesc');
+    const cardPreviewVibes = document.getElementById('cardPreviewVibes');
+    const cardPreviewCity = document.getElementById('cardPreviewCity');
+
+    let previewCount = 0;
+    const maxPreviews = 3;
     let selectedPreviewIndex = null;
 
-    // Gate-Code Check
-    gateCheckButton.addEventListener('click', async () => {
-      const code = gateCodeInput.value.trim().toUpperCase();
-      
+    function setGateStatus(msg, type = '') {
+      gateStatus.textContent = msg;
+      gateStatus.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function setSaveStatus(msg, type = '') {
+      saveStatus.textContent = msg;
+      saveStatus.className = 'status' + (type ? ' ' + type : '');
+    }
+
+    function showMessage(msg) {
+      previewHint.textContent = msg;
+    }
+
+    // Gate-Code prüfen + Login + Tages-Check
+    checkCodeButton.addEventListener('click', async () => {
+      const code = gateCodeInput.value.trim();
+
       if (!code) {
-        showGateStatus('Bitte gib einen Gate-Code ein.', 'error');
+        setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
+        phase1Content.style.display = 'none';
+        phase2Content.style.display = 'none';
         return;
       }
 
-      gateCheckButton.disabled = true;
-      showGateStatus('Prüfe Gate-Code ...', '');
+      if (code !== 'UG-GATE') {
+        setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
+        phase1Content.style.display = 'none';
+        phase2Content.style.display = 'none';
+        return;
+      }
 
       try {
         const { data: sessionData, error: sessionError } = await supa.auth.getSession();
-        if (sessionError || !sessionData.session) {
-          showGateStatus('Bitte melde dich zuerst an, um das Gate zu betreten.', 'error');
-          gateCheckButton.disabled = false;
+
+        if (sessionError || !sessionData || !sessionData.session) {
+          const params = new URLSearchParams();
+          params.set('from', 'gate');
+          window.location.href = `${BASE_URL}Login.html?${params.toString()}`;
           return;
         }
 
-        const { data: codeData, error: codeError } = await supa
-          .from('gate_codes')
-          .select('*')
-          .eq('code', code)
-          .maybeSingle();
+        const userId = sessionData.session.user.id;
 
-        if (codeError) {
-          console.error(codeError);
-          showGateStatus('Fehler bei der Code-Prüfung.', 'error');
-          gateCheckButton.disabled = false;
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+
+        const { data: existingCards, error: existingError } = await supa
+          .from('gate_cards')
+          .select('id, created_at')
+          .gte('created_at', todayStart.toISOString())
+          .eq('user_id', userId)
+          .limit(1);
+
+        if (existingError) {
+          console.error(existingError);
+          setGateStatus('Fehler beim Prüfen, ob du heute schon eine Gate-Karte gespeichert hast.', 'error');
+          phase1Content.style.display = 'none';
+          phase2Content.style.display = 'none';
           return;
         }
 
-        if (!codeData) {
-          showGateStatus('Ungültiger Gate-Code. Zugang verweigert.', 'error');
-          gateCheckButton.disabled = false;
+        const hasCardToday = existingCards && existingCards.length > 0;
+
+        if (hasCardToday) {
+          setGateStatus('Du hast heute bereits eine Gate-Karte gespeichert. Das Gate bleibt zu – komm morgen wieder.', 'error');
+          phase1Content.style.display = 'none';
+          phase2Content.style.display = 'none';
           return;
         }
 
-        if (!codeData.is_active) {
-          showGateStatus('Dieser Gate-Code ist abgelaufen.', 'error');
-          gateCheckButton.disabled = false;
-          return;
-        }
-
-        // Success
-        showGateStatus('Gate-Code akzeptiert. Willkommen im Gate.', 'success');
-        setTimeout(() => {
-          gateContent.classList.add('active');
-        }, 800);
-
+        setGateStatus('Gate geöffnet. Erstelle jetzt 3 Bild-Varianten.', 'success');
+        phase1Content.style.display = 'block';
+        phase2Content.style.display = 'none';
       } catch (e) {
         console.error(e);
-        showGateStatus('Unerwarteter Fehler bei der Code-Prüfung.', 'error');
-        gateCheckButton.disabled = false;
+        setGateStatus('Unerwarteter Fehler beim Öffnen des Gates.', 'error');
+        phase1Content.style.display = 'none';
+        phase2Content.style.display = 'none';
       }
     });
 
-    function showGateStatus(message, type) {
-      gateStatus.textContent = message;
-      gateStatus.className = 'gate-status';
-      if (type) gateStatus.classList.add(type);
-      gateStatus.style.display = 'block';
-    }
-
-    // Live-Vorschau
-    gateCardName.addEventListener('input', () => {
-      previewName.textContent = gateCardName.value.trim() || 'Noch kein Name';
+    gateCodeInput.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') {
+        checkCodeButton.click();
+      }
     });
+
+    gatePrompt.addEventListener('input', () => {
+      gatePromptCounter.textContent = gatePrompt.value.length + ' / 240';
+    });
+
     gateCardDescription.addEventListener('input', () => {
-      previewDescription.textContent = gateCardDescription.value.trim() || 'Noch keine Beschreibung';
-    });
-    gateCity.addEventListener('input', () => {
-      previewCity.textContent = gateCity.value.trim() || '–';
-    });
-    [gateMood1, gateMood2, gateMood3].forEach(input => {
-      input.addEventListener('input', updateVibesPreview);
+      gateDescCounter.textContent = gateCardDescription.value.length + ' / 140';
+      updateCardPreview();
     });
 
-    function updateVibesPreview() {
-      const vibes = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
-      previewVibes.innerHTML = vibes.length > 0
-        ? vibes.map(v => `<span class="vibe-tag">${v}</span>`).join('')
-        : '<span style="color: #666;">Noch keine Vibes</span>';
-    }
+    gateCardName.addEventListener('input', updateCardPreview);
+    gateCity.addEventListener('input', updateCardPreview);
 
-    // Bild-Generierung
-    generateImageButton.addEventListener('click', async () => {
-      const prompt = gatePrompt.value.trim();
+    function validateFormForPreview() {
+      const lore = gatePrompt.value.trim();
       const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
 
-      if (!prompt) {
-        alert('Bitte füll das Prompt-Feld aus, bevor du Bilder generierst.');
-        return;
+      if (!lore) {
+        showMessage('Bitte KI-Prompt ausfüllen, bevor du ein Bild generierst.');
+        return false;
       }
       if (moods.length === 0) {
-        alert('Bitte trag mindestens einen Vibe ein.');
+        showMessage('Trag mindestens einen Vibe ein, bevor du ein Bild generierst.');
+        return false;
+      }
+      return true;
+    }
+
+    // KI-Bildgenerierung + Upload zu Supabase Storage (WebP, hohe Qualität)
+async function generateGateImage(promptText, previewIndex) {
+  const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+  const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
+  const fullPrompt = `${promptText}.${moodText}`;
+
+  // Puter.ai txt2img
+  const imgEl = await puter.ai.txt2img(fullPrompt, {
+    model: 'gpt-image-1',
+    quality: 'low'
+  });
+
+  const imageUrl = imgEl.src; // Base64-DataURL
+
+  // Base64 → Blob
+  const pngBlob = await fetch(imageUrl).then(r => r.blob());
+
+  // PNG → WebP konvertieren (Canvas-basiert, Qualität 0.92 = sehr gut)
+  const webpBlob = await convertToWebP(pngBlob, 0.92);
+
+  // Upload zu Supabase Storage
+  const fileName = `gate_${Date.now()}_${Math.random().toString(36).substring(7)}.webp`;
+  const { data: uploadData, error: uploadError } = await supa.storage
+    .from('gate-images')
+    .upload(fileName, webpBlob, {
+      contentType: 'image/webp',
+      cacheControl: '3600'
+    });
+
+  if (uploadError) {
+    throw new Error(`Upload fehlgeschlagen: ${uploadError.message}`);
+  }
+
+  // Public URL holen
+  const { data: publicUrlData } = supa.storage
+    .from('gate-images')
+    .getPublicUrl(fileName);
+
+  const persistentUrl = publicUrlData.publicUrl;
+
+  return { imageUrl: persistentUrl };
+}
+
+// Hilfsfunktion: Blob → WebP mit Canvas (hohe Qualität)
+async function convertToWebP(blob, quality = 0.92) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    img.onload = () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      canvas.toBlob(
+        (webpBlob) => {
+          if (webpBlob) {
+            resolve(webpBlob);
+          } else {
+            reject(new Error('WebP-Konvertierung fehlgeschlagen'));
+          }
+        },
+        'image/webp',
+        quality // 0.92 = sehr hohe Qualität, trotzdem ~30% kleiner als PNG
+      );
+    };
+
+    img.onerror = () => reject(new Error('Bild konnte nicht geladen werden'));
+    img.src = URL.createObjectURL(blob);
+  });
+}
+
+    generateImageButton.addEventListener('click', async () => {
+      if (!validateFormForPreview()) {
         return;
       }
 
-      generateImageButton.disabled = true;
-      generateImageButton.textContent = 'Generiere 3 Bilder ...';
+      if (previewCount >= maxPreviews) {
+        showMessage('Du hast alle 3 Bild-Vorschauen erstellt. Wähle jetzt ein Bild aus.');
+        return;
+      }
 
-      // Slots in Loading-State
-      previewSlots.forEach(slot => {
-        slot.classList.add('loading');
-        slot.innerHTML = '';
-        slot.classList.remove('selected');
-        delete slot.dataset.imageUrl;
-      });
-      selectedPreviewIndex = null;
+      previewCount += 1;
+      const currentIndex = previewCount;
+      const slot = [...previewSlots].find(s => s.dataset.index === String(currentIndex));
+      const imgContainer = slot.querySelector('.gate-preview-image');
+
+      generateImageButton.disabled = true;
+      generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount}/${maxPreviews} (KI)`;
+      slot.classList.add('loading');
+      imgContainer.textContent = `Generiere & lade KI-Bild hoch (${previewCount}/${maxPreviews}) ...`;
 
       try {
-        const fullPrompt = `${prompt}. Vibes: ${moods.join(', ')}. Artistic, moody, atmospheric scene.`;
+        const promptText = gatePrompt.value.trim();
+        const { imageUrl } = await generateGateImage(promptText, currentIndex);
 
-        // 3 Bilder parallel generieren
-        const promises = Array.from({ length: 3 }, (_, i) => generateAndUploadImage(fullPrompt, i + 1));
-        const results = await Promise.all(promises);
+        imgContainer.innerHTML = `<img src="${imageUrl}" alt="Gate Vorschau ${currentIndex}">`;
 
-        results.forEach((result, i) => {
-          const slot = previewSlots[i];
-          slot.classList.remove('loading');
-          
-          if (result.success) {
-            slot.innerHTML = `<img src="${result.url}" alt="Gate Bild ${i + 1}" />`;
-            slot.dataset.imageUrl = result.url;
-          } else {
-            slot.innerHTML = `<span style="color: #ff6b6b; font-size: 0.9rem;">Fehler</span>`;
-          }
-        });
+        // Snapshot: Prompt + Vibes im Slot speichern
+        slot.dataset.prompt = promptText;
+        slot.dataset.mood1 = gateMood1.value.trim();
+        slot.dataset.mood2 = gateMood2.value.trim();
+        slot.dataset.mood3 = gateMood3.value.trim();
+        slot.dataset.imageUrl = imageUrl; // Persistente URL merken
 
-        generateImageButton.textContent = '🎨 Bild generieren (3 Varianten)';
-        generateImageButton.disabled = false;
+        if (selectedPreviewIndex === null) {
+          selectedPreviewIndex = currentIndex;
+          slot.classList.add('selected');
+          loadSelectedImageData();
+        }
 
+        const triesLeft = maxPreviews - previewCount;
+        if (triesLeft > 0) {
+          showMessage(`Vorschau ${previewCount}/${maxPreviews} erstellt. Du hast noch ${triesLeft} Versuch(e).`);
+        } else {
+          showMessage('Alle 3 Bild-Vorschauen erstellt. Wähle jetzt ein Bild aus, um deine Karte zu vervollständigen.');
+        }
       } catch (e) {
         console.error(e);
-        alert('Fehler bei der Bild-Generierung.');
-        previewSlots.forEach(slot => {
-          slot.classList.remove('loading');
-          slot.innerHTML = '<span class="slot-number">?</span>';
-        });
-        generateImageButton.textContent = '🎨 Bild generieren (3 Varianten)';
-        generateImageButton.disabled = false;
+        imgContainer.textContent = 'Fehler bei KI-Bild oder Upload.';
+        showMessage(`Fehler: ${e.message}. Versuch es gleich nochmal.`);
+      } finally {
+        slot.classList.remove('loading');
+        if (previewCount >= maxPreviews) {
+          generateImageButton.disabled = true;
+          generateImageButton.textContent = `Keine weiteren Vorschauen möglich (${previewCount}/${maxPreviews})`;
+        } else {
+          generateImageButton.disabled = false;
+          generateImageButton.textContent = `Bild generieren – Vorschau ${previewCount + 1}/${maxPreviews} (KI)`;
+        }
       }
     });
 
-    async function generateAndUploadImage(prompt, index) {
-      try {
-        // 1. Bild bei Puter.ai generieren
-        const puterRes = await fetch('https://api.puter.com/drivers/call', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            interface: 'puter-chat-completion',
-            driver: 'openai-completion',
-            method: 'complete',
-            args: {
-              messages: [{ role: 'user', content: prompt }],
-              model: 'gpt-4o-mini',
-              test_mode: true,
-              image: {
-                size: '1024x1024',
-                model: 'dall-e-3'
-              }
-            }
-          })
-        });
-
-        if (!puterRes.ok) {
-          console.error('Puter API error:', await puterRes.text());
-          return { success: false };
-        }
-
-        const puterData = await puterRes.json();
-        const imageUrl = puterData?.message?.content?.[1]?.image_url?.url;
-
-        if (!imageUrl) {
-          console.error('Keine Bild-URL in Puter-Response:', puterData);
-          return { success: false };
-        }
-
-        // 2. Bild herunterladen
-        const imageRes = await fetch(imageUrl);
-        if (!imageRes.ok) {
-          console.error('Fehler beim Herunterladen des Bildes');
-          return { success: false };
-        }
-        const imageBlob = await imageRes.blob();
-
-        // 3. WebP konvertieren (falls nötig)
-        let webpBlob = imageBlob;
-        if (!imageBlob.type.includes('webp')) {
-          webpBlob = await convertToWebP(imageBlob);
-        }
-
-        // 4. Zu Supabase Storage hochladen
-        const timestamp = Date.now();
-        const randomStr = Math.random().toString(36).substring(2, 8);
-        const fileName = `gate_${timestamp}_${randomStr}.webp`;
-
-        const { data: uploadData, error: uploadError } = await supa.storage
-          .from('gate-images')
-          .upload(fileName, webpBlob, {
-            contentType: 'image/webp',
-            cacheControl: '31536000'
-          });
-
-        if (uploadError) {
-          console.error('Upload-Fehler:', uploadError);
-          return { success: false };
-        }
-
-        // 5. Public URL generieren
-        const { data: publicUrlData } = supa.storage
-          .from('gate-images')
-          .getPublicUrl(fileName);
-
-        return { success: true, url: publicUrlData.publicUrl };
-
-      } catch (e) {
-        console.error('Fehler bei generateAndUploadImage:', e);
-        return { success: false };
-      }
-    }
-
-    async function convertToWebP(blob) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          canvas.toBlob((webpBlob) => {
-            resolve(webpBlob);
-          }, 'image/webp', 0.9);
-        };
-
-        img.src = URL.createObjectURL(blob);
-      });
-    }
-
-    // Bild-Auswahl
     previewSlots.forEach(slot => {
       slot.addEventListener('click', () => {
-        if (!slot.dataset.imageUrl) return;
+        const img = slot.querySelector('img');
+        if (!img) return;
 
         previewSlots.forEach(s => s.classList.remove('selected'));
         slot.classList.add('selected');
         selectedPreviewIndex = Number(slot.dataset.index);
+
+        loadSelectedImageData();
+        showMessage(`Vorschau ${selectedPreviewIndex} ausgewählt. Vervollständige jetzt deine Karte.`);
       });
     });
 
-    // Speichern
+    function loadSelectedImageData() {
+      if (!selectedPreviewIndex) return;
+
+      const selectedSlot = [...previewSlots].find(s => Number(s.dataset.index) === selectedPreviewIndex);
+      if (!selectedSlot) return;
+
+      const img = selectedSlot.querySelector('img');
+      if (!img) return;
+
+      // Prompt + Vibes aus Snapshot laden
+      gatePrompt.value = selectedSlot.dataset.prompt || '';
+      gateMood1.value = selectedSlot.dataset.mood1 || '';
+      gateMood2.value = selectedSlot.dataset.mood2 || '';
+      gateMood3.value = selectedSlot.dataset.mood3 || '';
+      gatePromptCounter.textContent = gatePrompt.value.length + ' / 240';
+
+      // Phase 2 aufklappen
+      phase2Content.style.display = 'block';
+
+      // Kartenvorschau initialisieren
+      cardPreviewImg.src = img.src;
+      updateCardPreview();
+    }
+
+    function updateCardPreview() {
+      const name = gateCardName.value.trim() || 'Name deiner Karte';
+      const desc = gateCardDescription.value.trim() || 'Beschreibung erscheint hier ...';
+      const city = gateCity.value.trim();
+      const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+
+      cardPreviewName.textContent = name;
+      cardPreviewDesc.textContent = desc;
+
+      cardPreviewVibes.innerHTML = '';
+      moods.forEach(mood => {
+        const vibe = document.createElement('span');
+        vibe.className = 'card-preview-vibe';
+        vibe.textContent = mood;
+        cardPreviewVibes.appendChild(vibe);
+      });
+
+      cardPreviewCity.textContent = city ? `📍 ${city}` : '';
+    }
+
     saveGateCardButton.addEventListener('click', async () => {
       const name = gateCardName.value.trim();
       const desc = gateCardDescription.value.trim();
@@ -637,7 +736,7 @@
       }
 
       const selectedSlot = [...previewSlots].find(s => Number(s.dataset.index) === selectedPreviewIndex);
-      const imagePath = selectedSlot.dataset.imageUrl;
+      const imagePath = selectedSlot.dataset.imageUrl; // Persistente Storage-URL
 
       if (!imagePath) {
         setSaveStatus('Fehler: Kein Bild-URL in der ausgewählten Vorschau gefunden.', 'error');
@@ -699,53 +798,15 @@
           return;
         }
 
-        // ✅ Formular sperren (keine weiteren Änderungen möglich)
-        gatePrompt.disabled = true;
-        gateMood1.disabled = true;
-        gateMood2.disabled = true;
-        gateMood3.disabled = true;
-        gateCardName.disabled = true;
-        gateCardDescription.disabled = true;
-        gateCity.disabled = true;
-        generateImageButton.disabled = true;
-        generateImageButton.textContent = 'Karte gespeichert – keine weiteren Bilder';
-
-        // ✅ Ungenutzte Bilder aus Storage löschen
-        try {
-          const selectedImageUrl = selectedSlot.dataset.imageUrl;
-
-          for (const slot of previewSlots) {
-            const imgUrl = slot.dataset.imageUrl;
-            if (imgUrl && imgUrl !== selectedImageUrl) {
-              const fileName = imgUrl.split('/').pop();
-              
-              const { error: deleteError } = await supa.storage
-                .from('gate-images')
-                .remove([fileName]);
-              
-              if (deleteError) {
-                console.warn('Konnte ungenutztes Bild nicht löschen:', fileName, deleteError);
-              }
-            }
-          }
-        } catch (cleanupError) {
-          console.warn('Fehler beim Storage-Cleanup:', cleanupError);
-        }
-
         setSaveStatus('Gate-Karte fest gespeichert. Vielleicht mischt sie sich morgen in den UnterGrund.', 'success');
       } catch (e) {
         console.error(e);
         setSaveStatus('Unerwarteter Fehler beim Speichern deiner Gate-Karte.', 'error');
         saveGateCardButton.disabled = false;
+      } finally {
+        saveGateCardButton.disabled = true;
       }
     });
-
-    function setSaveStatus(message, type) {
-      saveStatus.textContent = message;
-      saveStatus.className = 'save-status';
-      if (type) saveStatus.classList.add(type);
-      saveStatus.style.display = 'block';
-    }
   </script>
 </body>
 </html>
