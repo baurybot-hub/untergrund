@@ -13,7 +13,7 @@
       min-height: 100vh;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: #f5f5f5;
-      background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
+      background: radial-gradient(circle at top, #4c1d95 0, #020617 55%, #000 100%);
       display: flex;
       justify-content: center;
       padding: 32px 12px;
@@ -33,14 +33,17 @@
     .card-shell {
       position: relative;
       width: 100%;
-      max-width: 420px;
-      height: 900px;
-      border-radius: 18px;
-      padding: 4px;
-      background: linear-gradient(135deg,#22c55e,#4ade80,#22c55e);
+      max-width: 520px;
+      height: 780px;
+      border-radius: 26px;
+      padding: 2px;
+      background:
+        radial-gradient(circle at -10% -20%, rgba(56,189,248,0.32), transparent 55%),
+        radial-gradient(circle at 110% 120%, rgba(168,85,247,0.4), transparent 55%),
+        radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), rgba(2,6,23,1));
       box-shadow:
-        0 32px 90px rgba(0,0,0,0.95),
-        0 0 30px rgba(34,197,94,0.45);
+        0 40px 110px rgba(0,0,0,0.95),
+        0 0 40px rgba(129,140,248,0.55);
       box-sizing: border-box;
       transform-origin: center center;
     }
@@ -49,46 +52,53 @@
       position: relative;
       width: 100%;
       height: 100%;
-      border-radius: 14px;
-      padding: 12px 14px 11px;
-      background: radial-gradient(circle at top,
+      border-radius: 24px;
+      padding: 18px 18px 14px;
+      background: radial-gradient(circle at top left,
                   rgba(15,23,42,0.96) 0,
                   rgba(15,23,42,0.98) 40%,
                   rgba(2,6,23,1) 100%);
       display: flex;
       flex-direction: column;
       color: #e5e7eb;
-      backdrop-filter: blur(18px);
-      -webkit-backdrop-filter: blur(18px);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       overflow: hidden;
-      font-size: 14px;
     }
 
     .card::before {
       content: "";
       position: absolute;
-      inset: -40%;
-      background: linear-gradient(
-        120deg,
-        rgba(255,255,255,0.12),
-        transparent 40%,
-        rgba(56,189,248,0.16) 60%,
+      inset: -30%;
+      background: conic-gradient(
+        from 220deg,
+        rgba(168,85,247,0.25),
+        transparent 25%,
+        rgba(56,189,248,0.2),
+        transparent 55%,
+        rgba(236,72,153,0.23),
         transparent 80%,
-        rgba(244,114,182,0.18)
+        rgba(129,140,248,0.2)
       );
       mix-blend-mode: screen;
-      opacity: 0.55;
-      transform: translateX(-20%);
+      opacity: 0.6;
       pointer-events: none;
     }
 
-    .card-header {
+    .card-inner {
       position: relative;
       z-index: 1;
       display: flex;
+      flex-direction: column;
+      gap: 16px;
+      height: 100%;
+    }
+
+    .card-header {
+      display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 10px;
+      gap: 8px;
     }
 
     .card-title-block {
@@ -97,18 +107,21 @@
 
     .card-label {
       font-size: 11px;
-      letter-spacing: 0.18em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #9ca3af;
+      color: #a5b4fc;
     }
 
     .card-name {
-      font-size: clamp(20px, 2.6vw, 26px); /* fluid type [web:3171][web:3172] */
-      letter-spacing: 0.06em;
+      font-size: 22px;
+      letter-spacing: 0.18em;
       text-transform: uppercase;
-      margin-top: 2px;
+      margin-top: 4px;
       color: #f9fafb;
       font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .card-subline {
@@ -120,7 +133,7 @@
     .back-btn {
       border-radius: 999px;
       border: 1px solid rgba(148,163,184,0.75);
-      background: rgba(15,23,42,0.95);
+      background: radial-gradient(circle at top, #020617 0, #020617 60%, #020617 100%);
       color: #e5e7eb;
       padding: 7px 12px;
       font-size: 11px;
@@ -130,15 +143,33 @@
       white-space: nowrap;
     }
 
+    .card-main {
+      display: flex;
+      flex: 1 1 auto;
+      gap: 14px;
+      min-height: 0;
+    }
+
     .card-photo {
-      position: relative;
-      z-index: 1;
-      flex: 0 0 52%;
+      flex: 0 0 44%;
       border-radius: 18px;
       overflow: hidden;
       border: 1px solid rgba(55,65,81,0.9);
       background: radial-gradient(circle,#020617 0,#020617 60%,#000 100%);
-      margin-bottom: 12px;
+      position: relative;
+      box-shadow: 0 0 24px rgba(15,23,42,0.9);
+    }
+
+    .card-photo::after {
+      content: "GATE";
+      position: absolute;
+      right: -42px;
+      bottom: 14px;
+      font-size: 11px;
+      letter-spacing: 0.26em;
+      text-transform: uppercase;
+      color: rgba(148,163,184,0.45);
+      transform: rotate(-90deg);
     }
 
     .card-photo img {
@@ -149,20 +180,19 @@
     }
 
     .card-body {
-      position: relative;
-      z-index: 1;
       flex: 1 1 auto;
       display: flex;
       flex-direction: column;
       gap: 8px;
       font-size: 13px;
+      min-width: 0;
     }
 
     .card-section-label {
       font-size: 10px;
       text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: #9effc7;
+      letter-spacing: 0.18em;
+      color: #c4b5fd;
       margin-bottom: 2px;
     }
 
@@ -182,11 +212,11 @@
     .vibe-pill {
       display: inline-block;
       padding: 3px 8px;
-      background: rgba(28,255,136,0.15);
-      border: 1px solid rgba(28,255,136,0.3);
-      border-radius: 4px;
+      background: rgba(129,140,248,0.15);
+      border: 1px solid rgba(129,140,248,0.4);
+      border-radius: 999px;
       font-size: 11px;
-      color: #9effc7;
+      color: #c7d2fe;
     }
 
     .card-city {
@@ -196,9 +226,13 @@
     }
 
     .collect-section {
-      position: relative;
-      z-index: 1;
-      margin-top: 10px;
+      margin-top: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .collect-buttons {
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -207,13 +241,13 @@
     .collect-btn,
     .share-btn {
       border-radius: 999px;
-      border: 1px solid rgba(34,197,94,0.8);
-      background: linear-gradient(90deg, #22c55e, #16a34a);
-      color: #020617;
+      border: 1px solid rgba(129,140,248,0.9);
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      color: #e5e7eb;
       padding: 9px 14px;
       font-size: 12px;
       font-weight: 600;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
       cursor: pointer;
       transition: all 0.2s;
@@ -222,24 +256,25 @@
 
     .share-btn {
       border-color: rgba(148,163,184,0.8);
-      background: linear-gradient(90deg, #e5e7eb, #9ca3af);
-      color: #020617;
+      background: linear-gradient(90deg, #0f172a, #1f2937);
+      color: #e5e7eb;
       font-weight: 500;
     }
 
     .collect-btn:hover:not(:disabled),
     .share-btn:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 0 20px rgba(34,197,94,0.5);
+      transform: translateY(-1px);
+      box-shadow: 0 0 18px rgba(129,140,248,0.6);
     }
 
     .collect-btn:disabled,
     .share-btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      background: rgba(55,65,81,0.6);
-      border-color: rgba(148,163,184,0.4);
+      background: rgba(31,41,55,0.7);
+      border-color: rgba(148,163,184,0.6);
       color: #9ca3af;
+      box-shadow: none;
     }
 
     .collect-info {
@@ -250,19 +285,17 @@
     }
 
     .card-footer {
-      position: relative;
-      z-index: 1;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 8px;
+      margin-top: 6px;
       padding-top: 6px;
       border-top: 1px dashed rgba(55,65,81,0.9);
       font-size: 11px;
     }
 
     .card-footer-left {
-      max-width: 65%;
+      max-width: 60%;
       color: #fca5a5;
       min-height: 1.2em;
     }
@@ -281,7 +314,7 @@
       font-size: 10px;
       text-transform: uppercase;
       letter-spacing: 0.16em;
-      color: #6ee7b7;
+      color: #a5b4fc;
     }
 
     .status {
@@ -290,53 +323,75 @@
       margin-top: 8px;
       color: #fca5a5;
     }
+
+    @media (max-width: 480px) {
+      .card-shell {
+        max-width: 100%;
+        height: 720px;
+      }
+      .card-main {
+        flex-direction: column;
+      }
+      .card-photo {
+        flex: 0 0 230px;
+      }
+      .card-photo::after {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="gate-wrap">
     <div class="card-shell" id="cardShell">
       <div class="card" id="cardContent" style="display:none;">
-        <div class="card-header">
-          <div class="card-title-block">
-            <div class="card-label">UnterGrund Gate Karte</div>
-            <div id="gateName" class="card-name">Gate-Name</div>
-            <div class="card-subline">Geteiltes Gate aus dem UnterGrund – sammelbar, solange du es findest.</div>
-          </div>
-          <button id="backButton" class="back-btn">Zurück</button>
-        </div>
-
-        <div class="card-photo">
-          <img id="gateImage" src="" alt="Gate Bild">
-        </div>
-
-        <div class="card-body">
-          <div>
-            <div class="card-section-label">Kurzbeschreibung</div>
-            <div id="gateDescription" class="card-text"></div>
+        <div class="card-inner">
+          <div class="card-header">
+            <div class="card-title-block">
+              <div class="card-label">UnterGrund Secret Gate</div>
+              <div id="gateName" class="card-name">Gate-Name</div>
+              <div class="card-subline">Ein geheimer Eintritt in den UnterGrund – sammelbar, solange du den Link hast.</div>
+            </div>
+            <button id="backButton" class="back-btn">Mein Album</button>
           </div>
 
-          <div>
-            <div class="card-section-label">Vibes</div>
-            <div id="gateVibes" class="card-vibes"></div>
+          <div class="card-main">
+            <div class="card-photo">
+              <img id="gateImage" src="" alt="Gate Bild">
+            </div>
+
+            <div class="card-body">
+              <div>
+                <div class="card-section-label">Kurzbeschreibung</div>
+                <div id="gateDescription" class="card-text"></div>
+              </div>
+
+              <div>
+                <div class="card-section-label">Vibes</div>
+                <div id="gateVibes" class="card-vibes"></div>
+              </div>
+
+              <div id="gateCityRow">
+                <div class="card-section-label">Herkunft</div>
+                <div id="gateCity" class="card-city"></div>
+              </div>
+            </div>
           </div>
 
-          <div id="gateCityRow">
-            <div class="card-section-label">Herkunft</div>
-            <div id="gateCity" class="card-city"></div>
+          <div class="collect-section">
+            <div class="collect-buttons">
+              <button id="collectButton" class="collect-btn">Gate-Karte sammeln</button>
+              <button id="shareButton" class="share-btn">Gate-Link teilen</button>
+            </div>
+            <div id="collectInfo" class="collect-info"></div>
           </div>
-        </div>
 
-        <div class="collect-section">
-          <button id="collectButton" class="collect-btn">Gate-Karte sammeln</button>
-          <button id="shareButton" class="share-btn">Gate-Link teilen</button>
-          <div id="collectInfo" class="collect-info"></div>
-        </div>
-
-        <div class="card-footer">
-          <div id="statusText" class="card-footer-left"></div>
-          <div class="card-footer-right">
-            <div id="cardNumber" class="card-number">UG‑GATE #0000</div>
-            <div class="card-set">Set: UnterGrund Gates · S1</div>
+          <div class="card-footer">
+            <div id="statusText" class="card-footer-left"></div>
+            <div class="card-footer-right">
+              <div id="cardNumber" class="card-number">UG‑GATE #0000</div>
+              <div class="card-set">Set: Secret Gates · S1</div>
+            </div>
           </div>
         </div>
       </div>
@@ -380,7 +435,7 @@
 
       const outerPadding = 4 * 2;
       const availableHeight = window.innerHeight - outerPadding;
-      const baseHeight = 900;
+      const baseHeight = 780;
       const scale = Math.min(1, availableHeight / baseHeight);
 
       cardShell.style.transformOrigin = 'center center';
@@ -424,7 +479,7 @@
     }
 
     async function checkGateAlreadyCollected(gateCardId) {
-      const {  sessionData } = await supa.auth.getSession();
+      const { data: sessionData } = await supa.auth.getSession();
       if (!sessionData || !sessionData.session) return false;
 
       const userId = sessionData.session.user.id;
@@ -445,11 +500,10 @@
     }
 
     async function handleCollectClick() {
-      const {  sessionData, error: sessionError } = await supa.auth.getSession();
+      const { data: sessionData, error: sessionError } = await supa.auth.getSession();
 
       if (sessionError || !sessionData || !sessionData.session) {
         collectInfo.textContent = 'Melde dich an, um Gate-Karten zu sammeln.';
-    
         return;
       }
 
@@ -494,7 +548,7 @@
           try {
             await navigator.share({
               title: gateNameEl.textContent || 'UnterGrund Gate',
-              text: 'Schau dir diese Gate-Karte an und sammle sie in deinem Gate-Album.',
+              text: 'Schau dir dieses Gate an und sammle es in deinem Gate-Album.',
               url: shareUrl
             });
             collectInfo.textContent = 'Gate-Link wurde geteilt.';
@@ -557,7 +611,7 @@
 
       setCardNumber(data.id);
 
-      cardContent.style.display = 'flex';
+      cardContent.style.display = 'block';
       errorBox.style.display = 'none';
 
       const alreadyCollected = await checkGateAlreadyCollected(currentGateId);
