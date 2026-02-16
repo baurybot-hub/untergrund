@@ -328,7 +328,7 @@
       </div>
       <div class="header-right">
         <a href="index.html" class="header-button">← Zurück zum UnterGrund-Explorer</a>
-        <!-- NEU: Gate & Gate-Album Buttons, initial versteckt -->
+        <!-- Gate & Gate-Album Buttons, initial versteckt -->
         <a id="gateAlbumLink" href="GateAlbum.html" class="header-button" style="display:none;">
           🌀 Gate‑Album
         </a>
@@ -769,7 +769,7 @@
         }
       }
 
-      // Gate öffnen ab 18 Karten
+      // Gate öffnen ab 13 Karten
       if (allStickers.length >= 13) {
         const gateLink = document.getElementById('gateLink');
         if (gateLink) gateLink.style.display = 'inline-block';
@@ -840,18 +840,34 @@
         });
       }
 
-      // Gate-Album freischalten, sobald mind. 1 Gate gesammelt wurde
-const {  gateEntries, error: gateError } = await client
-  .from('gate_collection')
-  .select('id')
-  .eq('user_id', userId)
-  .limit(1);
+      // 5) Gate-Album freischalten, sobald mind. 1 Gate gesammelt wurde
+      try {
+        const { data: gateEntries, error: gateError } = await client
+          .from('gate_collection')
+          .select('id')
+          .eq('user_id', userId)
+          .limit(1);
 
-if (!gateError && gateEntries && gateEntries.length > 0) {
-  const gateAlbumLink = document.getElementById('gateAlbumLink');
-  if (gateAlbumLink) gateAlbumLink.style.display = 'inline-block';
-}
+        console.log('Gate debug', { gateError, gateEntries, userId });
 
+        if (!gateError && gateEntries && gateEntries.length > 0) {
+          const gateAlbumLink = document.getElementById('gateAlbumLink');
+          if (gateAlbumLink) {
+            gateAlbumLink.style.display = 'inline-block';
+          }
+
+          const hasSeenGateAlbumUnlock = localStorage.getItem('untergrund-unlock-gate-album');
+          if (!hasSeenGateAlbumUnlock) {
+            alert('Glückwunsch! Du hast deine erste Gate-Karte gesammelt. Das Gate-Album ist freigeschaltet – halte nach geheimen Botschaften Ausschau und werde Teil des Gates.');
+            if (typeof throwConfetti === 'function') {
+              throwConfetti();
+            }
+            localStorage.setItem('untergrund-unlock-gate-album', 'true');
+          }
+        }
+      } catch (e) {
+        console.error('Gate-Album unlock error', e);
+      }
     }
 
     loadTheme();
