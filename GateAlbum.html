@@ -303,11 +303,13 @@
       document.getElementById("userInfo").textContent = "Eingeloggt als " + userEmail;
 
       // Gate-Collection + entsprechende gate_cards holen
-      const {  collections, error: collError } = await client
-        .from("gate_collection")
-        .select("gate_card_id, collected_at, gate_cards (id, name, image_path)")
-        .eq("user_id", userId)
-        .order("collected_at", { ascending: true });
+      // RICHTIG
+const {  collections, error: collError } = await client
+  .from("gate_collection")
+  .select("gate_card_id, collected_at, gate_cards (id, name, image_path)")
+  .eq("user_id", userId)
+  .order("collected_at", { ascending: true });
+
 
       const gateGrid = document.getElementById("gateGrid");
       const emptyState = document.getElementById("emptyState");
