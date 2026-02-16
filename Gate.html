@@ -532,7 +532,7 @@
       const imgEl = await puter.ai.txt2img(fullPrompt, {
         model: 'gpt-image-1',
         quality: 'low'
-      }); // [web:3129]
+      }); // 
 
       const imageUrl = imgEl.src;
       const pngBlob = await fetch(imageUrl).then(r => r.blob());
@@ -540,7 +540,7 @@
 
       const webpBlob = await convertToWebP(pngBlob, 0.92);
 
-      const blobUrl = URL.createObjectURL(webpBlob); [web:3134]
+      const blobUrl = URL.createObjectURL(webpBlob); 
 
       return { blobUrl, webpBlob };
     }
@@ -765,7 +765,7 @@
           .upload(fileName, imageBlob, {
             contentType: 'image/webp',
             cacheControl: '3600'
-          }); [web:3133][web:3136]
+          }); 
 
         if (uploadError) {
           console.error(uploadError);
@@ -776,7 +776,7 @@
 
         const { data: publicUrlData } = supa.storage
           .from('gate-images')
-          .getPublicUrl(fileName); [web:3130]
+          .getPublicUrl(fileName); 
 
         const imagePath = publicUrlData.publicUrl;
 
