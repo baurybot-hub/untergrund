@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>UnterGrund Gate teilen</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+      background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
+      display: flex;
+      justify-content: center;
+      padding: 32px 12px;
+    }
+
+    .gate-wrap {
+      position: relative;
+      min-height: calc(var(--vh, 1vh) * 100);
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .card-shell {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      height: 900px;
+      border-radius: 18px;
+      padding: 4px;
+      background: linear-gradient(135deg,#22c55e,#4ade80,#22c55e);
+      box-shadow:
+        0 32px 90px rgba(0,0,0,0.95),
+        0 0 30px rgba(34,197,94,0.45);
+      box-sizing: border-box;
+      transform-origin: center center;
+    }
+
+    .card {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      padding: 10px 12px 9px;
+      background: radial-gradient(circle at top,
+                  rgba(15,23,42,0.96) 0,
+                  rgba(15,23,42,0.98) 40%,
+                  rgba(2,6,23,1) 100%);
+      display: flex;
+      flex-direction: column;
+      color: #e5e7eb;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: linear-gradient(
+        120deg,
+        rgba(255,255,255,0.12),
+        transparent 40%,
+        rgba(56,189,248,0.16) 60%,
+        transparent 80%,
+        rgba(244,114,182,0.18)
+      );
+      mix-blend-mode: screen;
+      opacity: 0.55;
+      transform: translateX(-20%);
+      pointer-events: none;
+    }
+
+    .card-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .card-title-block {
+      max-width: 70%;
+    }
+
+    .card-label {
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+
+    .card-name {
+      font-size: 18px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 2px;
+      color: #f9fafb;
+      font-weight: 700;
+    }
+
+    .card-subline {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 2px;
+    }
+
+    .back-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.75);
+      background: rgba(15,23,42,0.95);
+      color: #e5e7eb;
+      padding: 6px 11px;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .card-photo {
+      position: relative;
+      z-index: 1;
+      flex: 0 0 52%;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: radial-gradient(circle,#020617 0,#020617 60%,#000 100%);
+      margin-bottom: 10px;
+    }
+
+    .card-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .card-body {
+      position: relative;
+      z-index: 1;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 12px;
+    }
+
+    .card-section-label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #9effc7;
+      margin-bottom: 1px;
+    }
+
+    .card-text {
+      font-size: 11px;
+      line-height: 1.5;
+      color: #e5e7eb;
+    }
+
+    .card-vibes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .vibe-pill {
+      display: inline-block;
+      padding: 2px 6px;
+      background: rgba(28,255,136,0.15);
+      border: 1px solid rgba(28,255,136,0.3);
+      border-radius: 4px;
+      font-size: 10px;
+      color: #9effc7;
+    }
+
+    .card-city {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .collect-section {
+      position: relative;
+      z-index: 1;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .collect-btn,
+    .share-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(34,197,94,0.8);
+      background: linear-gradient(90deg, #22c55e, #16a34a);
+      color: #020617;
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .share-btn {
+      border-color: rgba(148,163,184,0.8);
+      background: linear-gradient(90deg, #e5e7eb, #9ca3af);
+      color: #020617;
+      font-weight: 500;
+    }
+
+    .collect-btn:hover:not(:disabled),
+    .share-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(34,197,94,0.5);
+    }
+
+    .collect-btn:disabled,
+    .share-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: rgba(55,65,81,0.6);
+      border-color: rgba(148,163,184,0.4);
+      color: #9ca3af;
+    }
+
+    .collect-info {
+      font-size: 10px;
+      color: #9ca3af;
+      text-align: center;
+      min-height: 1em;
+    }
+
+    .card-footer {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 6px;
+      padding-top: 4px;
+      border-top: 1px dashed rgba(55,65,81,0.9);
+      font-size: 10px;
+    }
+
+    .card-footer-left {
+      max-width: 65%;
+      color: #fca5a5;
+      min-height: 1.2em;
+    }
+
+    .card-footer-right {
+      text-align: right;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      color: #9ca3af;
+    }
+
+    .card-number {
+      font-size: 10px;
+    }
+
+    .card-set {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #6ee7b7;
+    }
+
+    .status {
+      text-align: center;
+      font-size: 12px;
+      margin-top: 8px;
+      color: #fca5a5;
+    }
+  </style>
+</head>
+<body>
+  <div class="gate-wrap">
+    <div class="card-shell" id="cardShell">
+      <div class="card" id="cardContent" style="display:none;">
+        <div class="card-header">
+          <div class="card-title-block">
+            <div class="card-label">UnterGrund Gate Karte</div>
+            <div id="gateName" class="card-name">Gate-Name</div>
+            <div class="card-subline">Geteiltes Gate aus dem UnterGrund – sammelbar, solange du es findest.</div>
+          </div>
+          <button id="backButton" class="back-btn">Zurück</button>
+        </div>
+
+        <div class="card-photo">
+          <img id="gateImage" src="" alt="Gate Bild">
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="card-section-label">Kurzbeschreibung</div>
+            <div id="gateDescription" class="card-text"></div>
+          </div>
+
+          <div>
+            <div class="card-section-label">Vibes</div>
+            <div id="gateVibes" class="card-vibes"></div>
+          </div>
+
+          <div id="gateCityRow">
+            <div class="card-section-label">Herkunft</div>
+            <div id="gateCity" class="card-city"></div>
+          </div>
+        </div>
+
+        <div class="collect-section">
+          <button id="collectButton" class="collect-btn">Gate-Karte sammeln</button>
+          <button id="shareButton" class="share-btn">Gate-Link teilen</button>
+          <div id="collectInfo" class="collect-info"></div>
+        </div>
+
+        <div class="card-footer">
+          <div id="statusText" class="card-footer-left"></div>
+          <div class="card-footer-right">
+            <div id="cardNumber" class="card-number">UG‑GATE #0000</div>
+            <div class="card-set">Set: UnterGrund Gates · S1</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="errorBox" class="status" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const BASE_URL = "https://baurybot-hub.github.io/untergrund/";
+
+    const cardShell = document.getElementById('cardShell');
+    const cardContent = document.getElementById('cardContent');
+    const errorBox = document.getElementById('errorBox');
+
+    const gateNameEl = document.getElementById('gateName');
+    const gateDescriptionEl = document.getElementById('gateDescription');
+    const gateVibesEl = document.getElementById('gateVibes');
+    const gateCityEl = document.getElementById('gateCity');
+    const gateCityRow = document.getElementById('gateCityRow');
+    const gateImageEl = document.getElementById('gateImage');
+
+    const collectButton = document.getElementById('collectButton');
+    const shareButton = document.getElementById('shareButton');
+    const collectInfo = document.getElementById('collectInfo');
+    const statusText = document.getElementById('statusText');
+    const cardNumberEl = document.getElementById('cardNumber');
+    const backButton = document.getElementById('backButton');
+
+    let currentGateId = null;
+    let currentShareSlug = null;
+
+    function updateViewportScale() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+
+      const outerPadding = 4 * 2;
+      const availableHeight = window.innerHeight - outerPadding;
+      const baseHeight = 900;
+      const scale = Math.min(1, availableHeight / baseHeight);
+
+      cardShell.style.transformOrigin = 'center center';
+      cardShell.style.transform = `scale(${scale})`;
+    }
+
+    window.addEventListener('resize', updateViewportScale);
+    window.addEventListener('orientationchange', updateViewportScale);
+
+    function setError(msg) {
+      errorBox.style.display = 'block';
+      errorBox.textContent = msg;
+      cardContent.style.display = 'none';
+    }
+
+    function setCardNumber(id) {
+      if (!id) {
+        cardNumberEl.textContent = "UG‑GATE #0000";
+        return;
+      }
+      const num = String(id).slice(0,4).toUpperCase();
+      cardNumberEl.textContent = "UG‑GATE #" + num;
+    }
+
+    function renderVibes(m1, m2, m3) {
+      gateVibesEl.innerHTML = "";
+      const vibes = [m1, m2, m3].map(v => (v || "").trim()).filter(Boolean);
+      if (vibes.length === 0) {
+        const span = document.createElement("span");
+        span.className = "vibe-pill";
+        span.textContent = "no vibes yet";
+        gateVibesEl.appendChild(span);
+        return;
+      }
+      vibes.forEach(v => {
+        const pill = document.createElement("span");
+        pill.className = "vibe-pill";
+        pill.textContent = v;
+        gateVibesEl.appendChild(pill);
+      });
+    }
+
+    async function checkGateAlreadyCollected(gateCardId) {
+      const { data: sessionData } = await supa.auth.getSession();
+      if (!sessionData || !sessionData.session) return false;
+
+      const userId = sessionData.session.user.id;
+
+      const { data, error } = await supa
+        .from('gate_collection')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('gate_card_id', gateCardId)
+        .limit(1);
+
+      if (error) {
+        console.error(error);
+        return false;
+      }
+
+      return data && data.length > 0;
+    }
+
+    async function handleCollectClick() {
+      const { data: sessionData, error: sessionError } = await supa.auth.getSession();
+
+      if (sessionError || !sessionData || !sessionData.session) {
+        collectInfo.textContent = 'Melde dich an, um Gate-Karten zu sammeln.';
+        window.location.href = `${BASE_URL}Login.html?from=gate_share`;
+        return;
+      }
+
+      const userId = sessionData.session.user.id;
+      collectButton.disabled = true;
+      collectInfo.textContent = 'Füge Gate-Karte zu deinem Gate-Album hinzu ...';
+
+      const { error } = await supa
+        .from('gate_collection')
+        .insert({
+          user_id: userId,
+          gate_card_id: currentGateId
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          collectInfo.textContent = 'Diese Gate-Karte ist bereits in deinem Gate-Album.';
+          collectButton.textContent = 'Bereits gesammelt';
+          collectButton.disabled = false;
+          return;
+        }
+        console.error(error);
+        collectInfo.textContent = 'Fehler beim Sammeln. Versuch es später nochmal.';
+        collectButton.disabled = false;
+        return;
+      }
+
+      collectButton.textContent = '✓ Gesammelt';
+      collectInfo.textContent = 'Gate-Karte zu deinem Gate-Album hinzugefügt.';
+      statusText.textContent = 'Dieses Gate ist jetzt Teil deiner Sammlung.';
+    }
+
+    async function initShareButton() {
+      if (!currentShareSlug) {
+        shareButton.disabled = true;
+        return;
+      }
+      const shareUrl = `${BASE_URL}GateShare.html?s=${encodeURIComponent(currentShareSlug)}`;
+
+      shareButton.onclick = async () => {
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: gateNameEl.textContent || 'UnterGrund Gate',
+              text: 'Schau dir diese Gate-Karte an und sammle sie in deinem Gate-Album.',
+              url: shareUrl
+            });
+            collectInfo.textContent = 'Gate-Link wurde geteilt.';
+          } catch (e) {
+            console.error(e);
+          }
+        } else if (navigator.clipboard) {
+          try {
+            await navigator.clipboard.writeText(shareUrl);
+            collectInfo.textContent = 'Gate-Link in die Zwischenablage kopiert.';
+          } catch (e) {
+            console.error(e);
+            collectInfo.textContent = 'Konnte Link nicht kopieren.';
+          }
+        } else {
+          collectInfo.textContent = shareUrl;
+        }
+      };
+    }
+
+    async function loadGateFromSlug() {
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('s');
+
+      if (!slug) {
+        setError('Kein Gate-Slug in der URL gefunden.');
+        return;
+      }
+
+      currentShareSlug = slug;
+
+      const { data, error } = await supa
+        .from('gate_cards')
+        .select('id, image_path, name, description, mood1, mood2, mood3, city, share_slug')
+        .eq('share_slug', slug)
+        .maybeSingle();
+
+      if (error || !data) {
+        console.error(error);
+        setError('Dieses Gate gibt es nicht (mehr).');
+        return;
+      }
+
+      currentGateId = data.id;
+
+      gateNameEl.textContent = data.name || 'Unbenanntes Gate';
+      gateDescriptionEl.textContent = data.description || 'Noch keine Beschreibung hinterlegt.';
+      renderVibes(data.mood1, data.mood2, data.mood3);
+
+      if (data.city) {
+        gateCityEl.textContent = `📍 ${data.city}`;
+        gateCityRow.style.display = 'block';
+      } else {
+        gateCityRow.style.display = 'none';
+      }
+
+      if (data.image_path) {
+        gateImageEl.src = data.image_path;
+      }
+
+      setCardNumber(data.id);
+
+      cardContent.style.display = 'flex';
+      errorBox.style.display = 'none';
+
+      const alreadyCollected = await checkGateAlreadyCollected(currentGateId);
+      if (alreadyCollected) {
+        collectButton.textContent = 'Bereits gesammelt';
+        collectInfo.textContent = 'Diese Gate-Karte ist bereits in deinem Gate-Album.';
+      }
+
+      collectButton.onclick = handleCollectClick;
+      await initShareButton();
+      updateViewportScale();
+    }
+
+    backButton.onclick = () => {
+      window.location.href = `${BASE_URL}MeineSammlung.html`;
+    };
+
+    loadGateFromSlug();
+  </script>
+</body>
+</html>
