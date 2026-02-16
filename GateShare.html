@@ -107,18 +107,17 @@
       color: #a5b4fc;
     }
 
- .card-name {
-  font-size: 18px;          /* kleiner */
-  letter-spacing: 0.14em;   /* weniger auseinandergezogen */
-  text-transform: uppercase;
-  margin-top: 4px;
-  color: #f9fafb;
-  font-weight: 600;         /* etwas leichter als 700 */
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
+    .card-name {
+      font-size: 18px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-top: 4px;
+      color: #f9fafb;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     .card-subline {
       font-size: 11px;
@@ -407,13 +406,15 @@
       cardContent.style.display = 'none';
     }
 
-    function setCardNumber(id) {
-      if (!id) {
+    // NEU: Nummer aus Slug ableiten
+    function setCardNumberFromSlug(slug) {
+      if (!slug) {
         cardNumberEl.textContent = "UG‑GATE #0000";
         return;
       }
-      const num = String(id).slice(0,4).toUpperCase();
-      cardNumberEl.textContent = "UG‑GATE #" + num;
+      const codePart = slug.slice(-4).toUpperCase();
+      const displayCode = codePart && codePart.length === 4 ? codePart : "0000";
+      cardNumberEl.textContent = "UG‑GATE #" + displayCode;
     }
 
     function renderVibes(m1, m2, m3) {
@@ -565,7 +566,8 @@
         gateImageEl.src = data.image_path;
       }
 
-      setCardNumber(data.id);
+      // Nummer aus share_slug ziehen
+      setCardNumberFromSlug(data.share_slug);
 
       cardContent.style.display = 'flex';
       errorBox.style.display = 'none';
