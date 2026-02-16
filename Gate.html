@@ -792,13 +792,50 @@ async function convertToWebP(blob, quality = 0.92) {
         });
 
         if (insertError) {
-          console.error(insertError);
-          setSaveStatus('Fehler beim Speichern deiner Gate-Karte in der Datenbank.', 'error');
-          saveGateCardButton.disabled = false;
-          return;
-        }
+  console.error(insertError);
+  setSaveStatus('Fehler beim Speichern deiner Gate-Karte in der Datenbank.', 'error');
+  saveButton.disabled = false;
+  return;
+}
 
-        setSaveStatus('Gate-Karte fest gespeichert. Vielleicht mischt sie sich morgen in den UnterGrund.', 'success');
+// ✅ Ungenutzte Bilder aus Storage löschen
+try {
+  const selectedSlot = [...previewSlots].find(s => Number(s.dataset.index) === selectedPreviewIndex);
+  const selectedImageUrl = selectedSlot.dataset.imageUrl;
+
+  for (const slot of previewSlots) {
+    const imgUrl = slot.dataset.imageUrl;
+    if (imgUrl && imgUrl !== selectedImageUrl) {
+      const fileName = imgUrl.split('/').pop();
+      
+      const { error: deleteError } = await supa.storage
+        .from('gate-images')
+        .remove([fileName]);
+      
+      if (deleteError) {
+        console.warn('Konnte ungenutztes Bild nicht löschen:', fileName, deleteError);
+      }
+    }
+  }
+} catch (cleanupError) {
+  console.warn('Fehler beim Storage-Cleanup:', cleanupError);
+}
+
+// ✅ Bild-Generierung blocken
+generateButton.disabled = true;
+generateButton.textContent = 'Karte gespeichert – keine weiteren Bilder möglich';
+
+// ✅ Alle Inputs sperren
+gatePrompt.disabled = true;
+vibe1.disabled = true;
+vibe2.disabled = true;
+vibe3.disabled = true;
+cardName.disabled = true;
+cardDescription.disabled = true;
+cardCity.disabled = true;
+
+setSaveStatus('Gate-Karte fest gespeichert. Vielleicht mischt sie sich morgen in den UnterGrund.', 'success');
+        
       } catch (e) {
         console.error(e);
         setSaveStatus('Unerwarteter Fehler beim Speichern deiner Gate-Karte.', 'error');
