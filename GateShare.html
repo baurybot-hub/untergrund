@@ -33,16 +33,16 @@
     .card-shell {
       position: relative;
       width: 100%;
-      max-width: 520px;
-      height: 780px;
-      border-radius: 26px;
-      padding: 2px;
+      max-width: 420px;
+      height: 900px;
+      border-radius: 22px;
+      padding: 3px;
       background:
         radial-gradient(circle at -10% -20%, rgba(56,189,248,0.32), transparent 55%),
         radial-gradient(circle at 110% 120%, rgba(168,85,247,0.4), transparent 55%),
         radial-gradient(circle at 50% 0%, rgba(15,23,42,0.9), rgba(2,6,23,1));
       box-shadow:
-        0 40px 110px rgba(0,0,0,0.95),
+        0 32px 90px rgba(0,0,0,0.95),
         0 0 40px rgba(129,140,248,0.55);
       box-sizing: border-box;
       transform-origin: center center;
@@ -52,8 +52,8 @@
       position: relative;
       width: 100%;
       height: 100%;
-      border-radius: 24px;
-      padding: 18px 18px 14px;
+      border-radius: 18px;
+      padding: 14px 14px 11px;
       background: radial-gradient(circle at top left,
                   rgba(15,23,42,0.96) 0,
                   rgba(15,23,42,0.98) 40%,
@@ -64,6 +64,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       overflow: hidden;
+      font-size: 14px;
     }
 
     .card::before {
@@ -85,19 +86,13 @@
       pointer-events: none;
     }
 
-    .card-inner {
+    .card-header {
       position: relative;
       z-index: 1;
       display: flex;
-      flex-direction: column;
-      gap: 16px;
-      height: 100%;
-    }
-
-    .card-header {
-      display: flex;
       justify-content: space-between;
       align-items: flex-start;
+      margin-bottom: 10px;
       gap: 8px;
     }
 
@@ -143,33 +138,16 @@
       white-space: nowrap;
     }
 
-    .card-main {
-      display: flex;
-      flex: 1 1 auto;
-      gap: 14px;
-      min-height: 0;
-    }
-
     .card-photo {
-      flex: 0 0 44%;
+      position: relative;
+      z-index: 1;
+      flex: 0 0 52%;
       border-radius: 18px;
       overflow: hidden;
       border: 1px solid rgba(55,65,81,0.9);
       background: radial-gradient(circle,#020617 0,#020617 60%,#000 100%);
-      position: relative;
+      margin-bottom: 12px;
       box-shadow: 0 0 24px rgba(15,23,42,0.9);
-    }
-
-    .card-photo::after {
-      content: "GATE";
-      position: absolute;
-      right: -42px;
-      bottom: 14px;
-      font-size: 11px;
-      letter-spacing: 0.26em;
-      text-transform: uppercase;
-      color: rgba(148,163,184,0.45);
-      transform: rotate(-90deg);
     }
 
     .card-photo img {
@@ -180,12 +158,13 @@
     }
 
     .card-body {
+      position: relative;
+      z-index: 1;
       flex: 1 1 auto;
       display: flex;
       flex-direction: column;
       gap: 8px;
       font-size: 13px;
-      min-width: 0;
     }
 
     .card-section-label {
@@ -226,13 +205,9 @@
     }
 
     .collect-section {
-      margin-top: 4px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .collect-buttons {
+      position: relative;
+      z-index: 1;
+      margin-top: 10px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -285,17 +260,19 @@
     }
 
     .card-footer {
+      position: relative;
+      z-index: 1;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 6px;
+      margin-top: 8px;
       padding-top: 6px;
       border-top: 1px dashed rgba(55,65,81,0.9);
       font-size: 11px;
     }
 
     .card-footer-left {
-      max-width: 60%;
+      max-width: 65%;
       color: #fca5a5;
       min-height: 1.2em;
     }
@@ -323,75 +300,53 @@
       margin-top: 8px;
       color: #fca5a5;
     }
-
-    @media (max-width: 480px) {
-      .card-shell {
-        max-width: 100%;
-        height: 720px;
-      }
-      .card-main {
-        flex-direction: column;
-      }
-      .card-photo {
-        flex: 0 0 230px;
-      }
-      .card-photo::after {
-        display: none;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="gate-wrap">
     <div class="card-shell" id="cardShell">
       <div class="card" id="cardContent" style="display:none;">
-        <div class="card-inner">
-          <div class="card-header">
-            <div class="card-title-block">
-              <div class="card-label">UnterGrund Secret Gate</div>
-              <div id="gateName" class="card-name">Gate-Name</div>
-              <div class="card-subline">Ein geheimer Eintritt in den UnterGrund – sammelbar, solange du den Link hast.</div>
-            </div>
-            <button id="backButton" class="back-btn">Mein Album</button>
+        <div class="card-header">
+          <div class="card-title-block">
+            <div class="card-label">UnterGrund Secret Gate</div>
+            <div id="gateName" class="card-name">Gate-Name</div>
+            <div class="card-subline">Ein geheimer Eintritt in den UnterGrund – sammelbar, solange du den Link hast.</div>
+          </div>
+          <button id="backButton" class="back-btn">Mein Album</button>
+        </div>
+
+        <div class="card-photo">
+          <img id="gateImage" src="" alt="Gate Bild">
+        </div>
+
+        <div class="card-body">
+          <div>
+            <div class="card-section-label">Kurzbeschreibung</div>
+            <div id="gateDescription" class="card-text"></div>
           </div>
 
-          <div class="card-main">
-            <div class="card-photo">
-              <img id="gateImage" src="" alt="Gate Bild">
-            </div>
-
-            <div class="card-body">
-              <div>
-                <div class="card-section-label">Kurzbeschreibung</div>
-                <div id="gateDescription" class="card-text"></div>
-              </div>
-
-              <div>
-                <div class="card-section-label">Vibes</div>
-                <div id="gateVibes" class="card-vibes"></div>
-              </div>
-
-              <div id="gateCityRow">
-                <div class="card-section-label">Herkunft</div>
-                <div id="gateCity" class="card-city"></div>
-              </div>
-            </div>
+          <div>
+            <div class="card-section-label">Vibes</div>
+            <div id="gateVibes" class="card-vibes"></div>
           </div>
 
-          <div class="collect-section">
-            <div class="collect-buttons">
-              <button id="collectButton" class="collect-btn">Gate-Karte sammeln</button>
-              <button id="shareButton" class="share-btn">Gate-Link teilen</button>
-            </div>
-            <div id="collectInfo" class="collect-info"></div>
+          <div id="gateCityRow">
+            <div class="card-section-label">Herkunft</div>
+            <div id="gateCity" class="card-city"></div>
           </div>
+        </div>
 
-          <div class="card-footer">
-            <div id="statusText" class="card-footer-left"></div>
-            <div class="card-footer-right">
-              <div id="cardNumber" class="card-number">UG‑GATE #0000</div>
-              <div class="card-set">Set: Secret Gates · S1</div>
-            </div>
+        <div class="collect-section">
+          <button id="collectButton" class="collect-btn">Gate-Karte sammeln</button>
+          <button id="shareButton" class="share-btn">Gate-Link teilen</button>
+          <div id="collectInfo" class="collect-info"></div>
+        </div>
+
+        <div class="card-footer">
+          <div id="statusText" class="card-footer-left"></div>
+          <div class="card-footer-right">
+            <div id="cardNumber" class="card-number">UG‑GATE #0000</div>
+            <div class="card-set">Set: Secret Gates · S1</div>
           </div>
         </div>
       </div>
@@ -435,7 +390,7 @@
 
       const outerPadding = 4 * 2;
       const availableHeight = window.innerHeight - outerPadding;
-      const baseHeight = 780;
+      const baseHeight = 900;
       const scale = Math.min(1, availableHeight / baseHeight);
 
       cardShell.style.transformOrigin = 'center center';
@@ -611,7 +566,7 @@
 
       setCardNumber(data.id);
 
-      cardContent.style.display = 'block';
+      cardContent.style.display = 'flex';
       errorBox.style.display = 'none';
 
       const alreadyCollected = await checkGateAlreadyCollected(currentGateId);
