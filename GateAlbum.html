@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mein Gate-Album</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #4c1d95 0, #020617 55%, #000 100%);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .user-info {
+      background: rgba(15,23,42,0.9);
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      color: #a5b4fc;
+      margin-bottom: 24px;
+      border: 1px solid rgba(129,140,248,0.4);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .header-left h1 {
+      margin: 0;
+      font-size: 26px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-left .subtitle {
+      font-size: 14px;
+      color: #e5e7eb;
+      margin-top: 4px;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .header-button {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(129,140,248,0.5);
+      background: rgba(15,23,42,0.9);
+      color: #c7d2fe;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .header-button:hover {
+      background: rgba(79,70,229,0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 0 18px rgba(129,140,248,0.5);
+    }
+
+    .album-page {
+      background: rgba(15,23,42,0.94);
+      border-radius: 20px;
+      border: 2px solid rgba(129,140,248,0.4);
+      padding: 24px;
+      min-height: 480px;
+      position: relative;
+      box-shadow: 0 20px 80px rgba(0,0,0,0.9);
+    }
+
+    .album-page::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at 0% 0%, rgba(168,85,247,0.22), transparent 55%),
+                  radial-gradient(circle at 100% 100%, rgba(56,189,248,0.2), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    .album-inner {
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .page-header-title {
+      font-size: 18px;
+      margin-bottom: 6px;
+      color: #e5e7eb;
+    }
+
+    .page-header-subtitle {
+      font-size: 13px;
+      color: #a5b4fc;
+    }
+
+    .gate-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    @media (min-width: 700px) {
+      .gate-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    .gate-slot {
+      background: rgba(15,23,42,0.92);
+      border-radius: 14px;
+      border: 1px dashed rgba(148,163,184,0.5);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+
+    .gate-slot.filled {
+      border-style: solid;
+      border-color: rgba(129,140,248,0.8);
+      background: radial-gradient(circle at top, rgba(15,23,42,0.96), rgba(15,23,42,0.99));
+    }
+
+    .gate-slot.filled:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 0 20px rgba(129,140,248,0.7);
+    }
+
+    .gate-image {
+      width: 100%;
+      height: 150px;
+      object-fit: cover;
+      display: block;
+      background: rgba(15,23,42,0.95);
+    }
+
+    .gate-info {
+      padding: 8px 9px 9px;
+      background: rgba(15,23,42,0.98);
+      text-align: left;
+    }
+
+    .gate-name {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: #f9fafb;
+    }
+
+    .gate-meta {
+      font-size: 11px;
+      color: #a5b4fc;
+    }
+
+    .gate-empty-content {
+      width: 100%;
+      height: 100%;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: rgba(148,163,184,0.35);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #a0a0a0;
+    }
+
+    .empty-state h2 {
+      font-size: 22px;
+      margin-bottom: 10px;
+      color: #f5f5f5;
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+
+    .empty-state a {
+      display: inline-block;
+      padding: 12px 24px;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      color: #f9fafb;
+      font-weight: 600;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .empty-state a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(129,140,248,0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="user-info" id="userInfo">Lädt...</div>
+
+    <div class="header">
+      <div class="header-left">
+        <h1>Gate-Album <span id="gateCount" style="font-size:18px;color:#a5b4fc;">0</span></h1>
+        <div class="subtitle">Deine geheimen Gates, die du im UnterGrund gefunden hast.</div>
+      </div>
+      <div class="header-right">
+        <a href="MeineSammlung.html" class="header-button">Zurück zum Album</a>
+        <a href="index.html" class="header-button">Zur Stage</a>
+      </div>
+    </div>
+
+    <div class="album-page">
+      <div class="album-inner">
+        <div class="page-header">
+          <div id="albumTitle" class="page-header-title">Dein geheimes Gate-Album</div>
+          <div id="albumSubtitle" class="page-header-subtitle">
+            Sammle Gate-Karten durch geteilte Links und sie landen hier.
+          </div>
+        </div>
+
+        <div id="gateGrid" class="gate-grid" style="display:none;"></div>
+
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <h2>Noch kein Gate gefunden</h2>
+          <p>Sobald du deine erste Gate-Karte über einen geteilten Link sammelst, erscheint sie hier.</p>
+          <a href="index.html">Zur Stage & Artists entdecken</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
+  <!-- Konfetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+  <script>
+    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const BASE_URL = "https://baurybot-hub.github.io/untergrund/";
+
+    function fireConfetti() {
+      confetti({
+        particleCount: 180,
+        spread: 70,
+        origin: { y: 0.3 }
+      });
+    }
+
+    function getQueryParam(name) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(name);
+    }
+
+    async function loadGateAlbum() {
+      const { data, error } = await client.auth.getSession();
+      if (error || !data || !data.session) {
+        window.location.href = "Login.html?from=gate_album";
+        return;
+      }
+
+      const session = data.session;
+      const userId = session.user.id;
+      const userEmail = session.user.email;
+      document.getElementById("userInfo").textContent = "Eingeloggt als " + userEmail;
+
+      // Gate-Collection + entsprechende gate_cards holen
+      const {  collections, error: collError } = await client
+        .from("gate_collection")
+        .select("gate_card_id, collected_at, gate_cards (id, name, image_path)")
+        .eq("user_id", userId)
+        .order("collected_at", { ascending: true });
+
+      const gateGrid = document.getElementById("gateGrid");
+      const emptyState = document.getElementById("emptyState");
+      const gateCountEl = document.getElementById("gateCount");
+
+      if (collError) {
+        console.error(collError);
+        emptyState.style.display = "block";
+        gateGrid.style.display = "none";
+        gateCountEl.textContent = "0";
+        return;
+      }
+
+      if (!collections || collections.length === 0) {
+        emptyState.style.display = "block";
+        gateGrid.style.display = "none";
+        gateCountEl.textContent = "0";
+      } else {
+        emptyState.style.display = "none";
+        gateGrid.style.display = "grid";
+        gateGrid.innerHTML = "";
+        gateCountEl.textContent = collections.length.toString();
+
+        collections.forEach(item => {
+          const gate = item.gate_cards;
+          if (!gate) return;
+
+          const slot = document.createElement("div");
+          slot.className = "gate-slot filled";
+
+          const img = document.createElement("img");
+          img.className = "gate-image";
+          img.src = gate.image_path || "https://via.placeholder.com/300x400?text=Gate";
+          img.alt = gate.name || "Gate";
+
+          const info = document.createElement("div");
+          info.className = "gate-info";
+
+          const nameDiv = document.createElement("div");
+          nameDiv.className = "gate-name";
+          nameDiv.textContent = gate.name || "Unbenanntes Gate";
+
+          const metaDiv = document.createElement("div");
+          metaDiv.className = "gate-meta";
+          const date = item.collected_at
+            ? new Date(item.collected_at).toLocaleDateString("de-DE")
+            : "Unbekanntes Datum";
+          metaDiv.textContent = "gefunden am " + date;
+
+          info.appendChild(nameDiv);
+          info.appendChild(metaDiv);
+
+          slot.appendChild(img);
+          slot.appendChild(info);
+
+          // Optional: später Link zur GateShare-Ansicht
+          // slot.onclick = () => window.location.href = BASE_URL + "GateShare.html?s=" + gate.share_slug;
+
+          gateGrid.appendChild(slot);
+        });
+      }
+
+      // Freischalt-Moment mit Konfetti
+      const first = getQueryParam("first");
+      if (first === "1") {
+        const titleEl = document.getElementById("albumTitle");
+        const subtitleEl = document.getElementById("albumSubtitle");
+        titleEl.textContent = "Gate-Album freigeschaltet!";
+        subtitleEl.textContent = "Du hast deine erste Gate-Karte gefunden – ab jetzt landen alle weiteren hier.";
+        fireConfetti();
+      }
+    }
+
+    loadGateAlbum();
+  </script>
+</body>
+</html>
