@@ -186,6 +186,17 @@
       color: #a5b4fc;
     }
 
+    .gate-empty-content {
+      width: 100%;
+      height: 100%;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      color: rgba(148,163,184,0.35);
+    }
+
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -231,7 +242,7 @@
       </div>
       <div class="header-right">
         <a href="MeineSammlung.html" class="header-button">Zurück zum Album</a>
-        <a href="index.html" class="header-button">Zurück in den UnterGrund</a>
+        <a href="index.html" class="header-button">Zur Stage</a>
       </div>
     </div>
 
@@ -240,16 +251,16 @@
         <div class="page-header">
           <div id="albumTitle" class="page-header-title">Dein geheimes Gate-Album</div>
           <div id="albumSubtitle" class="page-header-subtitle">
-            Gate-Karten, die du über geteilte Links oder im UnterGrund zwischen Artists gefunden hast.
+            Sammle Gate-Karten durch geteilte Links und sie landen hier.
           </div>
         </div>
 
         <div id="gateGrid" class="gate-grid" style="display:none;"></div>
 
-        <div id="emptyState" class="empty-state" style="display:none;">
+        <div id="emptyState" class="empty-state" style="display:none%;">
           <h2>Noch kein Gate gefunden</h2>
-          <p>Sobald du deine erste Gate-Karte sammelst, erscheint sie hier.</p>
-          <a href="index.html">Zurück in den UnterGrund</a>
+          <p>Sobald du deine erste Gate-Karte über einen geteilten Link sammelst, erscheint sie hier.</p>
+          <a href="index.html">Zur Stage & Artists entdecken</a>
         </div>
       </div>
     </div>
@@ -263,6 +274,8 @@
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const BASE_URL = "https://baurybot-hub.github.io/untergrund/";
 
     function fireConfetti() {
       confetti({
@@ -278,13 +291,13 @@
     }
 
     async function loadGateAlbum() {
-      const {  sessionData, error: sessionError } = await client.auth.getSession();
-      if (sessionError || !sessionData || !sessionData.session) {
+      const { data, error } = await client.auth.getSession();
+      if (error || !data || !data.session) {
         window.location.href = "Login.html?from=gate_album";
         return;
       }
 
-      const session = sessionData.session;
+      const session = data.session;
       const userId = session.user.id;
       const userEmail = session.user.email;
       document.getElementById("userInfo").textContent = "Eingeloggt als " + userEmail;
@@ -296,14 +309,12 @@
         .eq("user_id", userId)
         .order("collected_at", { ascending: true });
 
-      console.log('collections', collections);
-
       const gateGrid = document.getElementById("gateGrid");
       const emptyState = document.getElementById("emptyState");
       const gateCountEl = document.getElementById("gateCount");
 
       if (collError) {
-        console.error('gate_collection error', collError);
+        console.error(collError);
         emptyState.style.display = "block";
         gateGrid.style.display = "none";
         gateCountEl.textContent = "0";
@@ -317,7 +328,6 @@
       } else {
         // 2) Alle Gate-IDs sammeln
         const gateIds = collections.map(c => c.gate_card_id);
-        console.log('gateIds', gateIds);
 
         // 3) Passende gate_cards holen
         const {  gates, error: gatesError } = await client
@@ -325,18 +335,17 @@
           .select("id, name, image_path")
           .in("id", gateIds);
 
-        console.log('gates', gates);
-
         if (gatesError) {
-          console.error('gate_cards error', gatesError);
+          console.error(gatesError);
           emptyState.style.display = "block";
           gateGrid.style.display = "none";
           gateCountEl.textContent = "0";
           return;
         }
 
+        // Map für schnellen Zugriff
         const gateMap = new Map();
-        (gates || []).forEach(g => gateMap.set(g.id, g));
+        gates.forEach(g => gateMap.set(g.id, g));
 
         emptyState.style.display = "none";
         gateGrid.style.display = "grid";
@@ -379,6 +388,7 @@
         });
       }
 
+      // Freischalt-Moment mit Konfetti
       const first = getQueryParam("first");
       if (first === "1") {
         const titleEl = document.getElementById("albumTitle");
