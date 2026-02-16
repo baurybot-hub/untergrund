@@ -20,7 +20,7 @@
     }
     .gate-wrap {
       width: 100%;
-      max-width: 540px;
+      max-width: 640px;
       background: rgba(0,0,0,0.88);
       border-radius: 20px;
       border: 1px solid rgba(28,255,136,0.35);
@@ -170,6 +170,75 @@
       color: #a0a0a0;
       margin-top: 4px;
     }
+
+    /* Live-Kartenvorschau */
+    .card-preview {
+      margin-top: 24px;
+      padding: 16px;
+      background: rgba(15,15,15,0.9);
+      border-radius: 14px;
+      border: 1px solid rgba(28,255,136,0.25);
+    }
+    .card-preview h3 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: #9effc7;
+    }
+    .card-preview-inner {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .card-preview-img {
+      flex-shrink: 0;
+      width: 120px;
+      height: 160px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+      overflow: hidden;
+    }
+    .card-preview-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .card-preview-text {
+      flex: 1;
+      min-width: 0;
+    }
+    .card-preview-text h4 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #f5f5f5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .card-preview-text p {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: #c0c0c0;
+      line-height: 1.4;
+    }
+    .card-preview-vibes {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .card-preview-vibe {
+      display: inline-block;
+      padding: 2px 6px;
+      background: rgba(28,255,136,0.15);
+      border: 1px solid rgba(28,255,136,0.3);
+      border-radius: 4px;
+      font-size: 10px;
+      color: #9effc7;
+    }
+    .card-preview-city {
+      font-size: 11px;
+      color: #9ca3af;
+    }
   </style>
 </head>
 <body>
@@ -189,85 +258,104 @@
     <button id="checkCodeButton">Gate öffnen</button>
     <div id="gateStatus" class="status"></div>
 
-    <div id="gateContent" style="display:none; margin-top:24px;">
-      <!-- KI-Prompt fürs Bild -->
+    <!-- Phase 1: Nur Prompt + Vibes + Bilder erstellen -->
+    <div id="phase1Content" style="display:none; margin-top:24px;">
+      <h2>Erstelle 3 Bild-Varianten</h2>
+
       <div class="field">
         <label for="gatePrompt">Beschreibe dein Gate-Artwork (KI-Prompt)</label>
         <textarea id="gatePrompt" rows="3" maxlength="240"
           placeholder="Dunkler U-Bahn-Tunnel, grüne Neonlichter, flackernde Werbetafeln, Nebel, einsame Gestalt mit Kapuze, körniger Filmlook."></textarea>
         <div class="hint">
-          Beschreib das Bild, das du vor dir siehst: Stil, Farben, Umgebung, Stimmung. Dieser Text steuert später das KI-Bild.
+          Beschreib das Bild, das du vor dir siehst: Stil, Farben, Umgebung, Stimmung.
         </div>
         <div id="gatePromptCounter" class="char-counter">0 / 240</div>
       </div>
 
-      <div class="gate-card-form">
-        <h2>Deine Gate-Karte</h2>
-
-        <div class="field">
-          <label for="gateCardName">Name der Karte</label>
-          <input id="gateCardName" type="text" maxlength="30"
-                 placeholder="Name deiner Gate-Karte">
-          <div class="hint">Max. 30 Zeichen. Kurz, prägnant, merkbar.</div>
+      <div class="field">
+        <label>Vibes / Mood (3 kurze Wörter)</label>
+        <div class="hint">
+          Drei Vibes, die deine Karte beschreiben (1–2 Wörter). Beispiele: neon, melancholisch, dreckig, hopeful.
         </div>
-
-        <div class="field">
-          <label for="gateCardDescription">Kurzbeschreibung</label>
-          <textarea id="gateCardDescription" maxlength="140" rows="2"
-            placeholder="Was machst du hier im UnterGrund? Welche Funktion hast du? Was willst du uns sagen?"></textarea>
-          <div id="gateDescCounter" class="char-counter">0 / 140</div>
-        </div>
-
-        <div class="field">
-          <label>Vibes / Mood (3 kurze Wörter)</label>
-          <div class="hint">
-            Drei Vibes, die die Karte beschreiben (1–2 Wörter). Beispiele: neon, melancholisch, dreckig, hopeful.
-          </div>
-          <input id="gateMood1" type="text" maxlength="18" placeholder="Vibe 1 (z.B. neon)">
-          <input id="gateMood2" type="text" maxlength="18" placeholder="Vibe 2 (z.B. melancholisch)">
-          <input id="gateMood3" type="text" maxlength="18" placeholder="Vibe 3 (z.B. dreckig)">
-        </div>
-
-        <div class="field">
-          <label for="gateCity">Herkunft / City (optional)</label>
-          <input id="gateCity" type="text" maxlength="24"
-                 placeholder="z.B. Berlin, Ruhrpott oder Neonhafen">
-          <div class="hint">Echte City oder Fantasie-Ort, max. 24 Zeichen.</div>
-        </div>
-
-        <div class="field">
-          <button id="generateImageButton">Bild generieren – Vorschau 1/3 (KI)</button>
-        </div>
-
-        <!-- 3 Preview-Slots -->
-        <div class="gate-previews" id="gatePreviews">
-          <div class="gate-preview-slot" data-index="1">
-            <div class="gate-preview-label">Vorschau 1</div>
-            <div class="gate-preview-image">Noch kein Bild.</div>
-          </div>
-          <div class="gate-preview-slot" data-index="2">
-            <div class="gate-preview-label">Vorschau 2</div>
-            <div class="gate-preview-image">Noch kein Bild.</div>
-          </div>
-          <div class="gate-preview-slot" data-index="3">
-            <div class="gate-preview-label">Vorschau 3</div>
-            <div class="gate-preview-image">Noch kein Bild.</div>
-          </div>
-        </div>
-        <div class="preview-hint" id="previewHint">
-          Du kannst maximal 3 Bilder erstellen. Such dir eines deiner erstellten Bilder aus und mach einen endgültigen Save – vielleicht wird deine Karte morgen im UnterGrund reingemischt.
-        </div>
-
-        <div class="field">
-          <div class="save-hint">
-            Diese Karte könnte sich morgen im UnterGrund mischen und gesammelt werden.<br>
-            Du kannst pro Tag nur eine Gate-Karte fest speichern. Kein erneutes Erstellen.
-          </div>
-          <button id="saveGateCardButton">Gate-Karte endgültig festlegen</button>
-        </div>
-
-        <div id="saveStatus" class="status"></div>
+        <input id="gateMood1" type="text" maxlength="18" placeholder="Vibe 1 (z.B. neon)">
+        <input id="gateMood2" type="text" maxlength="18" placeholder="Vibe 2 (z.B. melancholisch)">
+        <input id="gateMood3" type="text" maxlength="18" placeholder="Vibe 3 (z.B. dreckig)">
       </div>
+
+      <div class="field">
+        <button id="generateImageButton">Bild generieren – Vorschau 1/3 (KI)</button>
+      </div>
+
+      <!-- 3 Preview-Slots -->
+      <div class="gate-previews" id="gatePreviews">
+        <div class="gate-preview-slot" data-index="1">
+          <div class="gate-preview-label">Vorschau 1</div>
+          <div class="gate-preview-image">Noch kein Bild.</div>
+        </div>
+        <div class="gate-preview-slot" data-index="2">
+          <div class="gate-preview-label">Vorschau 2</div>
+          <div class="gate-preview-image">Noch kein Bild.</div>
+        </div>
+        <div class="gate-preview-slot" data-index="3">
+          <div class="gate-preview-label">Vorschau 3</div>
+          <div class="gate-preview-image">Noch kein Bild.</div>
+        </div>
+      </div>
+      <div class="preview-hint" id="previewHint">
+        Du kannst maximal 3 Bilder erstellen. Klick auf ein Bild, um es auszuwählen.
+      </div>
+    </div>
+
+    <!-- Phase 2: Formular + Kartenvorschau (klappt nach Bildauswahl auf) -->
+    <div id="phase2Content" style="display:none; margin-top:24px;">
+      <h2>Vervollständige deine Gate-Karte</h2>
+
+      <div class="field">
+        <label for="gateCardName">Name der Karte</label>
+        <input id="gateCardName" type="text" maxlength="30"
+               placeholder="Name deiner Gate-Karte">
+        <div class="hint">Max. 30 Zeichen. Kurz, prägnant, merkbar.</div>
+      </div>
+
+      <div class="field">
+        <label for="gateCardDescription">Kurzbeschreibung</label>
+        <textarea id="gateCardDescription" maxlength="140" rows="2"
+          placeholder="Was machst du hier im UnterGrund? Welche Funktion hast du? Was willst du uns sagen?"></textarea>
+        <div id="gateDescCounter" class="char-counter">0 / 140</div>
+      </div>
+
+      <div class="field">
+        <label for="gateCity">Herkunft / City (optional)</label>
+        <input id="gateCity" type="text" maxlength="24"
+               placeholder="z.B. Berlin, Ruhrpott oder Neonhafen">
+        <div class="hint">Echte City oder Fantasie-Ort, max. 24 Zeichen.</div>
+      </div>
+
+      <!-- Live-Kartenvorschau -->
+      <div class="card-preview">
+        <h3>Deine Karte (Vorschau)</h3>
+        <div class="card-preview-inner">
+          <div class="card-preview-img">
+            <img id="cardPreviewImg" src="" alt="">
+          </div>
+          <div class="card-preview-text">
+            <h4 id="cardPreviewName">Name deiner Karte</h4>
+            <p id="cardPreviewDesc">Beschreibung erscheint hier ...</p>
+            <div class="card-preview-vibes" id="cardPreviewVibes"></div>
+            <div class="card-preview-city" id="cardPreviewCity"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="save-hint">
+          Diese Karte könnte sich morgen im UnterGrund mischen und gesammelt werden.<br>
+          Du kannst pro Tag nur eine Gate-Karte fest speichern. Kein erneutes Erstellen.
+        </div>
+        <button id="saveGateCardButton">Gate-Karte endgültig festlegen</button>
+      </div>
+
+      <div id="saveStatus" class="status"></div>
     </div>
   </div>
 
@@ -281,24 +369,25 @@
     const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
     const supa = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Gleich wie in Login.html
     const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
 
     const gateCodeInput = document.getElementById('gateCode');
     const checkCodeButton = document.getElementById('checkCodeButton');
     const gateStatus = document.getElementById('gateStatus');
-    const gateContent = document.getElementById('gateContent');
+
+    const phase1Content = document.getElementById('phase1Content');
+    const phase2Content = document.getElementById('phase2Content');
 
     const gatePrompt = document.getElementById('gatePrompt');
     const gatePromptCounter = document.getElementById('gatePromptCounter');
 
-    const gateCardName = document.getElementById('gateCardName');
-    const gateCardDescription = document.getElementById('gateCardDescription');
-    const gateDescCounter = document.getElementById('gateDescCounter');
-
     const gateMood1 = document.getElementById('gateMood1');
     const gateMood2 = document.getElementById('gateMood2');
     const gateMood3 = document.getElementById('gateMood3');
+
+    const gateCardName = document.getElementById('gateCardName');
+    const gateCardDescription = document.getElementById('gateCardDescription');
+    const gateDescCounter = document.getElementById('gateDescCounter');
     const gateCity = document.getElementById('gateCity');
 
     const generateImageButton = document.getElementById('generateImageButton');
@@ -308,6 +397,12 @@
     const previewContainer = document.getElementById('gatePreviews');
     const previewSlots = previewContainer.querySelectorAll('.gate-preview-slot');
     const previewHint = document.getElementById('previewHint');
+
+    const cardPreviewImg = document.getElementById('cardPreviewImg');
+    const cardPreviewName = document.getElementById('cardPreviewName');
+    const cardPreviewDesc = document.getElementById('cardPreviewDesc');
+    const cardPreviewVibes = document.getElementById('cardPreviewVibes');
+    const cardPreviewCity = document.getElementById('cardPreviewCity');
 
     let previewCount = 0;
     const maxPreviews = 3;
@@ -333,18 +428,19 @@
 
       if (!code) {
         setGateStatus('Bitte einen Gate-Code eingeben.', 'error');
-        gateContent.style.display = 'none';
+        phase1Content.style.display = 'none';
+        phase2Content.style.display = 'none';
         return;
       }
 
       if (code !== 'UG-GATE') {
         setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
-        gateContent.style.display = 'none';
+        phase1Content.style.display = 'none';
+        phase2Content.style.display = 'none';
         return;
       }
 
       try {
-        // 1. Session holen
         const { data: sessionData, error: sessionError } = await supa.auth.getSession();
 
         if (sessionError || !sessionData || !sessionData.session) {
@@ -356,11 +452,9 @@
 
         const userId = sessionData.session.user.id;
 
-        // 2. Heute-Start berechnen (00:00)
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
 
-        // 3. Prüfen, ob heute schon eine Gate-Karte existiert
         const { data: existingCards, error: existingError } = await supa
           .from('gate_cards')
           .select('id, created_at')
@@ -371,7 +465,8 @@
         if (existingError) {
           console.error(existingError);
           setGateStatus('Fehler beim Prüfen, ob du heute schon eine Gate-Karte gespeichert hast.', 'error');
-          gateContent.style.display = 'none';
+          phase1Content.style.display = 'none';
+          phase2Content.style.display = 'none';
           return;
         }
 
@@ -379,46 +474,46 @@
 
         if (hasCardToday) {
           setGateStatus('Du hast heute bereits eine Gate-Karte gespeichert. Das Gate bleibt zu – komm morgen wieder.', 'error');
-          gateContent.style.display = 'none';
+          phase1Content.style.display = 'none';
+          phase2Content.style.display = 'none';
           return;
         }
 
-        // 4. Gate darf auf
-        setGateStatus('Gate geöffnet. Gestalte jetzt deine Gate-Karte.', 'success');
-        gateContent.style.display = 'block';
+        setGateStatus('Gate geöffnet. Erstelle jetzt 3 Bild-Varianten.', 'success');
+        phase1Content.style.display = 'block';
+        phase2Content.style.display = 'none';
       } catch (e) {
         console.error(e);
         setGateStatus('Unerwarteter Fehler beim Öffnen des Gates.', 'error');
-        gateContent.style.display = 'none';
+        phase1Content.style.display = 'none';
+        phase2Content.style.display = 'none';
       }
     });
 
-    // Enter-Key Support für Gate-Code
     gateCodeInput.addEventListener('keydown', (ev) => {
       if (ev.key === 'Enter') {
         checkCodeButton.click();
       }
     });
 
-    // Char-Counter Prompt
     gatePrompt.addEventListener('input', () => {
       gatePromptCounter.textContent = gatePrompt.value.length + ' / 240';
     });
 
-    // Char-Counter Kurzbeschreibung
     gateCardDescription.addEventListener('input', () => {
       gateDescCounter.textContent = gateCardDescription.value.length + ' / 140';
+      updateCardPreview();
     });
 
-    // Pflichtfelder für Preview
+    gateCardName.addEventListener('input', updateCardPreview);
+    gateCity.addEventListener('input', updateCardPreview);
+
     function validateFormForPreview() {
-      const name = gateCardName.value.trim();
-      const desc = gateCardDescription.value.trim();
       const lore = gatePrompt.value.trim();
       const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
 
-      if (!lore || !name || !desc) {
-        showMessage('Bitte Name, Kurzbeschreibung und Prompt ausfüllen, bevor du ein Bild generierst.');
+      if (!lore) {
+        showMessage('Bitte KI-Prompt ausfüllen, bevor du ein Bild generierst.');
         return false;
       }
       if (moods.length === 0) {
@@ -428,36 +523,31 @@
       return true;
     }
 
-    // KI-Bildgenerierung über Puter (gpt-image-1, realistisch, nicht abstrakt)
-async function generateGateImage(promptText, previewIndex) {
-  const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
-  const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
-  const fullPrompt = `${promptText}.${moodText}`;
+    async function generateGateImage(promptText, previewIndex) {
+      const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+      const moodText = moods.length ? ` Vibes: ${moods.join(', ')}.` : '';
+      const fullPrompt = `${promptText}.${moodText}`;
 
-  // puter.ai.txt2img gibt ein HTMLImageElement zurück
-  const imgEl = await puter.ai.txt2img(fullPrompt, {
-    model: 'gpt-image-1',   // GPT Image-1, realistisch [web:3044]
-    quality: 'low'          // für schnelle, günstige Generierung
-  });
+      const imgEl = await puter.ai.txt2img(fullPrompt, {
+        model: 'gpt-image-1',
+        quality: 'low'
+      });
 
-  // Wir nutzen die src als URL in deinem bestehenden Flow
-  const imageUrl = imgEl.src;
-  if (!imageUrl) {
-    throw new Error('Keine Bild-URL von der KI erhalten.');
-  }
+      const imageUrl = imgEl.src;
+      if (!imageUrl) {
+        throw new Error('Keine Bild-URL von der KI erhalten.');
+      }
 
-  return { imageUrl };
-}
+      return { imageUrl };
+    }
 
-
-    // Bild generieren – Vorschau
     generateImageButton.addEventListener('click', async () => {
       if (!validateFormForPreview()) {
         return;
       }
 
       if (previewCount >= maxPreviews) {
-        showMessage('Du hast heute schon 3 Bild-Vorschauen erstellt. Such dir eines der Bilder aus und speichere deine Gate-Karte.');
+        showMessage('Du hast alle 3 Bild-Vorschauen erstellt. Wähle jetzt ein Bild aus.');
         return;
       }
 
@@ -472,28 +562,33 @@ async function generateGateImage(promptText, previewIndex) {
       imgContainer.textContent = `Generiere KI-Gate-Bild (${previewCount}/${maxPreviews}) ...`;
 
       try {
-        const promptText = gatePrompt.value.trim() || 'Stimmungsvolles Underground-Artwork im UnterGrund-Stil';
+        const promptText = gatePrompt.value.trim();
         const { imageUrl } = await generateGateImage(promptText, currentIndex);
 
         imgContainer.innerHTML = `<img src="${imageUrl}" alt="Gate Vorschau ${currentIndex}">`;
 
+        // Snapshot: Prompt + Vibes im Slot speichern
+        slot.dataset.prompt = promptText;
+        slot.dataset.mood1 = gateMood1.value.trim();
+        slot.dataset.mood2 = gateMood2.value.trim();
+        slot.dataset.mood3 = gateMood3.value.trim();
+
         if (selectedPreviewIndex === null) {
           selectedPreviewIndex = currentIndex;
           slot.classList.add('selected');
+          loadSelectedImageData();
         }
 
         const triesLeft = maxPreviews - previewCount;
         if (triesLeft > 0) {
-          showMessage(`Vorschau ${previewCount}/${maxPreviews} erstellt. Du hast noch ${triesLeft} Versuch(e) für heute.`);
+          showMessage(`Vorschau ${previewCount}/${maxPreviews} erstellt. Du hast noch ${triesLeft} Versuch(e).`);
         } else {
-          showMessage('Du hast alle 3 Bild-Vorschauen genutzt. Such dir jetzt eines der Bilder aus und mach einen endgültigen Save – vielleicht wird deine Karte morgen im UnterGrund reingemischt.');
+          showMessage('Alle 3 Bild-Vorschauen erstellt. Wähle jetzt ein Bild aus, um deine Karte zu vervollständigen.');
         }
       } catch (e) {
         console.error(e);
         imgContainer.textContent = 'Fehler bei der KI-Bildgenerierung.';
-        showMessage('Die KI konnte das Bild gerade nicht erstellen. Versuch es gleich nochmal oder passe deinen Prompt leicht an.');
-        // Versuchs-Zähler nicht hochsetzen, wenn KI hart failt? (Optional)
-        // previewCount -= 1;
+        showMessage('Die KI konnte das Bild gerade nicht erstellen. Versuch es gleich nochmal.');
       } finally {
         slot.classList.remove('loading');
         if (previewCount >= maxPreviews) {
@@ -506,7 +601,6 @@ async function generateGateImage(promptText, previewIndex) {
       }
     });
 
-    // Bildauswahl durch Klick
     previewSlots.forEach(slot => {
       slot.addEventListener('click', () => {
         const img = slot.querySelector('img');
@@ -515,11 +609,56 @@ async function generateGateImage(promptText, previewIndex) {
         previewSlots.forEach(s => s.classList.remove('selected'));
         slot.classList.add('selected');
         selectedPreviewIndex = Number(slot.dataset.index);
-        showMessage(`Vorschau ${selectedPreviewIndex} ist ausgewählt. Du kannst jetzt deine Gate-Karte fest speichern.`);
+
+        loadSelectedImageData();
+        showMessage(`Vorschau ${selectedPreviewIndex} ausgewählt. Vervollständige jetzt deine Karte.`);
       });
     });
 
-    // Speichern in gate_cards (Bild-URL von Puter)
+    function loadSelectedImageData() {
+      if (!selectedPreviewIndex) return;
+
+      const selectedSlot = [...previewSlots].find(s => Number(s.dataset.index) === selectedPreviewIndex);
+      if (!selectedSlot) return;
+
+      const img = selectedSlot.querySelector('img');
+      if (!img) return;
+
+      // Prompt + Vibes aus Snapshot laden
+      gatePrompt.value = selectedSlot.dataset.prompt || '';
+      gateMood1.value = selectedSlot.dataset.mood1 || '';
+      gateMood2.value = selectedSlot.dataset.mood2 || '';
+      gateMood3.value = selectedSlot.dataset.mood3 || '';
+      gatePromptCounter.textContent = gatePrompt.value.length + ' / 240';
+
+      // Phase 2 aufklappen
+      phase2Content.style.display = 'block';
+
+      // Kartenvorschau initialisieren
+      cardPreviewImg.src = img.src;
+      updateCardPreview();
+    }
+
+    function updateCardPreview() {
+      const name = gateCardName.value.trim() || 'Name deiner Karte';
+      const desc = gateCardDescription.value.trim() || 'Beschreibung erscheint hier ...';
+      const city = gateCity.value.trim();
+      const moods = [gateMood1.value.trim(), gateMood2.value.trim(), gateMood3.value.trim()].filter(Boolean);
+
+      cardPreviewName.textContent = name;
+      cardPreviewDesc.textContent = desc;
+
+      cardPreviewVibes.innerHTML = '';
+      moods.forEach(mood => {
+        const vibe = document.createElement('span');
+        vibe.className = 'card-preview-vibe';
+        vibe.textContent = mood;
+        cardPreviewVibes.appendChild(vibe);
+      });
+
+      cardPreviewCity.textContent = city ? `📍 ${city}` : '';
+    }
+
     saveGateCardButton.addEventListener('click', async () => {
       const name = gateCardName.value.trim();
       const desc = gateCardDescription.value.trim();
@@ -547,13 +686,12 @@ async function generateGateImage(promptText, previewIndex) {
         return;
       }
 
-      const imagePath = img.src; // Puter-URL oder dataUrl
+      const imagePath = img.src;
 
       try {
         saveGateCardButton.disabled = true;
         setSaveStatus('Speichere deine Gate-Karte im UnterGrund ...', '');
 
-        // Session / User holen
         const { data: sessionData, error: sessionError } = await supa.auth.getSession();
         if (sessionError || !sessionData.session) {
           setSaveStatus('Bitte melde dich zuerst an, um eine Gate-Karte zu speichern.', 'error');
@@ -562,7 +700,6 @@ async function generateGateImage(promptText, previewIndex) {
         }
         const userId = sessionData.session.user.id;
 
-        // Prüfen, ob heute schon eine Gate-Karte gespeichert wurde
         const todayStart = new Date();
         todayStart.setHours(0, 0, 0, 0);
 
@@ -586,11 +723,11 @@ async function generateGateImage(promptText, previewIndex) {
           return;
         }
 
-        // Insert in gate_cards
         const { error: insertError } = await supa.from('gate_cards').insert({
           user_id: userId,
           image_path: imagePath,
           prompt: lore,
+          name: name,
           description: desc,
           mood1: moods[0] ?? null,
           mood2: moods[1] ?? null,
