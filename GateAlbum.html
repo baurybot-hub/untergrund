@@ -312,8 +312,11 @@
 
         if (gate) {
           slot.className = 'gate-slot filled';
-          // optional: später Link zurück zur GateShare-Ansicht
-          // slot.onclick = () => window.location.href = `GateShare.html?s=${gate.share_slug}`;
+
+          // Klick öffnet GateShare
+          if (gate.share_slug) {
+            slot.onclick = () => window.location.href = `GateShare.html?s=${encodeURIComponent(gate.share_slug)}`;
+          }
 
           const img = document.createElement('img');
           img.className = 'gate-image';
@@ -398,11 +401,11 @@
 
       cardCount.textContent = `(${collections.length})`;
 
-      // 2) korrespondierende Gate-Karten holen
+      // 2) korrespondierende Gate-Karten holen (inkl. share_slug)
       const gateIds = collections.map(c => c.gate_card_id);
       const { data: gates, error: gatesError } = await client
         .from('gate_cards')
-        .select('id, name, image_path')
+        .select('id, name, image_path, share_slug')
         .in('id', gateIds);
 
       if (gatesError) {
@@ -414,7 +417,7 @@
       const gateMap = new Map();
       (gates || []).forEach(g => gateMap.set(g.id, g));
 
-      // 3) Daten zusammenbauen (ähnlich wie in MeineSammlung)
+      // 3) Daten zusammenbauen
       allGates = collections.map(item => {
         const gate = gateMap.get(item.gate_card_id);
 
@@ -424,6 +427,7 @@
             id: item.gate_card_id,
             name: 'Unbekanntes Gate',
             image_path: null,
+            share_slug: null,
             collected_at: item.collected_at
           };
         }
@@ -432,6 +436,7 @@
           id: gate.id,
           name: gate.name,
           image_path: gate.image_path,
+          share_slug: gate.share_slug,
           collected_at: item.collected_at
         };
       });
