@@ -257,7 +257,7 @@
 
         <div id="gateGrid" class="gate-grid" style="display:none;"></div>
 
-        <div id="emptyState" class="empty-state" style="display:none;">
+        <div id="emptyState" class="empty-state" style="display:none%;">
           <h2>Noch kein Gate gefunden</h2>
           <p>Sobald du deine erste Gate-Karte über einen geteilten Link sammelst, erscheint sie hier.</p>
           <a href="index.html">Zur Stage & Artists entdecken</a>
@@ -302,14 +302,12 @@
       const userEmail = session.user.email;
       document.getElementById("userInfo").textContent = "Eingeloggt als " + userEmail;
 
-      // Gate-Collection + entsprechende gate_cards holen
-      // RICHTIG
-const {  collections, error: collError } = await client
-  .from("gate_collection")
-  .select("gate_card_id, collected_at, gate_cards (id, name, image_path)")
-  .eq("user_id", userId)
-  .order("collected_at", { ascending: true });
-
+      // 1) Gate-Collection für den User holen
+      const {  collections, error: collError } = await client
+        .from("gate_collection")
+        .select("gate_card_id, collected_at")
+        .eq("user_id", userId)
+        .order("collected_at", { ascending: true });
 
       const gateGrid = document.getElementById("gateGrid");
       const emptyState = document.getElementById("emptyState");
@@ -328,13 +326,34 @@ const {  collections, error: collError } = await client
         gateGrid.style.display = "none";
         gateCountEl.textContent = "0";
       } else {
+        // 2) Alle Gate-IDs sammeln
+        const gateIds = collections.map(c => c.gate_card_id);
+
+        // 3) Passende gate_cards holen
+        const {  gates, error: gatesError } = await client
+          .from("gate_cards")
+          .select("id, name, image_path")
+          .in("id", gateIds);
+
+        if (gatesError) {
+          console.error(gatesError);
+          emptyState.style.display = "block";
+          gateGrid.style.display = "none";
+          gateCountEl.textContent = "0";
+          return;
+        }
+
+        // Map für schnellen Zugriff
+        const gateMap = new Map();
+        gates.forEach(g => gateMap.set(g.id, g));
+
         emptyState.style.display = "none";
         gateGrid.style.display = "grid";
         gateGrid.innerHTML = "";
         gateCountEl.textContent = collections.length.toString();
 
         collections.forEach(item => {
-          const gate = item.gate_cards;
+          const gate = gateMap.get(item.gate_card_id);
           if (!gate) return;
 
           const slot = document.createElement("div");
@@ -364,9 +383,6 @@ const {  collections, error: collError } = await client
 
           slot.appendChild(img);
           slot.appendChild(info);
-
-          // Optional: später Link zur GateShare-Ansicht
-          // slot.onclick = () => window.location.href = BASE_URL + "GateShare.html?s=" + gate.share_slug;
 
           gateGrid.appendChild(slot);
         });
