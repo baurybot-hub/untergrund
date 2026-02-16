@@ -328,6 +328,13 @@
       </div>
       <div class="header-right">
         <a href="index.html" class="header-button">← Zurück zum UnterGrund-Explorer</a>
+        <!-- NEU: Gate & Gate-Album Buttons, initial versteckt -->
+        <a id="gateAlbumLink" href="GateAlbum.html" class="header-button" style="display:none;">
+          🌀 Gate‑Album
+        </a>
+        <a id="gateLink" href="Gate.html" class="header-button" style="display:none;">
+          🔓 Gate öffnen
+        </a>
         <button id="themeButton" class="header-button" style="display:none;" onclick="openThemeModal()">
           🎨 Album-Design
         </button>
@@ -576,15 +583,11 @@
       const startIdx = (currentPage - 1) * STICKERS_PER_PAGE;
       const endIdx = startIdx + STICKERS_PER_PAGE;
       const pageStickers = allStickers.slice(startIdx, endIdx);
-      console.log('pageStickers', pageStickers);
 
       grid.innerHTML = '';
 
-      // Render 6 slots (filled or empty)
       for (let i = 0; i < STICKERS_PER_PAGE; i++) {
         const sticker = pageStickers[i];
-        console.log('slot', i, sticker);
-
         const slot = document.createElement('div');
 
         if (sticker) {
@@ -665,7 +668,7 @@
 
       document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
 
-      // 1) eigene Collections holen (älteste zuerst = erste gesammelte zuerst)
+      // 1) eigene Collections holen (älteste zuerst)
       const { data: collections, error: collError } = await client
         .from('user_collections')
         .select('artist_id, collected_at')
@@ -691,7 +694,7 @@
 
       cardCount.textContent = `(${collections.length})`;
 
-      // 2) korrespondierende Artists holen
+      // 2) Artists holen
       const artistIds = collections.map(c => c.artist_id);
       const { data: artists, error: artistError } = await client
         .from('artists')
@@ -707,7 +710,7 @@
       const artistMap = new Map();
       (artists || []).forEach(a => artistMap.set(a.id, a));
 
-      // 3) Sticker-Daten zusammenbauen (mit Fallback)
+      // 3) Sticker-Daten
       allStickers = collections.map(item => {
         const artist = artistMap.get(item.artist_id);
 
@@ -729,7 +732,7 @@
         };
       });
 
-            // Playlist‑Hinweis erst ab z.B. 2 Karten zeigen
+      // Playlist-Hinweis ab 2 Karten
       if (allStickers.length >= 2) {
         const embed = document.getElementById('playlistEmbedWrapper');
         if (embed) embed.style.display = 'block';
@@ -753,7 +756,7 @@
         }
       }
 
-      // UnterGrund Stats ab 12 Karten freischalten
+      // UnterGrund Stats ab 12 Karten
       if (allStickers.length >= 12) {
         const statsLink = document.getElementById('statsLink');
         if (statsLink) statsLink.style.display = 'inline-block';
@@ -766,8 +769,20 @@
         }
       }
 
+      // Gate öffnen ab 18 Karten
+      if (allStickers.length >= 18) {
+        const gateLink = document.getElementById('gateLink');
+        if (gateLink) gateLink.style.display = 'inline-block';
 
-      // 4) Collab-Matches für die gesammelten Artists holen
+        const hasSeenGateUnlock = localStorage.getItem('untergrund-unlock-gate');
+        if (!hasSeenGateUnlock) {
+          alert('Du hast das UnterGrund Gate freigeschaltet. Öffne es, um deine Gate-Karte zu erstellen.');
+          throwConfetti();
+          localStorage.setItem('untergrund-unlock-gate', 'true');
+        }
+      }
+
+      // 4) Collab-Matches
       if (artistIds.length > 0) {
         const { data: matches, error: matchError } = await client
           .from('artist_collab_matches')
@@ -823,6 +838,18 @@
 
           collabList.appendChild(row);
         });
+      }
+
+      // Gate-Album freischalten, sobald es mind. 1 Gate gibt
+      const { data: gateRows, error: gateError } = await client
+        .from('gate_collection')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      if (!gateError && gateRows !== null) {
+        // count kommt im Header, bei head: true liefert supabase-js data=null, count separat [web:3374][web:3380]
+        const gateAlbumLink = document.getElementById('gateAlbumLink');
+        if (gateAlbumLink) gateAlbumLink.style.display = 'inline-block';
       }
     }
 
