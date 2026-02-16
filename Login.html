@@ -72,13 +72,8 @@
   <script>
     const { createClient } = supabase;
 
-    // GitHub-Pages Basis-URL (wie im Rest der App)
     const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
-
-    // aktuelle Query-Parameter (z.B. ?from=collection&artist_id=1 oder ?from=gate)
     const CURRENT_SEARCH = window.location.search || '';
-
-    // OAuth-Redirect-Ziel (Supabase leitet nach Provider-Login hierher zurück)
     const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
 
     const client = createClient(
@@ -92,7 +87,7 @@
       const artistId = params.get('artist_id');
 
       if (from === 'collection') {
-        // nach Login in die persönliche Sammlung
+        // nach Login in die persönliche Artists-Sammlung
         return BASE_URL + 'MeineSammlung.html';
       }
 
@@ -108,7 +103,12 @@
         return BASE_URL + 'Gate.html';
       }
 
-      // Standard: zurück zum Explorer
+      if (from === 'gate_album') {
+        // zurück zum Gate-Album
+        return BASE_URL + 'GateAlbum.html';
+      }
+
+      // Standard: zurück zum UnterGrund-Explorer
       return BASE_URL + 'index.html';
     }
 
@@ -123,6 +123,8 @@
         hintEl.textContent = 'Melde dich an, um diese Stage-Karte zu deiner Sammlung hinzuzufügen.';
       } else if (from === 'gate') {
         hintEl.textContent = 'Melde dich an, um das Gate zu öffnen und eine Gate-Karte zu erstellen.';
+      } else if (from === 'gate_album') {
+        hintEl.textContent = 'Melde dich an, um dein Gate-Album zu öffnen.';
       } else {
         hintEl.textContent = '';
       }
@@ -140,12 +142,10 @@
       }
     }
 
-    // Supabase wertet den Hash aus (access_token etc.) und legt Session im Browser an
     async function handleAuthFromHash() {
       if (window.location.hash.includes('access_token')) {
         await client.auth.getUser();
 
-        // URL bereinigen, Query-Parameter (from, artist_id, etc.) behalten
         const cleanUrl =
           window.location.origin +
           window.location.pathname +
