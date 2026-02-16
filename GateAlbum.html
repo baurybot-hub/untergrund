@@ -308,6 +308,7 @@
         .select("gate_card_id, collected_at")
         .eq("user_id", userId)
         .order("collected_at", { ascending: true });
+console.log('collections', collections);
 
       const gateGrid = document.getElementById("gateGrid");
       const emptyState = document.getElementById("emptyState");
@@ -334,6 +335,8 @@
           .from("gate_cards")
           .select("id, name, image_path")
           .in("id", gateIds);
+console.log('gates', gates);
+console.log('gateIds', gateIds);
 
         if (gatesError) {
           console.error(gatesError);
