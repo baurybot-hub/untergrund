@@ -691,6 +691,15 @@
       cardPreviewCity.textContent = city ? `📍 ${city}` : '';
     }
 
+    function generateShareSlug(length = 32) {
+      const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+      let result = '';
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return result;
+    }
+    
     saveGateCardButton.addEventListener('click', async () => {
       const name = gateCardName.value.trim();
       const desc = gateCardDescription.value.trim();
@@ -791,6 +800,7 @@
           mood3: moods[2] ?? null,
           city: city || null,
           status: 'archived'
+          share_slug: generateShareSlug()
         });
 
         if (insertError) {
