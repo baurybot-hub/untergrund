@@ -377,6 +377,36 @@ input:focus {
       </p>
     </div>
   </div>
+  <!-- Gate-Popup (minimal) -->
+  <div id="gate-modal-backdrop"
+       style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,0.9);z-index:75;">
+    <div style="width:100%;max-width:420px;background:#020617;border-radius:18px;border:1px solid #1f2937;padding:18px 16px 14px;box-shadow:0 24px 70px rgba(0,0,0,0.85);font-size:0.8rem;color:#e5e7eb;position:relative;">
+      <button onclick="closeGatePopup()"
+              style="position:absolute;top:8px;right:10px;background:none;border:none;color:#9ca3af;font-size:1rem;cursor:pointer;">
+        &times;
+      </button>
+
+      <div style="font-size:0.75rem;color:#22c55e;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px;">
+        UnterGrund Gate
+      </div>
+      <h2 id="gate-title" style="font-size:1.1rem;margin:0 0 4px;">Gate</h2>
+
+      <div id="gate-image-wrapper"
+           style="border-radius:14px;overflow:hidden;margin:10px 0;background:#020617;border:1px solid #1f2937;min-height:140px;display:flex;align-items:center;justify-content:center;">
+        <span style="font-size:0.8rem;color:#6b7280;">Gate‑Karte lädt…</span>
+      </div>
+
+      <p id="gate-description" style="font-size:0.8rem;color:#e5e7eb;margin:0 0 12px;">
+        Dieses Gate gehört den Stimmen aus dem UnterGrund.
+      </p>
+
+      <button onclick="enterGateFromPopup()"
+              style="width:100%;border-radius:999px;border:none;padding:9px 12px;font-size:0.9rem;font-weight:600;background:#22c55e;color:#022c22;cursor:pointer;">
+        Gate betreten
+      </button>
+    </div>
+  </div>
+  <!-- /Gate-Popup -->
 
   <footer>
     <button onclick="openLegal('impressum')" style="background:none;border:none;color:#9ca3af;text-decoration:underline;cursor:pointer;margin-right:12px;">
@@ -394,7 +424,12 @@ input:focus {
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const ARTISTS_TABLE = "artists";
+    const GATE_TABLE = "gate_cards";
 
+    let gatePool = [];
+    let currentGate = null;
+
+    
     // Supabase Client
     const client = window.supabase?.createClient
       ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
@@ -816,10 +851,14 @@ input:focus {
       } else if (res.reason && res.reason.startsWith("limit")) {
         alert("Follow-Limit erreicht – du kannst diesen Artist nur einmal follow-pushen.");
       }
-      await updateFocusUI();
+            await updateFocusUI();
+
+      // Minimal: nach einem Follow einmal Gate testen
+      showGatePopupOnce();
 
       const url = normalizeSpotifyArtistUrl(currentArtist.spotify_url);
       if (url) window.open(url, "_blank");
+
     }
 
     async function shareCurrentArtist() {
@@ -857,7 +896,24 @@ input:focus {
           }
         }
       );
+if (!res.ok) {
+          console.error("GateCards Load Fehler:", await res.text());
+          return;
+        }
 
+        gatePool = await res.json();
+      } catch (err) {
+        console.error("loadGatePool Fehler:", err);
+      }
+    }
+
+    function pickRandomGate() {
+      if (!gatePool || gatePool.length === 0) return null;
+      const idx = Math.floor(Math.random() * gatePool.length);
+      return gatePool[idx];
+    }
+
+      
       if (!res.ok) {
         const txt = await res.text();
         console.error("Artists Load Fehler:", res.status, txt);
@@ -1023,6 +1079,57 @@ input:focus {
     function closeInfoModal() {
       const backdrop = document.getElementById("info-modal-backdrop");
       if (backdrop) backdrop.style.display = "none";
+    }
+    
+    function showGatePopupOnce() {
+      if (!gatePool || gatePool.length === 0) return;
+
+      const gate = pickRandomGate();
+      if (!gate) return;
+
+      currentGate = gate;
+
+      const backdrop = document.getElementById("gate-modal-backdrop");
+      if (!backdrop) return;
+
+      const titleEl = document.getElementById("gate-title");
+      const descEl = document.getElementById("gate-description");
+      const imageWrapper = document.getElementById("gate-image-wrapper");
+
+      if (titleEl) titleEl.textContent = gate.name || "Gate";
+      if (descEl) {
+        descEl.textContent =
+          gate.description ||
+          "Dieses Gate gehört den Stimmen aus dem UnterGrund.";
+      }
+
+      if (imageWrapper) {
+        if (gate.image_path) {
+          imageWrapper.innerHTML =
+            `<img src="${gate.image_path}" alt="Gate Karte" style="width:100%;display:block;">`;
+        } else {
+          imageWrapper.innerHTML =
+            `<div style="font-size:0.8rem;color:#6b7280;padding:16px;text-align:center;">
+               Keine Vorschau für dieses Gate gespeichert.
+             </div>`;
+        }
+      }
+
+      backdrop.style.display = "flex";
+    }
+
+    function closeGatePopup() {
+      const backdrop = document.getElementById("gate-modal-backdrop");
+      if (backdrop) backdrop.style.display = "none";
+    }
+
+    function enterGateFromPopup() {
+      if (!currentGate || !currentGate.share_slug) {
+        closeGatePopup();
+        return;
+      }
+      const slug = encodeURIComponent(currentGate.share_slug);
+      window.location.href = `GateShare.html?s=${slug}`;
     }
 
     async function submitArtist() {
@@ -1231,6 +1338,7 @@ input:focus {
     async function initApp() {
       setupCheatListener();
       await updateAuthButtons();
+      await loadGatePool();
 
       const params = new URLSearchParams(window.location.search);
       const artistIdFromUrl = params.get("artist");
