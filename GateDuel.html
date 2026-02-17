@@ -146,14 +146,8 @@
       text-align: center;
     }
 
-    .card-slot.revealed {
-      border-style: solid;
-      border-color: rgba(129,140,248,0.9);
-      box-shadow: 0 0 20px rgba(129,140,248,0.5);
-    }
-
     .card-slug {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       font-size: 11px;
       color: #9ca3af;
     }
@@ -217,58 +211,11 @@
       color: #9ca3af;
     }
 
-    .rule-row {
-      margin-top: 12px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(129,140,248,0.6);
-      font-size: 12px;
-    }
-
-    .rule-title {
-      font-size: 11px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #a5b4fc;
-      margin-bottom: 4px;
-    }
-
-    .rule-main {
-      font-size: 13px;
-      margin-bottom: 2px;
-    }
-
-    .rule-detail {
-      font-size: 11px;
-      color: #9ca3af;
-    }
-
-    .result-row {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      background: rgba(15,23,42,0.96);
-      font-size: 13px;
-    }
-
-    .result-win {
-      color: #bbf7d0;
-    }
-
-    .result-lose {
-      color: #fecaca;
-    }
-
-    .result-draw {
-      color: #e5e7eb;
-    }
-
     /* Info-Overlay */
     .info-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.85);
       display: none;
       align-items: center;
       justify-content: center;
@@ -276,8 +223,10 @@
     }
 
     .info-box {
-      max-width: 420px;
+      max-width: 520px;
       width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
       background: rgba(15,23,42,0.98);
       border-radius: 16px;
       border: 1px solid rgba(129,140,248,0.7);
@@ -287,13 +236,20 @@
     }
 
     .info-box h2 {
-      margin: 0 0 6px;
+      margin: 0 0 8px;
       font-size: 18px;
+    }
+
+    .info-box h3 {
+      margin: 12px 0 4px;
+      font-size: 15px;
+      color: #c7d2fe;
     }
 
     .info-box p {
       margin: 4px 0;
       color: #e5e7eb;
+      line-height: 1.5;
     }
 
     .info-box ul {
@@ -307,13 +263,174 @@
       margin-bottom: 4px;
     }
 
+    .info-box code {
+      background: rgba(129,140,248,0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: ui-monospace, monospace;
+      font-size: 11px;
+      color: #c7d2fe;
+    }
+
     .info-close {
-      margin-top: 10px;
+      margin-top: 12px;
       text-align: right;
+    }
+
+    /* Duel-Modal */
+    .duel-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+
+    .duel-modal {
+      max-width: 720px;
+      width: 92%;
+      background: rgba(15,23,42,0.98);
+      border-radius: 20px;
+      border: 1px solid rgba(129,140,248,0.8);
+      box-shadow: 0 0 60px rgba(129,140,248,0.7);
+      padding: 20px 18px 18px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .duel-modal h2 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      text-align: center;
+    }
+
+    .duel-cards-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .duel-card {
+      border-radius: 14px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: radial-gradient(circle at top, #020617 0, #020617 60%, #000 100%);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-align: center;
+      transition: all 0.4s;
+    }
+
+    .duel-card.revealed {
+      border-color: rgba(129,140,248,0.9);
+      box-shadow: 0 0 24px rgba(129,140,248,0.6);
+    }
+
+    .duel-card.winner {
+      border-color: rgba(34,197,94,0.9);
+      box-shadow: 0 0 32px rgba(34,197,94,0.8);
+    }
+
+    .duel-card-img {
+      width: 100%;
+      height: 120px;
+      border-radius: 10px;
+      background: radial-gradient(circle at top, #111827 0, #020617 70%);
+      border: 1px solid rgba(55,65,81,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .duel-card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .duel-card-code {
+      font-family: ui-monospace, monospace;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .duel-card-value {
+      font-size: 11px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+
+    .duel-step-section {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(129,140,248,0.6);
+      font-size: 13px;
+    }
+
+    .duel-step-title {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #a5b4fc;
+      margin-bottom: 6px;
+    }
+
+    .duel-step-content {
+      line-height: 1.5;
+    }
+
+    .duel-dice {
+      font-size: 48px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .duel-result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      font-size: 14px;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .duel-result.win {
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.6);
+      color: #bbf7d0;
+    }
+
+    .duel-result.lose {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.6);
+      color: #fecaca;
+    }
+
+    .duel-result.draw {
+      background: rgba(148,163,184,0.15);
+      border: 1px solid rgba(148,163,184,0.6);
+      color: #e5e7eb;
+    }
+
+    .duel-modal-actions {
+      margin-top: 14px;
+      text-align: center;
     }
 
     @media (max-width: 720px) {
       .players-row {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .duel-cards-row {
         grid-template-columns: minmax(0, 1fr);
       }
     }
@@ -397,33 +514,82 @@
       <div id="statusMain" class="status-main">Wähle für beide Spieler eine Gate-Karte und bestätige mit Go.</div>
       <div id="statusDetail" class="status-detail">Karten bleiben verdeckt, bis beide Go gedrückt haben.</div>
     </div>
-
-    <div id="ruleRow" class="rule-row" style="display:none;">
-      <div class="rule-title">Duel-Regel</div>
-      <div id="ruleMain" class="rule-main"></div>
-      <div id="ruleDetail" class="rule-detail"></div>
-    </div>
-
-    <div id="resultRow" class="result-row" style="display:none;">
-      <div id="resultText" class="result-draw"></div>
-    </div>
   </div>
 
   <!-- Regelwerk-Overlay -->
   <div id="infoOverlay" class="info-overlay">
     <div class="info-box">
       <h2>Gate Duel – Regelwerk (Test)</h2>
-      <p>Jeder Spieler setzt eine Gate-Karte mit eigenem UG‑GATE‑Code (letzte 4 Zeichen des Slugs, Basis‑36 Zahl).</p>
-      <p>Die Karten bleiben verdeckt, bis beide <strong>Go</strong> drücken. Dann wird eine Regel per „Würfel“ bestimmt:</p>
+      
+      <h3>Ablauf</h3>
+      <p>Jeder Spieler setzt eine Gate-Karte. Die Karten bleiben verdeckt, bis beide <strong>Go</strong> drücken.</p>
+      
+      <h3>UG‑GATE‑Code als Spielwert</h3>
+      <p>Jede Gate-Karte hat einen Code aus den letzten 4 Zeichen ihres Slugs (z.B. <code>AB12</code>).</p>
+      <p>Dieser Code wird in <strong>Basis-36</strong> in eine Dezimalzahl umgerechnet:</p>
       <ul>
-        <li><strong>1–2:</strong> Größerer Code gewinnt, Gleichstand = Unentschieden.</li>
-        <li><strong>3–4:</strong> Kleinerer Code gewinnt, Gleichstand = Unentschieden.</li>
-        <li><strong>5:</strong> Gerade gewinnt. Sind beide gerade oder beide ungerade → Unentschieden.</li>
-        <li><strong>6:</strong> Höhere „Stellensumme“ gewinnt (Basis‑36), Gleichstand = Unentschieden.</li>
+        <li>Ziffern 0–9 = Wert 0–9</li>
+        <li>Buchstaben A–Z = Wert 10–35</li>
       </ul>
-      <p>In dieser Testversion werden keine echten Karten verschoben – später würde der Verlierer seine gesetzte Gate‑Karte verlieren und der Gewinner sie in sein Gate‑Album bekommen.</p>
+      <p><strong>Beispiel:</strong> <code>AB12</code></p>
+      <p style="font-size:12px; color:#9ca3af; line-height:1.6;">
+        Von rechts nach links:<br>
+        2 × 36⁰ = 2 × 1 = 2<br>
+        1 × 36¹ = 1 × 36 = 36<br>
+        B (=11) × 36² = 11 × 1296 = 14256<br>
+        A (=10) × 36³ = 10 × 46656 = 466560<br>
+        <strong>Summe = 480854</strong>
+      </p>
+      <p>→ <code>AB12</code> wird zu <strong>480854</strong>.</p>
+
+      <h3>Würfel-Regeln</h3>
+      <p>Nach dem Aufdecken wird eine Regel per Würfel (1–6) bestimmt:</p>
+      <ul>
+        <li><strong>1–2:</strong> Größerer Code-Wert gewinnt. Gleichstand = Unentschieden.</li>
+        <li><strong>3–4:</strong> Kleinerer Code-Wert gewinnt. Gleichstand = Unentschieden.</li>
+        <li><strong>5:</strong> Gerade gewinnt. Sind beide gerade oder beide ungerade → Unentschieden.</li>
+        <li><strong>6:</strong> Höhere Stellensumme (Basis-36) gewinnt. Gleichstand = Unentschieden.</li>
+      </ul>
+
+      <h3>Kartentransfer (später)</h3>
+      <p>In dieser Testversion werden keine echten Karten verschoben. In der echten Version würde der Verlierer seine gesetzte Gate‑Karte verlieren und der Gewinner sie in sein Gate‑Album bekommen.</p>
+      
       <div class="info-close">
         <button id="closeInfo" class="btn btn-primary">Verstanden</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Duel-Modal -->
+  <div id="duelModalOverlay" class="duel-modal-overlay">
+    <div class="duel-modal" id="duelModal">
+      <h2 id="duelModalTitle">🎴 Duell läuft ...</h2>
+
+      <div class="duel-cards-row">
+        <div class="duel-card" id="duelCardA">
+          <div class="duel-card-img" id="duelImgA">???</div>
+          <div class="duel-card-name" id="duelNameA">Spieler A</div>
+          <div class="duel-card-code" id="duelCodeA">UG‑GATE #----</div>
+          <div class="duel-card-value" id="duelValueA"></div>
+        </div>
+
+        <div class="duel-card" id="duelCardB">
+          <div class="duel-card-img" id="duelImgB">???</div>
+          <div class="duel-card-name" id="duelNameB">Spieler B</div>
+          <div class="duel-card-code" id="duelCodeB">UG‑GATE #----</div>
+          <div class="duel-card-value" id="duelValueB"></div>
+        </div>
+      </div>
+
+      <div id="duelStepSection" class="duel-step-section" style="display:none;">
+        <div class="duel-step-title" id="duelStepTitle"></div>
+        <div class="duel-step-content" id="duelStepContent"></div>
+      </div>
+
+      <div id="duelResultBox" class="duel-result" style="display:none;"></div>
+
+      <div class="duel-modal-actions">
+        <button id="closeDuelModal" class="btn btn-primary">Schließen</button>
       </div>
     </div>
   </div>
@@ -435,19 +601,19 @@
         id: 'gate-1',
         name: 'Eule am Feuer',
         slug: 'ug-gate-ab12',
-        imageLabel: 'Eule am Feuer',
+        imageLabel: '🦉🔥',
       },
       {
         id: 'gate-2',
         name: 'Neon Tunnel',
         slug: 'ug-gate-7xq9',
-        imageLabel: 'Neon Tunnel',
+        imageLabel: '🌆✨',
       },
       {
         id: 'gate-3',
         name: 'Subway Phantom',
         slug: 'ug-gate-55zz',
-        imageLabel: 'Subway Phantom',
+        imageLabel: '👻🚇',
       },
     ];
 
@@ -464,29 +630,41 @@
     const slugBEl = document.getElementById('slugB');
     const imgA = document.getElementById('imgA');
     const imgB = document.getElementById('imgB');
-    const slotA = document.getElementById('slotA');
-    const slotB = document.getElementById('slotB');
     const stateA = document.getElementById('stateA');
     const stateB = document.getElementById('stateB');
 
     const statusMain = document.getElementById('statusMain');
     const statusDetail = document.getElementById('statusDetail');
-    const ruleRow = document.getElementById('ruleRow');
-    const ruleMain = document.getElementById('ruleMain');
-    const ruleDetail = document.getElementById('ruleDetail');
-    const resultRow = document.getElementById('resultRow');
-    const resultText = document.getElementById('resultText');
 
     const infoOverlay = document.getElementById('infoOverlay');
     const infoButton = document.getElementById('infoButton');
     const closeInfo = document.getElementById('closeInfo');
     const resetButton = document.getElementById('resetButton');
 
+    const duelModalOverlay = document.getElementById('duelModalOverlay');
+    const duelModal = document.getElementById('duelModal');
+    const closeDuelModal = document.getElementById('closeDuelModal');
+
+    const duelModalTitle = document.getElementById('duelModalTitle');
+    const duelCardA = document.getElementById('duelCardA');
+    const duelCardB = document.getElementById('duelCardB');
+    const duelImgA = document.getElementById('duelImgA');
+    const duelImgB = document.getElementById('duelImgB');
+    const duelNameA = document.getElementById('duelNameA');
+    const duelNameB = document.getElementById('duelNameB');
+    const duelCodeA = document.getElementById('duelCodeA');
+    const duelCodeB = document.getElementById('duelCodeB');
+    const duelValueA = document.getElementById('duelValueA');
+    const duelValueB = document.getElementById('duelValueB');
+    const duelStepSection = document.getElementById('duelStepSection');
+    const duelStepTitle = document.getElementById('duelStepTitle');
+    const duelStepContent = document.getElementById('duelStepContent');
+    const duelResultBox = document.getElementById('duelResultBox');
+
     let selectionA = null;
     let selectionB = null;
     let confirmedA = false;
     let confirmedB = false;
-    let duelResolved = false;
 
     function base36FromSlugLast4(slug) {
       if (!slug) return 0;
@@ -527,7 +705,6 @@
       selectionB = null;
       confirmedA = false;
       confirmedB = false;
-      duelResolved = false;
 
       populateSelect(selectA);
       populateSelect(selectB);
@@ -538,8 +715,6 @@
       slugBEl.textContent = 'UG‑GATE #----';
       imgA.textContent = 'Karte noch verdeckt';
       imgB.textContent = 'Karte noch verdeckt';
-      slotA.classList.remove('revealed');
-      slotB.classList.remove('revealed');
 
       goA.disabled = true;
       goB.disabled = true;
@@ -549,11 +724,6 @@
 
       statusMain.textContent = 'Wähle für beide Spieler eine Gate-Karte und bestätige mit Go.';
       statusDetail.textContent = 'Karten bleiben verdeckt, bis beide Go gedrückt haben.';
-
-      ruleRow.style.display = 'none';
-      resultRow.style.display = 'none';
-      resultText.className = 'result-draw';
-      resultText.textContent = '';
     }
 
     function updateSelection(player, cardId) {
@@ -575,83 +745,136 @@
         slugBEl.textContent = card ? 'UG‑GATE #' + formatCode(card.slug) : 'UG‑GATE #----';
         goB.disabled = !card;
       }
-      ruleRow.style.display = 'none';
-      resultRow.style.display = 'none';
-      duelResolved = false;
-      slotA.classList.remove('revealed');
-      slotB.classList.remove('revealed');
     }
 
     function checkReveal() {
       if (!selectionA || !selectionB) return;
       if (!confirmedA || !confirmedB) return;
-      if (duelResolved) return;
 
-      // Reveal
-      slotA.classList.add('revealed');
-      slotB.classList.add('revealed');
-      imgA.textContent = selectionA.imageLabel;
-      imgB.textContent = selectionB.imageLabel;
+      // Modal öffnen und Step-by-step durchlaufen
+      startDuelModal();
+    }
 
-      stateA.textContent = 'Status: aufgedeckt';
-      stateB.textContent = 'Status: aufgedeckt';
+    async function startDuelModal() {
+      duelModalOverlay.style.display = 'flex';
+      duelModalTitle.textContent = '🎴 Duell läuft ...';
 
-      // Regel würfeln
-      const dice = Math.floor(Math.random() * 6) + 1;
+      // Reset Modal-Karten
+      duelCardA.classList.remove('revealed', 'winner');
+      duelCardB.classList.remove('revealed', 'winner');
+      duelImgA.textContent = '???';
+      duelImgB.textContent = '???';
+      duelNameA.textContent = 'Spieler A';
+      duelNameB.textContent = 'Spieler B';
+      duelCodeA.textContent = 'UG‑GATE #----';
+      duelCodeB.textContent = 'UG‑GATE #----';
+      duelValueA.textContent = '';
+      duelValueB.textContent = '';
+      duelStepSection.style.display = 'none';
+      duelResultBox.style.display = 'none';
+
+      await sleep(800);
+
+      // Schritt 1: Karten aufdecken
+      duelModalTitle.textContent = '🎴 Karten werden aufgedeckt ...';
+      duelCardA.classList.add('revealed');
+      duelCardB.classList.add('revealed');
+      duelImgA.textContent = selectionA.imageLabel;
+      duelImgB.textContent = selectionB.imageLabel;
+      duelNameA.textContent = selectionA.name;
+      duelNameB.textContent = selectionB.name;
+      const codeA = formatCode(selectionA.slug);
+      const codeB = formatCode(selectionB.slug);
+      duelCodeA.textContent = 'UG‑GATE #' + codeA;
+      duelCodeB.textContent = 'UG‑GATE #' + codeB;
+
+      await sleep(1200);
+
+      // Schritt 2: Code-Umrechnung
       const valA = base36FromSlugLast4(selectionA.slug);
       const valB = base36FromSlugLast4(selectionB.slug);
+      duelValueA.textContent = `Wert: ${valA}`;
+      duelValueB.textContent = `Wert: ${valB}`;
+
+      duelStepSection.style.display = 'block';
+      duelStepTitle.textContent = 'Code-Umrechnung (Basis-36)';
+      duelStepContent.innerHTML = `
+        <strong>Spieler A:</strong> <code>${codeA}</code> → <strong>${valA}</strong><br>
+        <strong>Spieler B:</strong> <code>${codeB}</code> → <strong>${valB}</strong><br>
+        <span style="font-size:11px; color:#9ca3af;">(Basis-36: Ziffern 0-9 = 0-9, A-Z = 10-35, Stellenwerte 36⁰, 36¹, 36², 36³)</span>
+      `;
+
+      await sleep(2000);
+
+      // Schritt 3: Würfel
+      duelStepTitle.textContent = 'Regel wird ausgewürfelt ...';
+      duelStepContent.innerHTML = '<div class="duel-dice">🎲</div>';
+      await sleep(1000);
+
+      const dice = Math.floor(Math.random() * 6) + 1;
+      duelStepContent.innerHTML = `<div class="duel-dice">🎲 ${dice}</div>`;
+      await sleep(800);
+
+      // Schritt 4: Regel anwenden
       const sumA = sumDigitsBase36(selectionA.slug);
       const sumB = sumDigitsBase36(selectionB.slug);
 
-      let winner = null; // 'A', 'B' oder null für Unentschieden
+      let winner = null; // 'A', 'B' oder null
       let ruleText = '';
       let detailText = '';
 
       if (dice === 1 || dice === 2) {
-        ruleText = 'Regel: Größerer UG‑GATE‑Code gewinnt.';
+        ruleText = 'Größerer Code-Wert gewinnt.';
         if (valA > valB) winner = 'A';
         else if (valB > valA) winner = 'B';
         detailText = `Code A: ${valA}, Code B: ${valB}.`;
       } else if (dice === 3 || dice === 4) {
-        ruleText = 'Regel: Kleinerer UG‑GATE‑Code gewinnt.';
+        ruleText = 'Kleinerer Code-Wert gewinnt.';
         if (valA < valB) winner = 'A';
         else if (valB < valA) winner = 'B';
         detailText = `Code A: ${valA}, Code B: ${valB}.`;
       } else if (dice === 5) {
-        ruleText = 'Regel: Gerade gewinnt. Sind beide gleich (gerade/ungerade), ist es unentschieden.';
+        ruleText = 'Gerade gewinnt. Sind beide gleich (gerade/ungerade), ist es unentschieden.';
         const evenA = valA % 2 === 0;
         const evenB = valB % 2 === 0;
         if (evenA && !evenB) winner = 'A';
         else if (evenB && !evenA) winner = 'B';
         detailText = `Code A: ${valA} (${evenA ? 'gerade' : 'ungerade'}), Code B: ${valB} (${evenB ? 'gerade' : 'ungerade'}).`;
       } else {
-        ruleText = 'Regel: Höhere Stellensumme (Basis‑36) gewinnt.';
+        ruleText = 'Höhere Stellensumme (Basis-36) gewinnt.';
         if (sumA > sumB) winner = 'A';
         else if (sumB > sumA) winner = 'B';
         detailText = `Summe A: ${sumA}, Summe B: ${sumB}.`;
       }
 
-      ruleMain.textContent = ruleText;
-      ruleDetail.textContent = detailText;
-      ruleRow.style.display = 'block';
+      duelStepTitle.textContent = `Regel (Würfel ${dice})`;
+      duelStepContent.innerHTML = `
+        <strong>${ruleText}</strong><br>
+        <span style="font-size:11px; color:#9ca3af;">${detailText}</span>
+      `;
+
+      await sleep(1800);
+
+    // Schritt 5: Ergebnis
+      duelModalTitle.textContent = '🎴 Ergebnis';
+      duelResultBox.style.display = 'block';
 
       if (winner === 'A') {
-        resultText.className = 'result-win';
-        resultText.textContent = 'Spieler A würde diese Runde gewinnen – im echten Modus würde die Gate-Karte von Spieler B rüberwandern.';
-        statusMain.textContent = 'Ergebnis: Spieler A gewinnt dieses Test-Duel.';
+        duelCardA.classList.add('winner');
+        duelResultBox.className = 'duel-result win';
+        duelResultBox.textContent = '🏆 Spieler A gewinnt! Im echten Modus würde die Karte von Spieler B rüberwandern.';
       } else if (winner === 'B') {
-        resultText.className = 'result-lose';
-        resultText.textContent = 'Spieler B würde diese Runde gewinnen – im echten Modus würde die Gate-Karte von Spieler A rüberwandern.';
-        statusMain.textContent = 'Ergebnis: Spieler B gewinnt dieses Test-Duel.';
+        duelCardB.classList.add('winner');
+        duelResultBox.className = 'duel-result lose';
+        duelResultBox.textContent = '🏆 Spieler B gewinnt! Im echten Modus würde die Karte von Spieler A rüberwandern.';
       } else {
-        resultText.className = 'result-draw';
-        resultText.textContent = 'Unentschieden – bei dieser Regel sind beide Codes gleich stark.';
-        statusMain.textContent = 'Ergebnis: Unentschieden.';
+        duelResultBox.className = 'duel-result draw';
+        duelResultBox.textContent = '🤝 Unentschieden – bei dieser Regel sind beide Codes gleich stark.';
       }
+    }
 
-      statusDetail.textContent = 'In der echten Version würde jetzt ein Karten-Transfer im Gate-Album stattfinden.';
-      resultRow.style.display = 'block';
-      duelResolved = true;
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     // Event Wiring
@@ -707,6 +930,10 @@
       if (e.target === infoOverlay) {
         infoOverlay.style.display = 'none';
       }
+    });
+
+    closeDuelModal.addEventListener('click', () => {
+      duelModalOverlay.style.display = 'none';
     });
 
     resetButton.addEventListener('click', () => {
