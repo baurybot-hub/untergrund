@@ -834,6 +834,7 @@
         saveGateCardButton.disabled = true;
       }
     });
+    
     </script>
   <!-- Gate Manifest Popup -->
   <div id="gateManifestOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center; padding:16px;">
@@ -861,11 +862,7 @@
     </div>
   </div>
 
-  <script>
-    // dein kompletter bisheriger JS-Code bleibt hier unverändert,
-    // nur GANZ AM ENDE vor dem schließenden </script> fügen wir das dazu:
-
-    // Gate Manifest Popup Steuerung
+<script>    // Gate Manifest Popup Steuerung
     const gateInfoButton = document.getElementById('gateInfoButton');
     const gateManifestOverlay = document.getElementById('gateManifestOverlay');
     const gateManifestClose = document.getElementById('gateManifestClose');
