@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>UnterGrund Gate Duel (Test)</title>
+  <title>Gate Duel – Schere Stein Papier</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
@@ -21,12 +21,12 @@
 
     .duel-wrap {
       width: 100%;
-      max-width: 960px;
+      max-width: 860px;
       background: rgba(15,23,42,0.96);
       border-radius: 20px;
       border: 1px solid rgba(148,163,184,0.5);
       box-shadow: 0 32px 80px rgba(0,0,0,0.85);
-      padding: 18px 16px 18px;
+      padding: 20px 18px;
     }
 
     .duel-header {
@@ -34,15 +34,13 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
     }
 
     .duel-title-block h1 {
       font-size: 22px;
       margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
 
     .duel-subtitle {
@@ -54,7 +52,6 @@
     .header-actions {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
     }
 
     .btn {
@@ -67,14 +64,12 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       cursor: pointer;
-      white-space: nowrap;
       transition: all 0.16s;
     }
 
     .btn-primary {
       border-color: rgba(129,140,248,0.9);
       background: linear-gradient(90deg, #4f46e5, #7c3aed);
-      color: #e5e7eb;
       font-weight: 600;
     }
 
@@ -86,19 +81,12 @@
     .btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .info-badge {
-      font-size: 10px;
-      color: #9ca3af;
-      margin-top: 4px;
     }
 
     .players-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      gap: 14px;
       margin-bottom: 16px;
     }
 
@@ -106,75 +94,58 @@
       border-radius: 16px;
       border: 1px solid rgba(55,65,81,0.9);
       background: radial-gradient(circle at top, #020617 0, #020617 60%, #000 100%);
-      padding: 10px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      padding: 12px;
     }
 
     .player-header {
       display: flex;
       justify-content: space-between;
       align-items: baseline;
-      font-size: 12px;
+      margin-bottom: 8px;
     }
 
     .player-name {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #e5e7eb;
     }
 
-    .player-label {
-      font-size: 11px;
-      color: #9ca3af;
+    .player-score {
+      font-size: 18px;
+      font-weight: 700;
+      color: #a5b4fc;
     }
 
     .card-slot {
-      border-radius: 14px;
+      border-radius: 12px;
       border: 1px dashed rgba(75,85,99,0.9);
       background: rgba(15,23,42,0.96);
       padding: 10px;
-      min-height: 140px;
+      min-height: 100px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 6px;
       text-align: center;
+      margin-bottom: 8px;
     }
 
-    .card-slug {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 11px;
-      color: #9ca3af;
+    .card-slot.revealed {
+      border-color: rgba(129,140,248,0.9);
+      box-shadow: 0 0 16px rgba(129,140,248,0.5);
     }
 
     .card-name {
       font-size: 13px;
       font-weight: 600;
-      color: #e5e7eb;
     }
 
-    .card-img-placeholder {
-      width: 90%;
-      height: 80px;
-      border-radius: 10px;
-      background: radial-gradient(circle at top, #111827 0, #020617 70%);
-      border: 1px solid rgba(55,65,81,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    .card-code {
+      font-family: ui-monospace, monospace;
       font-size: 11px;
-      color: #6b7280;
-    }
-
-    .select-row {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
+      color: #9ca3af;
     }
 
     select {
@@ -185,33 +156,162 @@
       background: rgba(15,23,42,0.96);
       color: #e5e7eb;
       font-size: 12px;
+      margin-bottom: 8px;
     }
 
     .player-actions {
       display: flex;
       gap: 8px;
-      margin-top: 4px;
     }
 
     .status-row {
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px dashed rgba(55,65,81,0.9);
-      font-size: 12px;
-      color: #e5e7eb;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(129,140,248,0.5);
+      text-align: center;
+      font-size: 13px;
     }
 
-    .status-main {
-      font-weight: 500;
+    .game-area {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(15,23,42,0.96);
+      border: 1px solid rgba(129,140,248,0.6);
+      display: none;
+    }
+
+    .game-area.active {
+      display: block;
+    }
+
+    .round-header {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .round-title {
+      font-size: 16px;
+      font-weight: 600;
       margin-bottom: 4px;
     }
 
-    .status-detail {
-      font-size: 11px;
+    .round-info {
+      font-size: 12px;
       color: #9ca3af;
     }
 
-    /* Info-Overlay */
+    .choices-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .choice-box {
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.96);
+      text-align: center;
+    }
+
+    .choice-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #a5b4fc;
+      margin-bottom: 8px;
+    }
+
+    .choice-buttons {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .choice-btn {
+      font-size: 28px;
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      border: 1px solid rgba(75,85,99,0.9);
+      background: rgba(15,23,42,0.96);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .choice-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 0 16px rgba(129,140,248,0.6);
+      border-color: rgba(129,140,248,0.9);
+    }
+
+    .choice-btn.selected {
+      border-color: #a855f7;
+      box-shadow: 0 0 20px rgba(168,85,247,0.7);
+      background: rgba(168,85,247,0.15);
+    }
+
+    .choice-display {
+      font-size: 32px;
+      margin-top: 8px;
+      min-height: 40px;
+    }
+
+    .round-result {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .round-result.win {
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.6);
+      color: #bbf7d0;
+    }
+
+    .round-result.lose {
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.6);
+      color: #fecaca;
+    }
+
+    .round-result.draw {
+      background: rgba(148,163,184,0.15);
+      border: 1px solid rgba(148,163,184,0.6);
+      color: #e5e7eb;
+    }
+
+    .final-result {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .final-result.win {
+      background: rgba(34,197,94,0.2);
+      border: 1px solid rgba(34,197,94,0.8);
+      color: #bbf7d0;
+    }
+
+    .final-result.lose {
+      background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.8);
+      color: #fecaca;
+    }
+
     .info-overlay {
       position: fixed;
       inset: 0;
@@ -223,15 +323,13 @@
     }
 
     .info-box {
-      max-width: 520px;
+      max-width: 480px;
       width: 90%;
-      max-height: 85vh;
-      overflow-y: auto;
       background: rgba(15,23,42,0.98);
       border-radius: 16px;
       border: 1px solid rgba(129,140,248,0.7);
       box-shadow: 0 0 40px rgba(129,140,248,0.7);
-      padding: 18px 16px 16px;
+      padding: 18px 16px;
       font-size: 13px;
     }
 
@@ -240,36 +338,15 @@
       font-size: 18px;
     }
 
-    .info-box h3 {
-      margin: 12px 0 4px;
-      font-size: 15px;
-      color: #c7d2fe;
-    }
-
     .info-box p {
-      margin: 4px 0;
-      color: #e5e7eb;
+      margin: 6px 0;
       line-height: 1.5;
     }
 
     .info-box ul {
-      margin: 6px 0 8px 18px;
+      margin: 8px 0 8px 18px;
       padding: 0;
-      color: #d1d5db;
       font-size: 12px;
-    }
-
-    .info-box li {
-      margin-bottom: 4px;
-    }
-
-    .info-box code {
-      background: rgba(129,140,248,0.15);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: ui-monospace, monospace;
-      font-size: 11px;
-      color: #c7d2fe;
     }
 
     .info-close {
@@ -277,160 +354,8 @@
       text-align: right;
     }
 
-    /* Duel-Modal */
-    .duel-modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.92);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 300;
-    }
-
-    .duel-modal {
-      max-width: 720px;
-      width: 92%;
-      background: rgba(15,23,42,0.98);
-      border-radius: 20px;
-      border: 1px solid rgba(129,140,248,0.8);
-      box-shadow: 0 0 60px rgba(129,140,248,0.7);
-      padding: 20px 18px 18px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .duel-modal h2 {
-      margin: 0 0 12px;
-      font-size: 20px;
-      text-align: center;
-    }
-
-    .duel-cards-row {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-    .duel-card {
-      border-radius: 14px;
-      border: 1px solid rgba(55,65,81,0.9);
-      background: radial-gradient(circle at top, #020617 0, #020617 60%, #000 100%);
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      text-align: center;
-      transition: all 0.4s;
-    }
-
-    .duel-card.revealed {
-      border-color: rgba(129,140,248,0.9);
-      box-shadow: 0 0 24px rgba(129,140,248,0.6);
-    }
-
-    .duel-card.winner {
-      border-color: rgba(34,197,94,0.9);
-      box-shadow: 0 0 32px rgba(34,197,94,0.8);
-    }
-
-    .duel-card-img {
-      width: 100%;
-      height: 120px;
-      border-radius: 10px;
-      background: radial-gradient(circle at top, #111827 0, #020617 70%);
-      border: 1px solid rgba(55,65,81,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: #6b7280;
-    }
-
-    .duel-card-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: #e5e7eb;
-    }
-
-    .duel-card-code {
-      font-family: ui-monospace, monospace;
-      font-size: 12px;
-      color: #9ca3af;
-    }
-
-    .duel-card-value {
-      font-size: 11px;
-      color: #6b7280;
-      margin-top: 4px;
-    }
-
-    .duel-step-section {
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 12px;
-      background: rgba(15,23,42,0.96);
-      border: 1px solid rgba(129,140,248,0.6);
-      font-size: 13px;
-    }
-
-    .duel-step-title {
-      font-size: 11px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #a5b4fc;
-      margin-bottom: 6px;
-    }
-
-    .duel-step-content {
-      line-height: 1.5;
-    }
-
-    .duel-dice {
-      font-size: 48px;
-      text-align: center;
-      margin: 10px 0;
-    }
-
-    .duel-result {
-      margin-top: 12px;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 14px;
-      text-align: center;
-      font-weight: 600;
-    }
-
-    .duel-result.win {
-      background: rgba(34,197,94,0.15);
-      border: 1px solid rgba(34,197,94,0.6);
-      color: #bbf7d0;
-    }
-
-    .duel-result.lose {
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.6);
-      color: #fecaca;
-    }
-
-    .duel-result.draw {
-      background: rgba(148,163,184,0.15);
-      border: 1px solid rgba(148,163,184,0.6);
-      color: #e5e7eb;
-    }
-
-    .duel-modal-actions {
-      margin-top: 14px;
-      text-align: center;
-    }
-
     @media (max-width: 720px) {
-      .players-row {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .duel-cards-row {
+      .players-row, .choices-row {
         grid-template-columns: minmax(0, 1fr);
       }
     }
@@ -440,12 +365,9 @@
   <div class="duel-wrap">
     <div class="duel-header">
       <div class="duel-title-block">
-        <h1>⚔️ Gate Duel (Test)</h1>
+        <h1>⚔️ Gate Duel – Schere Stein Papier</h1>
         <div class="duel-subtitle">
-          Zwei Test‑Spieler wählen Gate‑Karten, setzen sie und spielen mit UG‑GATE‑Codes gegeneinander.
-        </div>
-        <div class="info-badge">
-          Frontend‑Demo ohne Login oder Supabase – nur zum Ausprobieren des Flows.
+          Wählt eure Gate-Karten und spielt Best-of-5. Wer zuerst 3 Runden gewinnt, erhält die Karte des Gegners.
         </div>
       </div>
       <div class="header-actions">
@@ -456,103 +378,102 @@
 
     <div class="players-row">
       <!-- Spieler A -->
-      <div class="player-card" id="playerA">
+      <div class="player-card">
         <div class="player-header">
-          <div>
-            <div class="player-name">Spieler A</div>
-            <div class="player-label">setzt eine Gate-Karte</div>
-          </div>
-          <div id="stateA" class="player-label">Status: Auswahl</div>
+          <div class="player-name">Spieler A</div>
+          <div class="player-score" id="scoreA">0</div>
         </div>
-
         <div class="card-slot" id="slotA">
-          <div class="card-img-placeholder" id="imgA">Karte noch verdeckt</div>
-          <div class="card-name" id="nameA">Keine Karte gewählt</div>
-          <div class="card-slug" id="slugA">UG‑GATE #----</div>
+          <div class="card-name" id="nameA">Keine Karte</div>
+          <div class="card-code" id="codeA">UG‑GATE #----</div>
         </div>
-
-        <div class="select-row">
-          <select id="selectA">
-            <option value="">Gate-Karte wählen …</option>
-          </select>
-          <div class="player-actions">
-            <button id="goA" class="btn btn-primary" disabled>Go</button>
-            <button id="cancelA" class="btn">Abbruch</button>
-          </div>
+        <select id="selectA">
+          <option value="">Gate-Karte wählen …</option>
+        </select>
+        <div class="player-actions">
+          <button id="goA" class="btn btn-primary" disabled>Bereit</button>
         </div>
       </div>
 
       <!-- Spieler B -->
-      <div class="player-card" id="playerB">
+      <div class="player-card">
         <div class="player-header">
-          <div>
-            <div class="player-name">Spieler B</div>
-            <div class="player-label">setzt eine Gate-Karte</div>
-          </div>
-          <div id="stateB" class="player-label">Status: Auswahl</div>
+          <div class="player-name">Spieler B</div>
+          <div class="player-score" id="scoreB">0</div>
         </div>
-
         <div class="card-slot" id="slotB">
-          <div class="card-img-placeholder" id="imgB">Karte noch verdeckt</div>
-          <div class="card-name" id="nameB">Keine Karte gewählt</div>
-          <div class="card-slug" id="slugB">UG‑GATE #----</div>
+          <div class="card-name" id="nameB">Keine Karte</div>
+          <div class="card-code" id="codeB">UG‑GATE #----</div>
         </div>
-
-        <div class="select-row">
-          <select id="selectB">
-            <option value="">Gate-Karte wählen …</option>
-          </select>
-          <div class="player-actions">
-            <button id="goB" class="btn btn-primary" disabled>Go</button>
-            <button id="cancelB" class="btn">Abbruch</button>
-          </div>
+        <select id="selectB">
+          <option value="">Gate-Karte wählen …</option>
+        </select>
+        <div class="player-actions">
+          <button id="goB" class="btn btn-primary" disabled>Bereit</button>
         </div>
       </div>
     </div>
 
-    <div class="status-row">
-      <div id="statusMain" class="status-main">Wähle für beide Spieler eine Gate-Karte und bestätige mit Go.</div>
-      <div id="statusDetail" class="status-detail">Karten bleiben verdeckt, bis beide Go gedrückt haben.</div>
+    <div class="status-row" id="statusRow">
+      Beide Spieler wählen eine Gate-Karte und klicken auf „Bereit".
+    </div>
+
+    <!-- Spielbereich (wird nach Go aktiv) -->
+    <div class="game-area" id="gameArea">
+      <div class="round-header">
+        <div class="round-title" id="roundTitle">Runde 1</div>
+        <div class="round-info" id="roundInfo">Wählt gleichzeitig: Schere ✂️ · Stein 🪨 · Papier 📄</div>
+      </div>
+
+      <div class="choices-row">
+        <div class="choice-box">
+          <div class="choice-label">Spieler A wählt</div>
+          <div class="choice-buttons" id="choicesA">
+            <button class="choice-btn" data-choice="rock">🪨</button>
+            <button class="choice-btn" data-choice="paper">📄</button>
+            <button class="choice-btn" data-choice="scissors">✂️</button>
+          </div>
+          <div class="choice-display" id="displayA">—</div>
+        </div>
+
+        <div class="choice-box">
+          <div class="choice-label">Spieler B wählt</div>
+          <div class="choice-buttons" id="choicesB">
+            <button class="choice-btn" data-choice="rock">🪨</button>
+            <button class="choice-btn" data-choice="paper">📄</button>
+            <button class="choice-btn" data-choice="scissors">✂️</button>
+          </div>
+          <div class="choice-display" id="displayB">—</div>
+        </div>
+      </div>
+
+      <div id="roundResult" class="round-result" style="display:none;"></div>
+      <div id="finalResult" class="final-result" style="display:none;"></div>
     </div>
   </div>
 
   <!-- Regelwerk-Overlay -->
   <div id="infoOverlay" class="info-overlay">
     <div class="info-box">
-      <h2>Gate Duel – Regelwerk (Test)</h2>
+      <h2>Gate Duel – Regelwerk</h2>
       
-      <h3>Ablauf</h3>
-      <p>Jeder Spieler setzt eine Gate-Karte. Die Karten bleiben verdeckt, bis beide <strong>Go</strong> drücken.</p>
-      
-      <h3>UG‑GATE‑Code als Spielwert</h3>
-      <p>Jede Gate-Karte hat einen Code aus den letzten 4 Zeichen ihres Slugs (z.B. <code>AB12</code>).</p>
-      <p>Dieser Code wird in <strong>Basis-36</strong> in eine Dezimalzahl umgerechnet:</p>
+      <p><strong>Ablauf:</strong></p>
       <ul>
-        <li>Ziffern 0–9 = Wert 0–9</li>
-        <li>Buchstaben A–Z = Wert 10–35</li>
-      </ul>
-      <p><strong>Beispiel:</strong> <code>AB12</code></p>
-      <p style="font-size:12px; color:#9ca3af; line-height:1.6;">
-        Von rechts nach links:<br>
-        2 × 36⁰ = 2 × 1 = 2<br>
-        1 × 36¹ = 1 × 36 = 36<br>
-        B (=11) × 36² = 11 × 1296 = 14256<br>
-        A (=10) × 36³ = 10 × 46656 = 466560<br>
-        <strong>Summe = 480854</strong>
-      </p>
-      <p>→ <code>AB12</code> wird zu <strong>480854</strong>.</p>
-
-      <h3>Würfel-Regeln</h3>
-      <p>Nach dem Aufdecken wird eine Regel per Würfel (1–6) bestimmt:</p>
-      <ul>
-        <li><strong>1–2:</strong> Größerer Code-Wert gewinnt. Gleichstand = Unentschieden.</li>
-        <li><strong>3–4:</strong> Kleinerer Code-Wert gewinnt. Gleichstand = Unentschieden.</li>
-        <li><strong>5:</strong> Gerade gewinnt. Sind beide gerade oder beide ungerade → Unentschieden.</li>
-        <li><strong>6:</strong> Höhere Stellensumme (Basis-36) gewinnt. Gleichstand = Unentschieden.</li>
+        <li>Beide Spieler wählen eine Gate-Karte und klicken auf „Bereit".</li>
+        <li>Dann startet ein Best-of-5 Schere-Stein-Papier-Duell.</li>
+        <li>Wer zuerst <strong>3 Runden</strong> gewinnt, erhält die Gate-Karte des Gegners.</li>
       </ul>
 
-      <h3>Kartentransfer (später)</h3>
-      <p>In dieser Testversion werden keine echten Karten verschoben. In der echten Version würde der Verlierer seine gesetzte Gate‑Karte verlieren und der Gewinner sie in sein Gate‑Album bekommen.</p>
+      <p><strong>Schere-Stein-Papier:</strong></p>
+      <ul>
+        <li>🪨 Stein schlägt ✂️ Schere</li>
+        <li>✂️ Schere schlägt 📄 Papier</li>
+        <li>📄 Papier schlägt 🪨 Stein</li>
+        <li>Gleiche Wahl = Unentschieden, keine Punkte</li>
+      </ul>
+
+      <p><strong>Kartentransfer (später):</strong></p>
+      <p>In dieser Testversion werden keine echten Karten verschoben. In der echten Version würde der Verlierer seine gesetzte Gate‑Karte aus dem Album verlieren und der Gewinner sie erhalten.</p>
       
       <div class="info-close">
         <button id="closeInfo" class="btn btn-primary">Verstanden</button>
@@ -560,363 +481,260 @@
     </div>
   </div>
 
-  <!-- Duel-Modal -->
-  <div id="duelModalOverlay" class="duel-modal-overlay">
-    <div class="duel-modal" id="duelModal">
-      <h2 id="duelModalTitle">🎴 Duell läuft ...</h2>
-
-      <div class="duel-cards-row">
-        <div class="duel-card" id="duelCardA">
-          <div class="duel-card-img" id="duelImgA">???</div>
-          <div class="duel-card-name" id="duelNameA">Spieler A</div>
-          <div class="duel-card-code" id="duelCodeA">UG‑GATE #----</div>
-          <div class="duel-card-value" id="duelValueA"></div>
-        </div>
-
-        <div class="duel-card" id="duelCardB">
-          <div class="duel-card-img" id="duelImgB">???</div>
-          <div class="duel-card-name" id="duelNameB">Spieler B</div>
-          <div class="duel-card-code" id="duelCodeB">UG‑GATE #----</div>
-          <div class="duel-card-value" id="duelValueB"></div>
-        </div>
-      </div>
-
-      <div id="duelStepSection" class="duel-step-section" style="display:none;">
-        <div class="duel-step-title" id="duelStepTitle"></div>
-        <div class="duel-step-content" id="duelStepContent"></div>
-      </div>
-
-      <div id="duelResultBox" class="duel-result" style="display:none;"></div>
-
-      <div class="duel-modal-actions">
-        <button id="closeDuelModal" class="btn btn-primary">Schließen</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    // Dummy-Gatekarten für den Test
     const dummyCards = [
-      {
-        id: 'gate-1',
-        name: 'Eule am Feuer',
-        slug: 'ug-gate-ab12',
-        imageLabel: '🦉🔥',
-      },
-      {
-        id: 'gate-2',
-        name: 'Neon Tunnel',
-        slug: 'ug-gate-7xq9',
-        imageLabel: '🌆✨',
-      },
-      {
-        id: 'gate-3',
-        name: 'Subway Phantom',
-        slug: 'ug-gate-55zz',
-        imageLabel: '👻🚇',
-      },
+      { id: 'gate-1', name: 'Eule am Feuer', slug: 'ug-gate-ab12' },
+      { id: 'gate-2', name: 'Neon Tunnel', slug: 'ug-gate-7xq9' },
+      { id: 'gate-3', name: 'Subway Phantom', slug: 'ug-gate-55zz' },
     ];
 
     const selectA = document.getElementById('selectA');
     const selectB = document.getElementById('selectB');
     const goA = document.getElementById('goA');
     const goB = document.getElementById('goB');
-    const cancelA = document.getElementById('cancelA');
-    const cancelB = document.getElementById('cancelB');
-
     const nameA = document.getElementById('nameA');
     const nameB = document.getElementById('nameB');
-    const slugAEl = document.getElementById('slugA');
-    const slugBEl = document.getElementById('slugB');
-    const imgA = document.getElementById('imgA');
-    const imgB = document.getElementById('imgB');
-    const stateA = document.getElementById('stateA');
-    const stateB = document.getElementById('stateB');
-
-    const statusMain = document.getElementById('statusMain');
-    const statusDetail = document.getElementById('statusDetail');
+    const codeA = document.getElementById('codeA');
+    const codeB = document.getElementById('codeB');
+    const slotA = document.getElementById('slotA');
+    const slotB = document.getElementById('slotB');
+    const scoreAEl = document.getElementById('scoreA');
+    const scoreBEl = document.getElementById('scoreB');
+    const statusRow = document.getElementById('statusRow');
+    const gameArea = document.getElementById('gameArea');
+    const roundTitle = document.getElementById('roundTitle');
+    const roundInfo = document.getElementById('roundInfo');
+    const choicesAButtons = document.getElementById('choicesA').querySelectorAll('.choice-btn');
+    const choicesBButtons = document.getElementById('choicesB').querySelectorAll('.choice-btn');
+    const displayA = document.getElementById('displayA');
+    const displayB = document.getElementById('displayB');
+    const roundResult = document.getElementById('roundResult');
+    const finalResult = document.getElementById('finalResult');
 
     const infoOverlay = document.getElementById('infoOverlay');
     const infoButton = document.getElementById('infoButton');
     const closeInfo = document.getElementById('closeInfo');
     const resetButton = document.getElementById('resetButton');
 
-    const duelModalOverlay = document.getElementById('duelModalOverlay');
-    const duelModal = document.getElementById('duelModal');
-    const closeDuelModal = document.getElementById('closeDuelModal');
-
-    const duelModalTitle = document.getElementById('duelModalTitle');
-    const duelCardA = document.getElementById('duelCardA');
-    const duelCardB = document.getElementById('duelCardB');
-    const duelImgA = document.getElementById('duelImgA');
-    const duelImgB = document.getElementById('duelImgB');
-    const duelNameA = document.getElementById('duelNameA');
-    const duelNameB = document.getElementById('duelNameB');
-    const duelCodeA = document.getElementById('duelCodeA');
-    const duelCodeB = document.getElementById('duelCodeB');
-    const duelValueA = document.getElementById('duelValueA');
-    const duelValueB = document.getElementById('duelValueB');
-    const duelStepSection = document.getElementById('duelStepSection');
-    const duelStepTitle = document.getElementById('duelStepTitle');
-    const duelStepContent = document.getElementById('duelStepContent');
-    const duelResultBox = document.getElementById('duelResultBox');
-
     let selectionA = null;
     let selectionB = null;
-    let confirmedA = false;
-    let confirmedB = false;
+    let readyA = false;
+    let readyB = false;
+    let scoreA = 0;
+    let scoreB = 0;
+    let currentRound = 1;
+    let choiceA = null;
+    let choiceB = null;
+    let gameActive = false;
 
-    function base36FromSlugLast4(slug) {
-      if (!slug) return 0;
-      const part = slug.slice(-4);
-      const value = parseInt(part, 36);
-      return Number.isNaN(value) ? 0 : value;
-    }
-
-    function sumDigitsBase36(slug) {
-      if (!slug) return 0;
-      const part = slug.slice(-4).toUpperCase();
-      let sum = 0;
-      for (const ch of part) {
-        const v = parseInt(ch, 36);
-        if (!Number.isNaN(v)) sum += v;
-      }
-      return sum;
-    }
+    const choiceEmoji = { rock: '🪨', paper: '📄', scissors: '✂️' };
 
     function formatCode(slug) {
-      if (!slug) return '----';
-      const part = slug.slice(-4).toUpperCase();
-      return part;
+      return slug ? slug.slice(-4).toUpperCase() : '----';
     }
 
-    function populateSelect(selectEl) {
-      selectEl.innerHTML = '<option value="">Gate-Karte wählen …</option>';
-      dummyCards.forEach(card => {
+    function populateSelect(sel) {
+      sel.innerHTML = '<option value="">Gate-Karte wählen …</option>';
+      dummyCards.forEach(c => {
         const opt = document.createElement('option');
-        opt.value = card.id;
-        opt.textContent = `${card.name} (${formatCode(card.slug)})`;
-        selectEl.appendChild(opt);
+        opt.value = c.id;
+        opt.textContent = `${c.name} (#${formatCode(c.slug)})`;
+        sel.appendChild(opt);
       });
     }
 
     function resetDuel() {
       selectionA = null;
       selectionB = null;
-      confirmedA = false;
-      confirmedB = false;
+      readyA = false;
+      readyB = false;
+      scoreA = 0;
+      scoreB = 0;
+      currentRound = 1;
+      choiceA = null;
+      choiceB = null;
+      gameActive = false;
 
       populateSelect(selectA);
       populateSelect(selectB);
 
-      nameA.textContent = 'Keine Karte gewählt';
-      nameB.textContent = 'Keine Karte gewählt';
-      slugAEl.textContent = 'UG‑GATE #----';
-      slugBEl.textContent = 'UG‑GATE #----';
-      imgA.textContent = 'Karte noch verdeckt';
-      imgB.textContent = 'Karte noch verdeckt';
+      nameA.textContent = 'Keine Karte';
+      nameB.textContent = 'Keine Karte';
+      codeA.textContent = 'UG‑GATE #----';
+      codeB.textContent = 'UG‑GATE #----';
+      slotA.classList.remove('revealed');
+      slotB.classList.remove('revealed');
 
       goA.disabled = true;
       goB.disabled = true;
 
-      stateA.textContent = 'Status: Auswahl';
-      stateB.textContent = 'Status: Auswahl';
+      scoreAEl.textContent = '0';
+      scoreBEl.textContent = '0';
 
-      statusMain.textContent = 'Wähle für beide Spieler eine Gate-Karte und bestätige mit Go.';
-      statusDetail.textContent = 'Karten bleiben verdeckt, bis beide Go gedrückt haben.';
+      statusRow.textContent = 'Beide Spieler wählen eine Gate-Karte und klicken auf „Bereit".';
+      gameArea.classList.remove('active');
+      roundResult.style.display = 'none';
+      finalResult.style.display = 'none';
     }
 
-    function updateSelection(player, cardId) {
-      const card = dummyCards.find(c => c.id === cardId) || null;
-      if (player === 'A') {
-        selectionA = card;
-        confirmedA = false;
-        stateA.textContent = 'Status: Auswahl';
-        imgA.textContent = card ? 'Karte gewählt (verdeckt)' : 'Karte noch verdeckt';
-        nameA.textContent = card ? card.name : 'Keine Karte gewählt';
-        slugAEl.textContent = card ? 'UG‑GATE #' + formatCode(card.slug) : 'UG‑GATE #----';
-        goA.disabled = !card;
-      } else {
-        selectionB = card;
-        confirmedB = false;
-        stateB.textContent = 'Status: Auswahl';
-        imgB.textContent = card ? 'Karte gewählt (verdeckt)' : 'Karte noch verdeckt';
-        nameB.textContent = card ? card.name : 'Keine Karte gewählt';
-        slugBEl.textContent = card ? 'UG‑GATE #' + formatCode(card.slug) : 'UG‑GATE #----';
-        goB.disabled = !card;
-      }
-    }
-
-    function checkReveal() {
-      if (!selectionA || !selectionB) return;
-      if (!confirmedA || !confirmedB) return;
-
-      // Modal öffnen und Step-by-step durchlaufen
-      startDuelModal();
-    }
-
-    async function startDuelModal() {
-      duelModalOverlay.style.display = 'flex';
-      duelModalTitle.textContent = '🎴 Duell läuft ...';
-
-      // Reset Modal-Karten
-      duelCardA.classList.remove('revealed', 'winner');
-      duelCardB.classList.remove('revealed', 'winner');
-      duelImgA.textContent = '???';
-      duelImgB.textContent = '???';
-      duelNameA.textContent = 'Spieler A';
-      duelNameB.textContent = 'Spieler B';
-      duelCodeA.textContent = 'UG‑GATE #----';
-      duelCodeB.textContent = 'UG‑GATE #----';
-      duelValueA.textContent = '';
-      duelValueB.textContent = '';
-      duelStepSection.style.display = 'none';
-      duelResultBox.style.display = 'none';
-
-      await sleep(800);
-
-      // Schritt 1: Karten aufdecken
-      duelModalTitle.textContent = '🎴 Karten werden aufgedeckt ...';
-      duelCardA.classList.add('revealed');
-      duelCardB.classList.add('revealed');
-      duelImgA.textContent = selectionA.imageLabel;
-      duelImgB.textContent = selectionB.imageLabel;
-      duelNameA.textContent = selectionA.name;
-      duelNameB.textContent = selectionB.name;
-      const codeA = formatCode(selectionA.slug);
-      const codeB = formatCode(selectionB.slug);
-      duelCodeA.textContent = 'UG‑GATE #' + codeA;
-      duelCodeB.textContent = 'UG‑GATE #' + codeB;
-
-      await sleep(1200);
-
-      // Schritt 2: Code-Umrechnung
-      const valA = base36FromSlugLast4(selectionA.slug);
-      const valB = base36FromSlugLast4(selectionB.slug);
-      duelValueA.textContent = `Wert: ${valA}`;
-      duelValueB.textContent = `Wert: ${valB}`;
-
-      duelStepSection.style.display = 'block';
-      duelStepTitle.textContent = 'Code-Umrechnung (Basis-36)';
-      duelStepContent.innerHTML = `
-        <strong>Spieler A:</strong> <code>${codeA}</code> → <strong>${valA}</strong><br>
-        <strong>Spieler B:</strong> <code>${codeB}</code> → <strong>${valB}</strong><br>
-        <span style="font-size:11px; color:#9ca3af;">(Basis-36: Ziffern 0-9 = 0-9, A-Z = 10-35, Stellenwerte 36⁰, 36¹, 36², 36³)</span>
-      `;
-
-      await sleep(2000);
-
-      // Schritt 3: Würfel
-      duelStepTitle.textContent = 'Regel wird ausgewürfelt ...';
-      duelStepContent.innerHTML = '<div class="duel-dice">🎲</div>';
-      await sleep(1000);
-
-      const dice = Math.floor(Math.random() * 6) + 1;
-      duelStepContent.innerHTML = `<div class="duel-dice">🎲 ${dice}</div>`;
-      await sleep(800);
-
-      // Schritt 4: Regel anwenden
-      const sumA = sumDigitsBase36(selectionA.slug);
-      const sumB = sumDigitsBase36(selectionB.slug);
-
-      let winner = null; // 'A', 'B' oder null
-      let ruleText = '';
-      let detailText = '';
-
-      if (dice === 1 || dice === 2) {
-        ruleText = 'Größerer Code-Wert gewinnt.';
-        if (valA > valB) winner = 'A';
-        else if (valB > valA) winner = 'B';
-        detailText = `Code A: ${valA}, Code B: ${valB}.`;
-      } else if (dice === 3 || dice === 4) {
-        ruleText = 'Kleinerer Code-Wert gewinnt.';
-        if (valA < valB) winner = 'A';
-        else if (valB < valA) winner = 'B';
-        detailText = `Code A: ${valA}, Code B: ${valB}.`;
-      } else if (dice === 5) {
-        ruleText = 'Gerade gewinnt. Sind beide gleich (gerade/ungerade), ist es unentschieden.';
-        const evenA = valA % 2 === 0;
-        const evenB = valB % 2 === 0;
-        if (evenA && !evenB) winner = 'A';
-        else if (evenB && !evenA) winner = 'B';
-        detailText = `Code A: ${valA} (${evenA ? 'gerade' : 'ungerade'}), Code B: ${valB} (${evenB ? 'gerade' : 'ungerade'}).`;
-      } else {
-        ruleText = 'Höhere Stellensumme (Basis-36) gewinnt.';
-        if (sumA > sumB) winner = 'A';
-        else if (sumB > sumA) winner = 'B';
-        detailText = `Summe A: ${sumA}, Summe B: ${sumB}.`;
-      }
-
-      duelStepTitle.textContent = `Regel (Würfel ${dice})`;
-      duelStepContent.innerHTML = `
-        <strong>${ruleText}</strong><br>
-        <span style="font-size:11px; color:#9ca3af;">${detailText}</span>
-      `;
-
-      await sleep(1800);
-
-    // Schritt 5: Ergebnis
-      duelModalTitle.textContent = '🎴 Ergebnis';
-      duelResultBox.style.display = 'block';
-
-      if (winner === 'A') {
-        duelCardA.classList.add('winner');
-        duelResultBox.className = 'duel-result win';
-        duelResultBox.textContent = '🏆 Spieler A gewinnt! Im echten Modus würde die Karte von Spieler B rüberwandern.';
-      } else if (winner === 'B') {
-        duelCardB.classList.add('winner');
-        duelResultBox.className = 'duel-result lose';
-        duelResultBox.textContent = '🏆 Spieler B gewinnt! Im echten Modus würde die Karte von Spieler A rüberwandern.';
-      } else {
-        duelResultBox.className = 'duel-result draw';
-        duelResultBox.textContent = '🤝 Unentschieden – bei dieser Regel sind beide Codes gleich stark.';
-      }
-    }
-
-    function sleep(ms) {
-      return new Promise(resolve => setTimeout(resolve, ms));
-    }
-
-    // Event Wiring
     selectA.addEventListener('change', () => {
-      updateSelection('A', selectA.value || null);
+      const card = dummyCards.find(c => c.id === selectA.value);
+      selectionA = card || null;
+      readyA = false;
+      if (card) {
+        nameA.textContent = card.name;
+        codeA.textContent = 'UG‑GATE #' + formatCode(card.slug);
+        goA.disabled = false;
+      } else {
+        nameA.textContent = 'Keine Karte';
+        codeA.textContent = 'UG‑GATE #----';
+        goA.disabled = true;
+      }
     });
 
     selectB.addEventListener('change', () => {
-      updateSelection('B', selectB.value || null);
+      const card = dummyCards.find(c => c.id === selectB.value);
+      selectionB = card || null;
+      readyB = false;
+      if (card) {
+        nameB.textContent = card.name;
+        codeB.textContent = 'UG‑GATE #' + formatCode(card.slug);
+        goB.disabled = false;
+      } else {
+        nameB.textContent = 'Keine Karte';
+        codeB.textContent = 'UG‑GATE #----';
+        goB.disabled = true;
+      }
     });
 
     goA.addEventListener('click', () => {
       if (!selectionA) return;
-      confirmedA = true;
-      stateA.textContent = 'Status: Go gesetzt';
-      statusMain.textContent = 'Beide müssen Go gedrückt haben, damit die Karten aufgedeckt werden.';
-      statusDetail.textContent = '';
-      checkReveal();
+      readyA = true;
+      goA.disabled = true;
+      goA.textContent = '✓ Bereit';
+      slotA.classList.add('revealed');
+      checkStartGame();
     });
 
     goB.addEventListener('click', () => {
       if (!selectionB) return;
-      confirmedB = true;
-      stateB.textContent = 'Status: Go gesetzt';
-      statusMain.textContent = 'Beide müssen Go gedrückt haben, damit die Karten aufgedeckt werden.';
-      statusDetail.textContent = '';
-      checkReveal();
+      readyB = true;
+      goB.disabled = true;
+      goB.textContent = '✓ Bereit';
+      slotB.classList.add('revealed');
+      checkStartGame();
     });
 
-    cancelA.addEventListener('click', () => {
-      confirmedA = false;
-      stateA.textContent = 'Status: abgebrochen';
-      statusMain.textContent = 'Duel abgebrochen. Starte ein neues Duel, wenn ihr bereit seid.';
-      statusDetail.textContent = '';
+    function checkStartGame() {
+      if (readyA && readyB && !gameActive) {
+        gameActive = true;
+        statusRow.textContent = 'Duell startet! Best-of-5: Wer zuerst 3 Runden gewinnt, erhält die Gate-Karte.';
+        gameArea.classList.add('active');
+        startRound();
+      }
+    }
+
+    function startRound() {
+      choiceA = null;
+      choiceB = null;
+      roundTitle.textContent = `Runde ${currentRound}`;
+      roundInfo.textContent = `Wählt gleichzeitig: Schere ✂️ · Stein 🪨 · Papier 📄`;
+      displayA.textContent = '—';
+      displayB.textContent = '—';
+      roundResult.style.display = 'none';
+      finalResult.style.display = 'none';
+
+      choicesAButtons.forEach(btn => {
+        btn.classList.remove('selected');
+        btn.disabled = false;
+      });
+      choicesBButtons.forEach(btn => {
+        btn.classList.remove('selected');
+        btn.disabled = false;
+      });
+    }
+
+    choicesAButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (choiceA) return;
+        choiceA = btn.dataset.choice;
+        choicesAButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        displayA.textContent = choiceEmoji[choiceA];
+        checkRoundReady();
+      });
     });
 
-    cancelB.addEventListener('click', () => {
-      confirmedB = false;
-      stateB.textContent = 'Status: abgebrochen';
-      statusMain.textContent = 'Duel abgebrochen. Starte ein neues Duel, wenn ihr bereit seid.';
-      statusDetail.textContent = '';
+    choicesBButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (choiceB) return;
+        choiceB = btn.dataset.choice;
+        choicesBButtons.forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        displayB.textContent = choiceEmoji[choiceB];
+        checkRoundReady();
+      });
     });
+
+    function checkRoundReady() {
+      if (choiceA && choiceB) {
+        resolveRound();
+      }
+    }
+
+    function resolveRound() {
+      const winner = getWinner(choiceA, choiceB);
+
+      roundResult.style.display = 'block';
+
+      if (winner === 'A') {
+        scoreA++;
+        scoreAEl.textContent = scoreA;
+        roundResult.className = 'round-result win';
+        roundResult.textContent = `Spieler A gewinnt diese Runde! ${choiceEmoji[choiceA]} schlägt ${choiceEmoji[choiceB]}.`;
+      } else if (winner === 'B') {
+        scoreB++;
+        scoreBEl.textContent = scoreB;
+        roundResult.className = 'round-result lose';
+        roundResult.textContent = `Spieler B gewinnt diese Runde! ${choiceEmoji[choiceB]} schlägt ${choiceEmoji[choiceA]}.`;
+      } else {
+        roundResult.className = 'round-result draw';
+        roundResult.textContent = `Unentschieden! Beide haben ${choiceEmoji[choiceA]} gewählt.`;
+      }
+
+      // Check Sieg
+      if (scoreA >= 3 || scoreB >= 3) {
+        endGame();
+      } else {
+        currentRound++;
+        setTimeout(() => startRound(), 2000);
+      }
+    }
+
+    function getWinner(a, b) {
+      if (a === b) return null;
+      if (
+        (a === 'rock' && b === 'scissors') ||
+        (a === 'scissors' && b === 'paper') ||
+        (a === 'paper' && b === 'rock')
+      ) return 'A';
+      return 'B';
+    }
+
+    function endGame() {
+      finalResult.style.display = 'block';
+      if (scoreA >= 3) {
+        finalResult.className = 'final-result win';
+        finalResult.textContent = `🏆 Spieler A gewinnt das Duell ${scoreA}:${scoreB}! Im echten Modus würde die Gate-Karte von Spieler B zu A wandern.`;
+      } else {
+        finalResult.className = 'final-result lose';
+        finalResult.textContent = `🏆 Spieler B gewinnt das Duell ${scoreB}:${scoreA}! Im echten Modus würde die Gate-Karte von Spieler A zu B wandern.`;
+      }
+      roundInfo.textContent = 'Duell beendet. Klicke auf „Neues Duel" für eine weitere Runde.';
+
+      choicesAButtons.forEach(b => b.disabled = true);
+      choicesBButtons.forEach(b => b.disabled = true);
+    }
 
     infoButton.addEventListener('click', () => {
       infoOverlay.style.display = 'flex';
@@ -932,15 +750,10 @@
       }
     });
 
-    closeDuelModal.addEventListener('click', () => {
-      duelModalOverlay.style.display = 'none';
-    });
-
     resetButton.addEventListener('click', () => {
       resetDuel();
     });
 
-    // Init
     resetDuel();
   </script>
 </body>
