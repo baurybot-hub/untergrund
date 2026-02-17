@@ -886,7 +886,7 @@ input:focus {
       }
     }
 
-    async function loadAllArtists() {
+        async function loadAllArtists() {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?select=*`,
         {
@@ -896,7 +896,30 @@ input:focus {
           }
         }
       );
-if (!res.ok) {
+
+      if (!res.ok) {
+        const txt = await res.text();
+        console.error("Artists Load Fehler:", res.status, txt);
+        throw new Error("Supabase Load Fehler: " + res.status);
+      }
+
+      allArtists = await res.json();
+    }
+
+    // NEU: Gate-Pool laden
+    async function loadGatePool() {
+      try {
+        const res = await fetch(
+          `${SUPABASE_URL}/rest/v1/${GATE_TABLE}?select=id,name,description,image_path,share_slug&status=eq.archived`,
+          {
+            headers: {
+              "apikey": SUPABASE_ANON_KEY,
+              "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          }
+        );
+
+        if (!res.ok) {
           console.error("GateCards Load Fehler:", await res.text());
           return;
         }
@@ -913,15 +936,6 @@ if (!res.ok) {
       return gatePool[idx];
     }
 
-      
-      if (!res.ok) {
-        const txt = await res.text();
-        console.error("Artists Load Fehler:", res.status, txt);
-        throw new Error("Supabase Load Fehler: " + res.status);
-      }
-
-      allArtists = await res.json();
-    }
 
     function pickRandomUnseenArtist() {
       const unseen = allArtists.filter(a => !seenArtistIds.has(a.id));
