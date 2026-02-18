@@ -1146,18 +1146,27 @@ input:focus {
       window.location.href = `GateShare.html?s=${slug}`;
     }
 
-    async function submitArtist() {
+        async function submitArtist() {
       const nameInput = document.getElementById("artist-input");
       const spotifyInput = document.getElementById("spotify-input");
       const statusEl = document.getElementById("submit-status");
+
       // Login prüfen
       const {  sessionData } = await client.auth.getSession();
       if (!sessionData || !sessionData.session) {
-        statusEl.textContent = "Bitte melde dich an, um Artists vorzuschlagen.";
+        // Hinweis im Modal
+        statusEl.textContent = "Bitte melde dich an, um Artists vorzuschlagen. Du kommst danach zurück in den UnterGrund.";
         statusEl.className = "modal-status err";
+
+        // Nach kurzem Delay zur Login-Seite weiterleiten
+        setTimeout(() => {
+          const currentUrl = window.location.href;
+          window.location.href = `Login.html?from=add-artist&returnUrl=${encodeURIComponent(currentUrl)}`;
+        }, 1200);
         return;
       }
       const userId = sessionData.session.user.id;
+
 
       const manualName = nameInput.value.trim();
       const rawUrl = spotifyInput.value.trim();
