@@ -1146,26 +1146,23 @@ input:focus {
       window.location.href = `GateShare.html?s=${slug}`;
     }
 
-        async function submitArtist() {
+          async function submitArtist() {
       const nameInput = document.getElementById("artist-input");
       const spotifyInput = document.getElementById("spotify-input");
       const statusEl = document.getElementById("submit-status");
 
-// HIER kurz zum Test einbauen:
-      const tmp = await client.auth.getSession();
-      console.log("submitArtist getSession:", tmp);
-          
-      // Login prüfen
-      const {  sessionData } = await client.auth.getSession();
-      if (!sessionData || !sessionData.session) {
-        // Hinweis im Modal
-        statusEl.textContent = "Bitte melde dich an, um Artists vorzuschlagen. Du kommst danach zurück in den UnterGrund.";
-        statusEl.className = "modal-status err";
+      // Login prüfen (korrekt destrukturieren)
+      const { data, error } = await client.auth.getSession();
+      console.log("submitArtist getSession:", data, error);
+      const session = data?.session || null;
 
-      
+      if (!session) {
+        statusEl.textContent = "Bitte melde dich an, um Artists vorzuschlagen.";
+        statusEl.className = "modal-status err";
         return;
       }
-      const userId = sessionData.session.user.id;
+      const userId = session.user.id;
+
 
 
       const manualName = nameInput.value.trim();
