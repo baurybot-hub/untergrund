@@ -1162,11 +1162,7 @@ input:focus {
         statusEl.textContent = "Bitte melde dich an, um Artists vorzuschlagen. Du kommst danach zurück in den UnterGrund.";
         statusEl.className = "modal-status err";
 
-        // Nach kurzem Delay zur Login-Seite weiterleiten
-        setTimeout(() => {
-          const currentUrl = window.location.href;
-          window.location.href = `Login.html?from=add-artist&returnUrl=${encodeURIComponent(currentUrl)}`;
-        }, 1200);
+      
         return;
       }
       const userId = sessionData.session.user.id;
