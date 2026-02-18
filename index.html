@@ -1146,14 +1146,12 @@ input:focus {
       window.location.href = `GateShare.html?s=${slug}`;
     }
 
-          async function submitArtist() {
+              async function submitArtist() {
       const nameInput = document.getElementById("artist-input");
       const spotifyInput = document.getElementById("spotify-input");
       const statusEl = document.getElementById("submit-status");
 
-      // Login prüfen (korrekt destrukturieren)
       const { data, error } = await client.auth.getSession();
-      console.log("submitArtist getSession:", data, error);
       const session = data?.session || null;
 
       if (!session) {
@@ -1162,6 +1160,7 @@ input:focus {
         return;
       }
       const userId = session.user.id;
+
 
 
 
@@ -1216,34 +1215,28 @@ input:focus {
           return;
         }
 
-        statusEl.textContent = "Speichere Artist…";
+                statusEl.textContent = "Speichere Artist…";
 
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Prefer": "return=minimal"
-          },
-          body: JSON.stringify({
+        const { error: insertError } = await client
+          .from(ARTISTS_TABLE)
+          .insert({
             name: manualName,
             spotify_url: cleanUrl,
             user_id: userId
-          })
+          });
 
-        });
-
-        if (!res.ok) {
-          const txt = await res.text();
-          console.error("Insert Fehler:", res.status, txt);
-          if (res.status === 409) {
+        if (insertError) {
+          console.error("Insert Fehler:", insertError);
+          if (insertError.code === "23505") {
             statusEl.textContent = "Dieser Artist existiert bereits (DB‑Constraint).";
             statusEl.className = "modal-status err";
             return;
           }
-          throw new Error("Supabase Insert Fehler: " + res.status);
+          statusEl.textContent = "❌ Fehler: " + (insertError.message || "Supabase Insert Fehler");
+          statusEl.className = "modal-status err";
+          return;
         }
+
 
         nameInput.value = "";
         spotifyInput.value = "";
