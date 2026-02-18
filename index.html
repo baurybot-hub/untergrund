@@ -1151,6 +1151,10 @@ input:focus {
       const spotifyInput = document.getElementById("spotify-input");
       const statusEl = document.getElementById("submit-status");
 
+// HIER kurz zum Test einbauen:
+      const tmp = await client.auth.getSession();
+      console.log("submitArtist getSession:", tmp);
+          
       // Login prüfen
       const {  sessionData } = await client.auth.getSession();
       if (!sessionData || !sessionData.session) {
