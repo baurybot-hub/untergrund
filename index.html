@@ -1150,6 +1150,14 @@ input:focus {
       const nameInput = document.getElementById("artist-input");
       const spotifyInput = document.getElementById("spotify-input");
       const statusEl = document.getElementById("submit-status");
+      // Login prüfen
+      const {  sessionData } = await client.auth.getSession();
+      if (!sessionData || !sessionData.session) {
+        statusEl.textContent = "Bitte melde dich an, um Artists vorzuschlagen.";
+        statusEl.className = "modal-status err";
+        return;
+      }
+      const userId = sessionData.session.user.id;
 
       const manualName = nameInput.value.trim();
       const rawUrl = spotifyInput.value.trim();
@@ -1214,8 +1222,10 @@ input:focus {
           },
           body: JSON.stringify({
             name: manualName,
-            spotify_url: cleanUrl
+            spotify_url: cleanUrl,
+            user_id: userId
           })
+
         });
 
         if (!res.ok) {
