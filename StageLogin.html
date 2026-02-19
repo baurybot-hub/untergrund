@@ -205,12 +205,15 @@
 
       setStatus('Verbinde deinen UnterGrund‑Account …');
 
-      const { error } = await client.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.href
-        }
-      });
+      const STAGE_REDIRECT = 'https://baurybot-hub.github.io/untergrund/StageLogin.html';
+
+const { error } = await client.auth.signInWithOAuth({
+  provider: 'google',
+  options: {
+    redirectTo: STAGE_REDIRECT
+  }
+});
+
 
       if (error) {
         console.error('Google login error:', error);
