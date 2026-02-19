@@ -617,14 +617,16 @@ input:focus {
       return { ok: true, newScore };
     }
 
-    async function unlockStageIfNeeded(artist) {
+   async function unlockStageIfNeeded(artist) {
   if (!artist) return;
 
   const score = artist.focus_score || 0;
-  if (score < MAX_FOCUS_SCORE) return;
+
+  // WICHTIG: ab Threshold, und nur wenn noch nicht freigeschaltet
+  if (score < MAX_FOCUS_SCORE) return;   // 1000 oder was du definiert hast
+  if (artist.stage_unlocked) return;     // verhindert mehrfaches Triggern
 
   try {
-    // Invite-Token nur erzeugen, wenn noch keiner gesetzt ist
     const inviteToken = artist.invite_token || crypto.randomUUID();
 
     const res = await fetch(
@@ -647,17 +649,16 @@ input:focus {
     );
 
     if (!res.ok) {
-  console.error(
-    "artists UPDATE Fehler (stage_unlocked/can_be_collected/invite_token):",
-    await res.text()
-  );
-}
-
-
+      console.error(
+        "artists UPDATE Fehler (stage_unlocked/can_be_collected/invite_token):",
+        await res.text()
+      );
+    }
   } catch (err) {
     console.error("unlockStageIfNeeded Fehler:", err);
   }
 }
+
 
 
     async function triggerCheatBoost() {
