@@ -498,8 +498,8 @@
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
-async function renderUserInfo(session) {
+
+    async function renderUserInfo(session) {
   const userInfoEl = document.getElementById('userInfo');
   if (!userInfoEl) return;
 
@@ -513,7 +513,7 @@ async function renderUserInfo(session) {
   const avatar = user.user_metadata?.avatar_url;
 
   userInfoEl.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;align-items:center;">
+    <div style="display:flex;align-items:center;gap:8px;">
       ${avatar ? `<img src="${avatar}" alt="${name}" style="width:28px;height:28px;border-radius:999px;object-fit:cover;">` : ''}
       <div style="font-size:13px;">
         <div>${name}</div>
@@ -521,7 +521,8 @@ async function renderUserInfo(session) {
       </div>
     </div>
   `;
-}
+    }
+
     function openPlaylist() {
       window.open(
         'https://open.spotify.com/playlist/2aaOMrGTYr08MfOhrtK4QF',
@@ -675,19 +676,23 @@ async function renderUserInfo(session) {
     }
 
     async function loadCollection() {
-      const { data, error } = await client.auth.getSession();
-      if (error) {
-        console.error('getSession error:', error);
-      }
+  const { data, error } = await client.auth.getSession();
+  if (error) {
+    console.error('getSession error', error);
+    document.getElementById('userInfo').textContent = 'Fehler beim Laden des Logins';
+    return;
+  }
 
-      const session = data?.session || null;
-      if (!session) {
-        window.location.href = 'Login.html?from=collection';
-        return;
-      }
+  const session = data?.session || null;
+  if (!session) {
+    window.location.href = 'Login.html?from=collection';
+    return;
+  }
 
-      const userId = session.user.id;
-      const userEmail = session.user.email;
+  await renderUserInfo(session);
+
+  const userId = session.user.id;
+  // ab hier alles lassen wie es ist (Collections holen usw.)
       
       // 1) eigene Collections holen (älteste zuerst)
       const { data: collections, error: collError } = await client
