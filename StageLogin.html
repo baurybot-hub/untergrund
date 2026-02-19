@@ -5,215 +5,276 @@
   <title>UnterGrund Stage Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
       color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
     }
     .login-container {
-      background: rgba(0, 0, 0, 0.82);
-      border: 1px solid rgba(28, 255, 136, 0.35);
-      box-shadow: 0 0 25px rgba(28, 255, 136, 0.25);
-      border-radius: 18px;
-      padding: 28px 24px 24px;
       width: 100%;
       max-width: 420px;
+      background: rgba(0, 0, 0, 0.88);
+      border-radius: 20px;
+      border: 1px solid rgba(28, 255, 136, 0.35);
+      padding: 32px 26px 26px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(28, 255, 136, 0.25);
     }
+    h1 { font-size: 24px; margin: 4px 0 8px; }
     .logo {
-      font-size: 13px;
+      font-size: 14px;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: #9effc7;
       margin-bottom: 6px;
     }
-    h1 {
-      margin: 0 0 6px;
-      font-size: 22px;
-    }
     .subtitle {
-      font-size: 13px;
-      color: #c4c4c4;
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 6px;
-    }
-    input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px 11px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      background: rgba(15, 15, 15, 0.9);
-      color: #f5f5f5;
       font-size: 14px;
-      outline: none;
+      color: #c0c0c0;
+      margin-bottom: 16px;
     }
-    input:focus {
-      border-color: #1cff88;
-      box-shadow: 0 0 0 1px rgba(28, 255, 136, 0.45);
+    .hint {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 12px;
+      min-height: 1.2em;
     }
-    .field {
-      margin-bottom: 14px;
-    }
-    button {
+    .login-button {
       width: 100%;
       border: none;
-      border-radius: 999px;
-      padding: 11px 14px;
-      margin-top: 4px;
-      background: linear-gradient(90deg, #1cff88, #00b35c);
-      color: #020202;
+      border-radius: 12px;
+      padding: 12px 18px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
       transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
     }
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 0 16px rgba(28, 255, 136, 0.45);
-      filter: brightness(1.05);
+    .login-button.google {
+      background: #4285F4;
+      color: #fff;
     }
-    button:disabled {
+    .login-button:disabled {
       opacity: 0.5;
       cursor: default;
       transform: none;
       box-shadow: none;
     }
+    .login-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 0 16px rgba(28, 255, 136, 0.35);
+      filter: brightness(1.03);
+    }
     .status {
-      margin-top: 10px;
       font-size: 13px;
-      min-height: 18px;
+      color: #e5e7eb;
+      min-height: 1.3em;
+      margin-top: 6px;
     }
-    .status.error {
-      color: #ff6b6b;
-    }
-    .status.success {
-      color: #9effc7;
-    }
-    .hint {
-      margin-top: 8px;
-      font-size: 11px;
-      color: #a0a0a0;
+    .artist-name {
+      font-size: 15px;
+      color: #e3ffe5;
+      margin-bottom: 6px;
     }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <div class="logo">UnterGrund Explorer</div>
-    <h1>Stage Login</h1>
-    <div class="subtitle">
-      Artist‑Name und Einladungspasswort eingeben, um deine Stage zu bearbeiten.
+    <div class="logo">🎴 UnterGrund Stage</div>
+    <h1>Deine Stage‑Einladung</h1>
+    <div id="stage-subtitle" class="subtitle">
+      Wir laden dich ein, deine eigene UnterGrund‑Stage‑Karte zu claimen.
     </div>
 
-    <div class="field">
-      <label for="artistName">Artist Name</label>
-      <input id="artistName" type="text" autocomplete="off" />
-    </div>
+    <div id="artist-info" class="hint" style="margin-bottom:14px;"></div>
 
-    <div class="field">
-      <label for="password">Einladungspasswort</label>
-      <input id="password" type="password" autocomplete="off" />
-    </div>
+    <button id="googleStageButton" class="login-button google">
+      <!-- hier könntest du später ein echtes Google‑Icon einbauen -->
+      🔵 <span>Mit Google verbinden</span>
+    </button>
 
-    <button id="loginButton">Stage betreten</button>
+    <div id="login-hint" class="hint"></div>
     <div id="status" class="status"></div>
-    <div class="hint">
-      Du hast eine Einladung bekommen, aber es klappt nicht?<br />
-      Prüfe Schreibweise deines Artist‑Namens genau so, wie er auf deiner Einladung steht.
-    </div>
   </div>
 
-  <!-- Supabase JS (ersetze ggf. Version/URL, falls du schon ein anderes Script nutzt) -->
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
-    // TODO: Deine Supabase Daten einsetzen
-    const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
-    const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
+    const { createClient } = supabase;
 
-    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
+    const client = createClient(
+      'https://tyflhzwrwzfakwedipig.supabase.co',
+      'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
+    );
 
-    const artistInput = document.getElementById("artistName");
-    const passwordInput = document.getElementById("password");
-    const loginButton = document.getElementById("loginButton");
-    const statusEl = document.getElementById("status");
+    const subtitleEl = document.getElementById('stage-subtitle');
+    const artistInfoEl = document.getElementById('artist-info');
+    const googleStageButton = document.getElementById('googleStageButton');
+    const statusEl = document.getElementById('status');
+    const loginHintEl = document.getElementById('login-hint');
 
-    function setStatus(message, type = "") {
-      statusEl.textContent = message;
-      statusEl.className = "status " + type;
+    let invitedArtist = null; // wird aus Token geladen
+
+    function setStatus(message) {
+      statusEl.textContent = message || '';
     }
 
-    loginButton.addEventListener("click", async () => {
-      const artistName = artistInput.value.trim();
-      const password = passwordInput.value.trim();
+    function setLoginHint(message) {
+      loginHintEl.textContent = message || '';
+    }
 
-      if (!artistName || !password) {
-        setStatus("Bitte Artist‑Name und Einladungspasswort eingeben.", "error");
+    // 1) Token aus URL lesen
+    function getInviteTokenFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('token');
+    }
+
+    // 2) Artist zu Token laden
+    async function loadArtistFromToken(token) {
+      if (!token) {
+        subtitleEl.textContent = 'Kein Einladungs‑Link gefunden.';
+        artistInfoEl.textContent =
+          'Bitte nutze den Link, den du von UnterGrund bekommen hast. Wenn etwas nicht passt, schreib uns gerne.';
+        googleStageButton.disabled = true;
         return;
       }
 
-      loginButton.disabled = true;
-      setStatus("Prüfe Zugang …");
+      setStatus('Prüfe deine Einladung …');
 
-      try {
-        const { data, error } = await client
-          .from("artists")
-          .select("id, stage_unlocked, stage_password")
-          .eq("name", artistName)
-          .limit(1)
-          .single();
+      const { data, error } = await client
+        .from('artists')
+        .select('id, name, invite_token_used')
+        .eq('invite_token', token)
+        .limit(1);
 
-        if (error || !data) {
-          setStatus("Artist nicht gefunden oder noch nicht für die Stage freigeschaltet.", "error");
-          loginButton.disabled = false;
-          return;
-        }
+      const artist = data && data[0];
 
-        if (!data.stage_unlocked) {
-          setStatus("Dieser Artist wurde noch nicht für die Stage freigegeben.", "error");
-          loginButton.disabled = false;
-          return;
-        }
-
-        if (!data.stage_password || data.stage_password !== password) {
-          setStatus("Einladungspasswort stimmt nicht.", "error");
-          loginButton.disabled = false;
-          return;
-        }
-
-        setStatus("Zugang erfolgreich. Weiterleitung …", "success");
-
-// Login-Zeit + Artist-ID im Browser merken
-const now = Date.now();
-sessionStorage.setItem("stage_access_granted", "true");
-sessionStorage.setItem("stage_artist_id", String(data.id));
-sessionStorage.setItem("stage_login_time", String(now));
-
-// Ohne artist_id in der URL weiterleiten – ID kommt nur noch aus sessionStorage
-window.location.href = "StageFormular.html";
-
-      } catch (e) {
-        console.error(e);
-        setStatus("Unerwarteter Fehler beim Login.", "error");
-        loginButton.disabled = false;
+      if (error || !artist) {
+        console.error(error);
+        subtitleEl.textContent = 'Einladung nicht gefunden.';
+        artistInfoEl.textContent =
+          'Wir konnten keine Stage‑Einladung zu diesem Link finden. Schreib UnterGrund, wenn du Hilfe brauchst.';
+        googleStageButton.disabled = true;
+        setStatus('');
+        return;
       }
-    });
 
-    // Enter‑Key Support
-    [artistInput, passwordInput].forEach((el) => {
-      el.addEventListener("keydown", (ev) => {
-        if (ev.key === "Enter") {
-          loginButton.click();
+      if (artist.invite_token_used) {
+        subtitleEl.textContent = 'Einladung bereits verwendet.';
+        artistInfoEl.textContent =
+          'Diese Einladung wurde schon mit einem UnterGrund‑Account verbunden. Wenn das nicht dein Account ist, melde dich bitte bei uns.';
+        googleStageButton.disabled = true;
+        setStatus('');
+        return;
+      }
+
+      invitedArtist = artist;
+
+      subtitleEl.textContent =
+        'Deine Community hat dich aus dem UnterGrund auf die Stage gepusht.';
+      artistInfoEl.innerHTML =
+        'Diese Einladung gehört zu <b>' +
+        artist.name +
+        '</b>.<br />' +
+        'Verbinde sie jetzt mit deinem UnterGrund‑Account und gestalte deine Stage‑Karte.';
+
+      setLoginHint(
+        'Du verbindest nur deinen bestehenden UnterGrund‑Account mit dieser Stage‑Karte – keine extra Registrierung.'
+      );
+      setStatus('');
+    }
+
+    // 3) Google‑Login starten
+    async function loginWithGoogleForStage() {
+      if (!invitedArtist) {
+        setStatus('Keine gültige Einladung geladen.');
+        return;
+      }
+
+      setStatus('Verbinde deinen UnterGrund‑Account …');
+
+      const { error } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.href
         }
       });
-    });
+
+      if (error) {
+        console.error('Google login error:', error);
+        setStatus('Login nicht möglich. Versuche es später noch einmal.');
+      }
+    }
+
+    googleStageButton.addEventListener('click', loginWithGoogleForStage);
+
+    // 4) Nach OAuth: Hash aufräumen
+    async function handleAuthFromHash() {
+      if (window.location.hash.includes('access_token')) {
+        await client.auth.getUser();
+
+        const cleanUrl =
+          window.location.origin +
+          window.location.pathname +
+          window.location.search;
+        history.replaceState(null, '', cleanUrl);
+      }
+    }
+
+    // 5) Wenn User eingeloggt + Einladung geladen → Artist mit User verknüpfen
+    async function linkArtistToUserIfLoggedIn() {
+      const {  userData, error: userError } = await client.auth.getUser();
+      const user = userData?.user || null;
+
+      if (userError) {
+        console.error(userError);
+      }
+      if (!user || !invitedArtist) return;
+
+      setStatus('Verbinde deine Stage‑Einladung mit deinem Account …');
+      googleStageButton.disabled = true;
+
+      const { error: updateError } = await client
+        .from('artists')
+        .update({
+          user_id: user.id,
+          invite_token_used: true
+        })
+        .eq('id', invitedArtist.id);
+
+      if (updateError) {
+        console.error(updateError);
+        setStatus('Konnte Artist nicht mit deinem Account verbinden.');
+        googleStageButton.disabled = false;
+        return;
+      }
+
+      setStatus('Claim erfolgreich. Du wirst zu deiner Stage‑Karte weitergeleitet …');
+
+      setTimeout(() => {
+        window.location.href = BASE_URL + 'StageFormular.html';
+      }, 1200);
+    }
+
+    // Init
+    (async () => {
+      const token = getInviteTokenFromUrl();
+      await handleAuthFromHash();
+      await loadArtistFromToken(token);
+      await linkArtistToUserIfLoggedIn();
+    })();
   </script>
 </body>
 </html>
