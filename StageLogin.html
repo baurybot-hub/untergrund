@@ -239,6 +239,7 @@ const { error } = await client.auth.signInWithOAuth({
     // 5) Wenn User eingeloggt + Einladung geladen → Artist mit User verknüpfen
     async function linkArtistToUserIfLoggedIn() {
       const {  userData, error: userError } = await client.auth.getUser();
+      console.log('StageLogin getUser:', userData, userError);  // NEU
       const user = userData?.user || null;
 
       if (userError) {
