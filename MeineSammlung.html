@@ -498,7 +498,30 @@
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+async function renderUserInfo(session) {
+  const userInfoEl = document.getElementById('userInfo');
+  if (!userInfoEl) return;
 
+  if (!session) {
+    userInfoEl.textContent = 'Nicht eingeloggt';
+    return;
+  }
+
+  const user = session.user;
+  const name = user.user_metadata?.full_name || user.email;
+  const avatar = user.user_metadata?.avatar_url;
+
+  userInfoEl.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;align-items:center;">
+      ${avatar ? `<img src="${avatar}" alt="${name}" style="width:28px;height:28px;border-radius:999px;object-fit:cover;">` : ''}
+      <div style="font-size:13px;">
+        <div>${name}</div>
+        <div style="font-size:11px;color:#9ca3af;">${user.email}</div>
+      </div>
+    </div>
+  `;
+}
     function openPlaylist() {
       window.open(
         'https://open.spotify.com/playlist/2aaOMrGTYr08MfOhrtK4QF',
@@ -665,9 +688,7 @@
 
       const userId = session.user.id;
       const userEmail = session.user.email;
-
-      document.getElementById('userInfo').textContent = `✅ Eingeloggt als: ${userEmail}`;
-
+      
       // 1) eigene Collections holen (älteste zuerst)
       const { data: collections, error: collError } = await client
         .from('user_collections')
