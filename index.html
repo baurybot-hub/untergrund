@@ -723,6 +723,8 @@ input:focus {
       alert(`UnterGrund‑Boost! +${boost} Focus für ${currentArtist.name || "den Artist"}.`);
 
       await updateFocusUI();
+       // NEU: Stage ggf. freischalten
+    await unlockStageIfNeeded(currentArtist);
     }
 
     // STAGE: öffentlicher Stage-Link
