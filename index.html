@@ -647,16 +647,13 @@ input:focus {
     );
 
     if (!res.ok) {
-      console.error(
-        "artists UPDATE Fehler (stage_unlocked/can_be_collected/invite_token):",
-        await res.text()
-      );
-    } else {
-      console.log(
-        "Artist Invite-Link:",
-        `https://deine-domain/StageLogin.html?token=${inviteToken}`
-      );
-    }
+  console.error(
+    "artists UPDATE Fehler (stage_unlocked/can_be_collected/invite_token):",
+    await res.text()
+  );
+}
+
+
   } catch (err) {
     console.error("unlockStageIfNeeded Fehler:", err);
   }
