@@ -82,34 +82,36 @@
   );
 
   function getNextUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const from = params.get('from');
-    const artistId = params.get('artist_id');
+  const params = new URLSearchParams(window.location.search);
+  const from = params.get('from');
+  const artistId = params.get('artist_id');
+  const token = params.get('token');
 
-    if (from === 'stage_claim' && artistId) {
-      return BASE_URL + `StageFormular.html?artist_id=${encodeURIComponent(artistId)}`;
-    }
-
-    if (from === 'collection') {
-      return BASE_URL + 'MeineSammlung.html';
-    }
-
-    if (from === 'stage' && artistId) {
-      return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
-        artistId
-      )}&auto_collect=true`;
-    }
-
-    if (from === 'gate') {
-      return BASE_URL + 'Gate.html';
-    }
-
-    if (from === 'gate_album') {
-      return BASE_URL + 'GateAlbum.html';
-    }
-
-    return BASE_URL + 'index.html';
+  if (from === 'stage_claim' && token) {
+    return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
   }
+
+  if (from === 'collection') {
+    return BASE_URL + 'MeineSammlung.html';
+  }
+
+  if (from === 'stage' && artistId) {
+    return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
+      artistId
+    )}&auto_collect=true`;
+  }
+
+  if (from === 'gate') {
+    return BASE_URL + 'Gate.html';
+  }
+
+  if (from === 'gate_album') {
+    return BASE_URL + 'GateAlbum.html';
+  }
+
+  return BASE_URL + 'index.html';
+}
+
 
   function setHintText() {
     const params = new URLSearchParams(window.location.search);
