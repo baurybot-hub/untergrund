@@ -383,44 +383,45 @@
     }
     currentUser = user;
 
-    // 1) artist_id aus URL lesen
-    const params = new URLSearchParams(window.location.search);
-    const urlArtistId = params.get("artist_id");
+      // 1) token aus URL lesen
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
 
-    // 2) Wenn artist_id in URL: einmalig claimen -> user_id setzen, invite_token_used = true
-    if (urlArtistId) {
-      const { error: claimError } = await client
-        .from("artists")
-        .update({
-          user_id: user.id,
-          invite_token_used: true
-        })
-        .eq("id", urlArtistId);
-
-      if (claimError) {
-        console.error("Invite-Claim-Error:", claimError);
-        setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
-        saveButton.disabled = true;
-        previewButton.disabled = true;
-        deletePhotoButton.disabled = true;
-        return;
-      }
-    }
-
-    // 3) Danach IMMER über user_id laden
-    const { data, error } = await client
+  // 2) Wenn token in URL: einmalig claimen -> user_id setzen, invite_token_used = true
+  if (token) {
+    const { error: claimError } = await client
       .from("artists")
-      .select(`
-        id, name,
-        stage_unlocked,
-        stage_music_connection, stage_ug_message, stage_photo_path,
-        stage_sound, stage_special_skill, stage_active_since,
-        stage_collab_1, stage_collab_2, stage_collab_3,
-        stage_contact, stage_palette
-      `)
-      .eq("user_id", user.id)
-      .limit(1)
-      .single();
+      .update({
+        user_id: user.id,
+        invite_token_used: true
+      })
+      .eq("invite_token", token);
+
+    if (claimError) {
+      console.error("Invite-Claim-Error:", claimError);
+      setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
+      saveButton.disabled = true;
+      previewButton.disabled = true;
+      deletePhotoButton.disabled = true;
+      return;
+    }
+  }
+
+  // 3) Danach IMMER über user_id laden (egal ob vorher URL da war oder nicht)
+  const { data, error } = await client
+    .from("artists")
+    .select(`
+      id, name,
+      stage_unlocked,
+      stage_music_connection, stage_ug_message, stage_photo_path,
+      stage_sound, stage_special_skill, stage_active_since,
+      stage_collab_1, stage_collab_2, stage_collab_3,
+      stage_contact, stage_palette
+    `)
+    .eq("user_id", user.id)
+    .limit(1)
+    .single();
+
 
     if (error || !data) {
       console.error(error);
