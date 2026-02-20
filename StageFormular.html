@@ -308,23 +308,10 @@
   const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const SESSION_DURATION_MS = 60 * 60 * 1000;
-
   async function getCurrentUser() {
     const { data, error } = await client.auth.getUser();
-    if (error || !data?.user) return null;
+    if (error || !data?.user) return null;  // [web:4117]
     return data.user;
-  }
-
-  function getArtistIdFromSessionOrUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const urlId = params.get("artist_id");
-    if (urlId) return urlId;
-
-    const flag = sessionStorage.getItem("stage_access_granted");
-    const id = sessionStorage.getItem("stage_artist_id");
-    if (flag !== "true" || !id) return null;
-    return id;
   }
 
   const musicConnectionEl = document.getElementById("musicConnection");
@@ -348,10 +335,9 @@
   const soundCounterEl = document.getElementById("soundCounter");
   const specialSkillCounterEl = document.getElementById("specialSkillCounter");
 
-  let currentPhotoPath = null;
-  let currentArtistData = null;
   let currentArtistId = null;
   let currentUser = null;
+  let currentPhotoPath = null;
 
   function setStatus(message, type = "") {
     statusEl.textContent = message;
@@ -376,85 +362,24 @@
     }
     currentUser = user;
 
-    // Einheitlich: zuerst aus URL/Session lesen
-    let artistId = getArtistIdFromSessionOrUrl();
-
-    const params = new URLSearchParams(window.location.search);
-    const urlArtistId = params.get("artist_id");
-
-    // Claim-Logik, falls artist_id in URL
-    if (urlArtistId) {
-      console.log("Stage-Claim-Versuch", user.id, urlArtistId);
-      const { error: claimError } = await client
-        .from("artists")
-        .update({
-          user_id: user.id,
-          invite_token_used: true
-        })
-        .eq("id", urlArtistId);
-
-      if (claimError) {
-        console.error("Stage-Claim-Error:", claimError);
-        setStatus(
-          "Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.",
-          "error"
-        );
-      } else {
-        artistId = urlArtistId;
-        sessionStorage.setItem("stage_access_granted", "true");
-        sessionStorage.setItem("stage_artist_id", urlArtistId);
-      }
-    }
-
-    // Kein artist_id in URL/Session → über user_id suchen
-    if (!artistId) {
-      const { data: artists, error: loadByUserError } = await client
-        .from("artists")
-        .select("id")
-        .eq("user_id", user.id)
-        .limit(1);
-
-      if (loadByUserError || !artists || !artists[0]) {
-        console.error(loadByUserError);
-        setStatus("Kein Artist mit deinem Account verknüpft.", "error");
-        saveButton.disabled = true;
-        previewButton.disabled = true;
-        deletePhotoButton.disabled = true;
-        return;
-      }
-      artistId = artists[0].id;
-      sessionStorage.setItem("stage_access_granted", "true");
-      sessionStorage.setItem("stage_artist_id", artistId);
-    }
-
-    if (!artistId) {
-      setStatus("Kein gültiger Stage‑Zugang gefunden.", "error");
-      saveButton.disabled = true;
-      previewButton.disabled = true;
-      deletePhotoButton.disabled = true;
-      return;
-    }
-
-    currentArtistId = artistId;
-    setStatus("Lade deine Stage‑Karte …");
-
+    // Artist ausschließlich über user_id holen
     const { data, error } = await client
       .from("artists")
       .select(`
-        id, name, owner_user_id, owner_claimed_at,
-        stage_unlocked, stage_password,
+        id, name,
+        stage_unlocked,
         stage_music_connection, stage_ug_message, stage_photo_path,
         stage_sound, stage_special_skill, stage_active_since,
         stage_collab_1, stage_collab_2, stage_collab_3,
         stage_contact, stage_palette
       `)
-      .eq("id", artistId)
+      .eq("user_id", user.id)
       .limit(1)
       .single();
 
     if (error || !data) {
       console.error(error);
-      setStatus("Artist konnte nicht geladen werden.", "error");
+      setStatus("Kein Artist mit deinem Account verknüpft.", "error");
       saveButton.disabled = true;
       previewButton.disabled = true;
       deletePhotoButton.disabled = true;
@@ -469,21 +394,8 @@
       return;
     }
 
-    // Stage-Session prüfen
-    if (data.owner_user_id && data.owner_claimed_at) {
-      const claimedAt = new Date(data.owner_claimed_at);
-      const now = new Date();
-      if (now - claimedAt > SESSION_DURATION_MS) {
-        await client
-          .from("artists")
-          .update({ owner_user_id: null, owner_claimed_at: null })
-          .eq("id", artistId);
-        data.owner_user_id = null;
-        data.owner_claimed_at = null;
-      }
-    }
-
-    currentArtistData = data;
+    currentArtistId = data.id;
+    currentPhotoPath = data.stage_photo_path || null;
 
     artistNameDisplay.textContent = "Angemeldet als: " + (data.name || "Unbekannter Artist");
     musicConnectionEl.value = data.stage_music_connection || "";
@@ -496,7 +408,6 @@
     collab3El.value = data.stage_collab_3 || "";
     contactEl.value = data.stage_contact || "";
     paletteEl.value = data.stage_palette || "neon";
-    currentPhotoPath = data.stage_photo_path || null;
 
     updateCounters();
     setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
@@ -512,7 +423,7 @@
 
     const { error: uploadError } = await client.storage
       .from("stage-photos")
-      .upload(filePath, file, { upsert: true, cacheControl: "0" });
+      .upload(filePath, file, { upsert: true, cacheControl: "0" });  // [web:4122]
 
     if (uploadError) {
       console.error(uploadError);
@@ -523,33 +434,11 @@
     return filePath;
   }
 
-  async function validatePasswordIfNeeded() {
-    if (!currentArtistData || !currentArtistData.owner_user_id) return true;
-
-    const enteredPassword = prompt(
-      "Zeit überschritten (60 Min nach letztem Speichern).
-Bitte Einladungspasswort erneut eingeben:"
-    );
-    if (!enteredPassword) {
-      setStatus("Speichern abgebrochen: Passwort nicht eingegeben.", "error");
-      return false;
-    }
-    if (enteredPassword.trim() !== currentArtistData.stage_password) {
-      setStatus("Einladungspasswort stimmt nicht. Speichern abgebrochen.", "error");
-      return false;
-    }
-    return true;
-  }
-
   saveButton.addEventListener("click", async () => {
-    const artistId = currentArtistId;
-    if (!artistId) {
-      setStatus("Kein gültiger Stage‑Zugang gefunden.", "error");
+    if (!currentArtistId || !currentUser) {
+      setStatus("Kein Artist geladen. Speichern nicht möglich.", "error");
       return;
     }
-
-    const passwordOk = await validatePasswordIfNeeded();
-    if (!passwordOk) return;
 
     setStatus("Speichere Stage‑Karte …");
     saveButton.disabled = true;
@@ -557,7 +446,7 @@ Bitte Einladungspasswort erneut eingeben:"
     try {
       let photoPath = null;
       if (photoInput.files.length > 0) {
-        photoPath = await uploadPhotoIfNeeded(artistId);
+        photoPath = await uploadPhotoIfNeeded(currentArtistId);
       }
 
       const updatePayload = {
@@ -571,8 +460,7 @@ Bitte Einladungspasswort erneut eingeben:"
         stage_collab_3: collab3El.value.trim() || null,
         stage_contact: contactEl.value.trim() || null,
         stage_palette: paletteEl.value || "neon",
-        has_stage_card: true,
-        owner_claimed_at: new Date().toISOString()
+        has_stage_card: true
       };
 
       if (photoPath) {
@@ -582,18 +470,15 @@ Bitte Einladungspasswort erneut eingeben:"
       const { error: updateError } = await client
         .from("artists")
         .update(updatePayload)
-        .eq("id", artistId)
-        .eq("owner_user_id", currentUser.id);
+        .eq("id", currentArtistId)
+        .eq("user_id", currentUser.id);  // passt zur RLS-Policy [web:4129]
 
       if (updateError) {
         console.error(updateError);
         setStatus("Speichern nicht möglich.", "error");
-        saveButton.disabled = false;
-        return;
+      } else {
+        setStatus("Stage‑Karte gespeichert. Du kannst sie jederzeit erneut anpassen.", "success");
       }
-
-      currentArtistData.owner_claimed_at = updatePayload.owner_claimed_at;
-      setStatus("Stage‑Karte gespeichert. Du kannst sie jederzeit erneut anpassen.", "success");
     } catch (e) {
       console.error(e);
       setStatus(e.message || "Fehler beim Speichern.", "error");
@@ -603,8 +488,7 @@ Bitte Einladungspasswort erneut eingeben:"
   });
 
   deletePhotoButton.addEventListener("click", async () => {
-    const artistId = currentArtistId;
-    if (!artistId) {
+    if (!currentArtistId || !currentUser) {
       setStatus("Kein gültiger Stage‑Zugang gefunden.", "error");
       return;
     }
@@ -616,8 +500,8 @@ Bitte Einladungspasswort erneut eingeben:"
       const { error: updateError } = await client
         .from("artists")
         .update({ stage_photo_path: null })
-        .eq("id", artistId)
-        .eq("owner_user_id", currentUser.id);
+        .eq("id", currentArtistId)
+        .eq("user_id", currentUser.id);
 
       if (updateError) {
         console.error(updateError);
@@ -629,7 +513,7 @@ Bitte Einladungspasswort erneut eingeben:"
       if (currentPhotoPath) {
         const { error: storageError } = await client.storage
           .from("stage-photos")
-          .remove([currentPhotoPath]);
+          .remove([currentPhotoPath]);  // [web:4122]
         if (storageError) {
           console.error(storageError);
         } else {
@@ -648,12 +532,11 @@ Bitte Einladungspasswort erneut eingeben:"
   });
 
   previewButton.addEventListener("click", () => {
-    const artistId = currentArtistId;
-    if (!artistId) {
-      alert("Kein gültiger Stage‑Zugang gefunden. Vorschau nicht möglich.");
+    if (!currentArtistId) {
+      alert("Kein Artist geladen. Vorschau nicht möglich.");
       return;
     }
-    window.open(`Stage.html?artist_id=${encodeURIComponent(artistId)}`, "_blank");
+    window.open(`Stage.html?artist_id=${encodeURIComponent(currentArtistId)}`, "_blank");
   });
 
   musicConnectionEl.addEventListener("input", updateCounters);
@@ -663,6 +546,7 @@ Bitte Einladungspasswort erneut eingeben:"
 
   loadArtist();
 </script>
+
   
 </body>
 </html>
