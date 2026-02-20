@@ -412,6 +412,7 @@
       deletePhotoButton.disabled = true;
       return;
     }
+console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
 
     if (!data.stage_unlocked) {
       setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
