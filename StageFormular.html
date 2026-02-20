@@ -383,26 +383,26 @@
   }
   currentUser = user;
 
-    const params = new URLSearchParams(window.location.search);
+      const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
 
   if (token) {
     const userId = user.id;
     console.log("Claim TRY", { token, userId });
 
-    const {  claimData, error: claimError } = await client
+    const {  claimRows, error: claimError } = await client
       .from("artists")
       .select("id, user_id, invite_token_used, invite_token")
       .eq("invite_token", token)
       .or("invite_token_used.is.null,invite_token_used.eq.false")
-      .limit(1)
-      .single();
+      .limit(1);
 
+    const claimData = claimRows && claimRows[0] ? claimRows[0] : null;
     console.log("Claim RESULT", { claimData, claimError });
 
-    if (claimError || !claimData) {
-      console.warn("Keine passende Einladung gefunden oder schon benutzt.", claimError);
-    } else {
+    if (claimError) {
+      console.error("Invite-Claim-Select-Error:", claimError);
+    } else if (claimData) {
       const { error: updateError } = await client
         .from("artists")
         .update({
@@ -416,8 +416,11 @@
       } else {
         console.log("Invite erfolgreich mit Account verknüpft.");
       }
+    } else {
+      console.warn("Keine passende Einladung gefunden oder schon benutzt.");
     }
   }
+
 
 
   // Danach IMMER über user_id laden
