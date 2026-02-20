@@ -309,8 +309,8 @@
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   async function getCurrentUser() {
-    const { data, error } = await client.auth.getUser();
-    if (error || !data?.user) return null;  // [web:4117]
+    const { data, error } = await client.auth.getUser();  // [web:4117]
+    if (error || !data?.user) return null;
     return data.user;
   }
 
@@ -351,58 +351,76 @@
     specialSkillCounterEl.textContent = specialSkillEl.value.length + " / 75";
   }
 
-  async function loadArtist() {
-  const user = await getCurrentUser();
-  if (!user) {
-    setStatus("Bitte melde dich zuerst mit deinem UnterGrund-Account an.", "error");
-    saveButton.disabled = true;
-    previewButton.disabled = true;
-    deletePhotoButton.disabled = true;
-    return;
+  async function uploadPhotoIfNeeded(artistId) {
+    const file = photoInput.files[0];
+    if (!file) return null;
+
+    const fileExt = file.name.split(".").pop();
+    const fileName = `stage_${artistId}.${fileExt}`;
+    const filePath = `artist_${artistId}/${fileName}`;
+
+    const { error: uploadError } = await client.storage
+      .from("stage-photos")
+      .upload(filePath, file, { upsert: true, cacheControl: "0" });  // [web:4122]
+
+    if (uploadError) {
+      console.error(uploadError);
+      throw new Error("Bild‑Upload fehlgeschlagen.");
+    }
+
+    currentPhotoPath = filePath;
+    return filePath;
   }
-  currentUser = user;
 
-  // 1) artist_id aus URL lesen
-  const params = new URLSearchParams(window.location.search);
-  const urlArtistId = params.get("artist_id");
-
-  // 2) Wenn artist_id in URL: einmalig claimen -> user_id setzen, invite_token_used = true
-  if (urlArtistId) {
-    const { error: claimError } = await client
-      .from("artists")
-      .update({
-        user_id: user.id,
-        invite_token_used: true
-      })
-      .eq("id", urlArtistId);
-
-    if (claimError) {
-      console.error("Invite-Claim-Error:", claimError);
-      setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
+  async function loadArtist() {
+    const user = await getCurrentUser();
+    if (!user) {
+      setStatus("Bitte melde dich zuerst mit deinem UnterGrund-Account an.", "error");
       saveButton.disabled = true;
       previewButton.disabled = true;
       deletePhotoButton.disabled = true;
       return;
     }
-  }
+    currentUser = user;
 
-  // 3) Danach IMMER über user_id laden (egal ob vorher URL da war oder nicht)
-  const { data, error } = await client
-    .from("artists")
-    .select(`
-      id, name,
-      stage_unlocked,
-      stage_music_connection, stage_ug_message, stage_photo_path,
-      stage_sound, stage_special_skill, stage_active_since,
-      stage_collab_1, stage_collab_2, stage_collab_3,
-      stage_contact, stage_palette
-    `)
-    .eq("user_id", user.id)
-    .limit(1)
-    .single();
-  // ... hier geht dein bestehender Code weiter (stage_unlocked prüfen, Felder setzen usw.)
-}
+    // 1) artist_id aus URL lesen
+    const params = new URLSearchParams(window.location.search);
+    const urlArtistId = params.get("artist_id");
 
+    // 2) Wenn artist_id in URL: einmalig claimen -> user_id setzen, invite_token_used = true
+    if (urlArtistId) {
+      const { error: claimError } = await client
+        .from("artists")
+        .update({
+          user_id: user.id,
+          invite_token_used: true
+        })
+        .eq("id", urlArtistId);
+
+      if (claimError) {
+        console.error("Invite-Claim-Error:", claimError);
+        setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
+        saveButton.disabled = true;
+        previewButton.disabled = true;
+        deletePhotoButton.disabled = true;
+        return;
+      }
+    }
+
+    // 3) Danach IMMER über user_id laden
+    const { data, error } = await client
+      .from("artists")
+      .select(`
+        id, name,
+        stage_unlocked,
+        stage_music_connection, stage_ug_message, stage_photo_path,
+        stage_sound, stage_special_skill, stage_active_since,
+        stage_collab_1, stage_collab_2, stage_collab_3,
+        stage_contact, stage_palette
+      `)
+      .eq("user_id", user.id)
+      .limit(1)
+      .single();
 
     if (error || !data) {
       console.error(error);
@@ -412,7 +430,8 @@
       deletePhotoButton.disabled = true;
       return;
     }
-console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
+
+    console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
 
     if (!data.stage_unlocked) {
       setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
@@ -439,27 +458,6 @@ console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
 
     updateCounters();
     setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
-  }
-
-  async function uploadPhotoIfNeeded(artistId) {
-    const file = photoInput.files[0];
-    if (!file) return null;
-
-    const fileExt = file.name.split(".").pop();
-    const fileName = `stage_${artistId}.${fileExt}`;
-    const filePath = `artist_${artistId}/${fileName}`;
-
-    const { error: uploadError } = await client.storage
-      .from("stage-photos")
-      .upload(filePath, file, { upsert: true, cacheControl: "0" });  // [web:4122]
-
-    if (uploadError) {
-      console.error(uploadError);
-      throw new Error("Bild‑Upload fehlgeschlagen.");
-    }
-
-    currentPhotoPath = filePath;
-    return filePath;
   }
 
   saveButton.addEventListener("click", async () => {
@@ -574,6 +572,7 @@ console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
 
   loadArtist();
 </script>
+
 
   
 </body>
