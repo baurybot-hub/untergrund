@@ -309,7 +309,13 @@
   const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   const SESSION_DURATION_MS = 60 * 60 * 1000; // 60 Minuten
-
+  
+  async function getCurrentUser() {
+    const { data, error } = await client.auth.getUser();
+    if (error || !data?.user) return null;
+    return data.user;
+}
+  
   const musicConnectionEl = document.getElementById("musicConnection");
   const ugMessageEl = document.getElementById("ugMessage");
   const soundEl = document.getElementById("sound");
@@ -340,13 +346,17 @@
     statusEl.className = "status " + type;
   }
 
-  function getArtistIdFromSession() {
+    function getArtistIdFromSessionOrUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const urlId = params.get("artist_id");
+    if (urlId) return urlId;
+
     const flag = sessionStorage.getItem("stage_access_granted");
     const id = sessionStorage.getItem("stage_artist_id");
     if (flag !== "true" || !id) return null;
     return id;
-  }
-
+    }
+  
   function updateCounters() {
     musicConnectionCounterEl.textContent = musicConnectionEl.value.length + " / 250";
     ugMessageCounterEl.textContent = ugMessageEl.value.length + " / 250";
@@ -354,10 +364,19 @@
     specialSkillCounterEl.textContent = specialSkillEl.value.length + " / 75";
   }
 
-  async function loadArtist() {
-    const artistId = getArtistIdFromSession();
+    async function loadArtist() {
+    const user = await getCurrentUser();
+    if (!user) {
+      setStatus("Bitte melde dich zuerst mit deinem UnterGrund-Account an.", "error");
+      saveButton.disabled = true;
+      previewButton.disabled = true;
+      deletePhotoButton.disabled = true;
+      return;
+    }
+
+    const artistId = getArtistIdFromSessionOrUrl();
     if (!artistId) {
-      setStatus("Kein gültiger Stage‑Zugang gefunden. Bitte über dein Einladungs‑Login einsteigen.", "error");
+      setStatus("Kein gültiger Stage‑Zugang gefunden. Bitte über deine Einladung einsteigen.", "error");
       saveButton.disabled = true;
       previewButton.disabled = true;
       deletePhotoButton.disabled = true;
