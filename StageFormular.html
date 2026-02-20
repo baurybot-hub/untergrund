@@ -387,7 +387,7 @@
 const token = params.get("token");
 
 if (token) {
-  console.log("Claim try", token, user.id);
+  console.log("Claim TRY", { token, userId: user.id });
 
   const { data, error: claimError } = await client
     .from("artists")
@@ -395,10 +395,12 @@ if (token) {
       user_id: user.id,
       invite_token_used: true
     })
-    .eq("id", 1)  // TEST: direkt Doktor Eule ansteuern
+    .eq("id", 1)                     // HARDCODE: Doktor Eule
     .select("id, user_id, invite_token_used");
 
-  console.log("Claim result", { data, claimError });
+  console.log("Claim RESULT", { data, claimError });
+}
+
 
   if (claimError) {
     console.error("Invite-Claim-Error:", claimError);
