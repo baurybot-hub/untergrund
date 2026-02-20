@@ -61,8 +61,6 @@
       justify-content: center;
       gap: 8px;
       transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
-    }
-    .login-button.google {
       background: #4285F4;
       color: #fff;
     }
@@ -83,11 +81,6 @@
       min-height: 1.3em;
       margin-top: 6px;
     }
-    .artist-name {
-      font-size: 15px;
-      color: #e3ffe5;
-      margin-bottom: 6px;
-    }
   </style>
 </head>
 <body>
@@ -100,9 +93,8 @@
 
     <div id="artist-info" class="hint" style="margin-bottom:14px;"></div>
 
-    <button id="googleStageButton" class="login-button google">
-      <!-- hier könntest du später ein echtes Google‑Icon einbauen -->
-      🔵 <span>Mit Google verbinden</span>
+    <button id="googleStageButton" class="login-button">
+      🔵 <span>Mit UnterGrund‑Account verbinden</span>
     </button>
 
     <div id="login-hint" class="hint"></div>
@@ -125,7 +117,7 @@
     const statusEl = document.getElementById('status');
     const loginHintEl = document.getElementById('login-hint');
 
-    let invitedArtist = null; // wird aus Token geladen
+    let invitedArtist = null;
 
     function setStatus(message) {
       statusEl.textContent = message || '';
@@ -135,13 +127,11 @@
       loginHintEl.textContent = message || '';
     }
 
-    // 1) Token aus URL lesen
     function getInviteTokenFromUrl() {
       const params = new URLSearchParams(window.location.search);
       return params.get('token');
     }
 
-    // 2) Artist zu Token laden
     async function loadArtistFromToken(token) {
       if (!token) {
         subtitleEl.textContent = 'Kein Einladungs‑Link gefunden.';
@@ -196,88 +186,24 @@
       setStatus('');
     }
 
-    // 3) Google‑Login starten
-    async function loginWithGoogleForStage() {
+    function loginWithGoogleForStage() {
       if (!invitedArtist) {
         setStatus('Keine gültige Einladung geladen.');
         return;
       }
 
-      setStatus('Verbinde deinen UnterGrund‑Account …');
+      const target = BASE_URL + 'Login.html'
+        + '?from=stage_claim'
+        + '&artist_id=' + encodeURIComponent(invitedArtist.id);
 
-      const STAGE_REDIRECT = 'https://baurybot-hub.github.io/untergrund/StageLogin.html';
-
-const { error } = await client.auth.signInWithOAuth({
-  provider: 'google',
-  options: {
-    redirectTo: STAGE_REDIRECT
-  }
-});
-
-
-      if (error) {
-        console.error('Google login error:', error);
-        setStatus('Login nicht möglich. Versuche es später noch einmal.');
-      }
+      window.location.href = target;
     }
 
     googleStageButton.addEventListener('click', loginWithGoogleForStage);
 
-    // 4) Nach OAuth: Hash aufräumen
-    async function handleAuthFromHash() {
-      if (window.location.hash.includes('access_token')) {
-        await client.auth.getUser();
-
-        const cleanUrl =
-          window.location.origin +
-          window.location.pathname +
-          window.location.search;
-        history.replaceState(null, '', cleanUrl);
-      }
-    }
-
-    // 5) Wenn User eingeloggt + Einladung geladen → Artist mit User verknüpfen
-    async function linkArtistToUserIfLoggedIn() {
-      const {  userData, error: userError } = await client.auth.getUser();
-      console.log('StageLogin getUser:', userData, userError);  // NEU
-      const user = userData?.user || null;
-
-      if (userError) {
-        console.error(userError);
-      }
-      if (!user || !invitedArtist) return;
-
-      setStatus('Verbinde deine Stage‑Einladung mit deinem Account …');
-      googleStageButton.disabled = true;
-
-      const { error: updateError } = await client
-        .from('artists')
-        .update({
-          user_id: user.id,
-          invite_token_used: true
-        })
-        .eq('id', invitedArtist.id);
-
-      if (updateError) {
-        console.error(updateError);
-        setStatus('Konnte Artist nicht mit deinem Account verbinden.');
-        googleStageButton.disabled = false;
-        return;
-      }
-
-      setStatus('Claim erfolgreich. Du wirst zu deiner Stage‑Karte weitergeleitet …');
-
-      setTimeout(() => {
-        window.location.href = BASE_URL + 'StageFormular.html';
-      }, 1200);
-    }
-
-    // Init
     (async () => {
       const token = getInviteTokenFromUrl();
-      await handleAuthFromHash();
       await loadArtistFromToken(token);
-      await linkArtistToUserIfLoggedIn();
     })();
   </script>
 </body>
