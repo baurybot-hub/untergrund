@@ -384,32 +384,32 @@
     currentUser = user;
 
     const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
+const token = params.get("token");
 
-  // 2) Wenn token in URL: einmalig claimen -> user_id setzen, invite_token_used = true
-  if (token) {
-    console.log("Claim try", token, user.id);  // LOG 1
+if (token) {
+  console.log("Claim try", token, user.id);
 
-    const { data, error: claimError } = await client
-      .from("artists")
-      .update({
-        user_id: user.id,
-        invite_token_used: true
-      })
-      .eq("invite_token", token)
-      .select("id, user_id, invite_token_used");  // damit wir sehen, was zurückkommt
+  const { data, error: claimError } = await client
+    .from("artists")
+    .update({
+      user_id: user.id,
+      invite_token_used: true
+    })
+    .eq("id", 1)  // TEST: direkt Doktor Eule ansteuern
+    .select("id, user_id, invite_token_used");
 
-    console.log("Claim result", { data, claimError });  // LOG 2
+  console.log("Claim result", { data, claimError });
 
-    if (claimError) {
-      console.error("Invite-Claim-Error:", claimError);
-      setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
-      saveButton.disabled = true;
-      previewButton.disabled = true;
-      deletePhotoButton.disabled = true;
-      return;
-    }
+  if (claimError) {
+    console.error("Invite-Claim-Error:", claimError);
+    setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
   }
+}
+
 
 
   // 3) Danach IMMER über user_id laden (egal ob vorher URL da war oder nicht)
