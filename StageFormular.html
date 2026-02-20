@@ -373,48 +373,44 @@
   }
 
   async function loadArtist() {
-    const user = await getCurrentUser();
-    if (!user) {
-      setStatus("Bitte melde dich zuerst mit deinem UnterGrund-Account an.", "error");
-      saveButton.disabled = true;
-      previewButton.disabled = true;
-      deletePhotoButton.disabled = true;
-      return;
-    }
-    currentUser = user;
-
-    const params = new URLSearchParams(window.location.search);
-const token = params.get("token");
-
-if (token) {
-  console.log("Claim TRY", { token, userId: user.id });
-
-  const { data, error: claimError } = await client
-    .from("artists")
-    .update({
-      user_id: user.id,
-      invite_token_used: true
-    })
-    .eq("id", 1)                     // HARDCODE: Doktor Eule
-    .select("id, user_id, invite_token_used");
-
-  console.log("Claim RESULT", { data, claimError });
-}
-
-
-  if (claimError) {
-    console.error("Invite-Claim-Error:", claimError);
-    setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
+  const user = await getCurrentUser();
+  if (!user) {
+    setStatus("Bitte melde dich zuerst mit deinem UnterGrund-Account an.", "error");
     saveButton.disabled = true;
     previewButton.disabled = true;
     deletePhotoButton.disabled = true;
     return;
   }
-}
+  currentUser = user;
 
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
 
+  if (token) {
+    console.log("Claim TRY", { token, userId: user.id });
 
-  // 3) Danach IMMER über user_id laden (egal ob vorher URL da war oder nicht)
+    const {  claimData, error: claimError } = await client
+      .from("artists")
+      .update({
+        user_id: user.id,
+        invite_token_used: true
+      })
+      .eq("id", 1) // Test: Doktor Eule, später wieder invite_token
+      .select("id, user_id, invite_token_used");
+
+    console.log("Claim RESULT", { claimData, claimError });
+
+    if (claimError) {
+      console.error("Invite-Claim-Error:", claimError);
+      setStatus("Stage-Einladung konnte nicht verbunden werden. Bitte melde dich bei UnterGrund.", "error");
+      saveButton.disabled = true;
+      previewButton.disabled = true;
+      deletePhotoButton.disabled = true;
+      return;
+    }
+  }
+
+  // Danach IMMER über user_id laden
   const { data, error } = await client
     .from("artists")
     .select(`
@@ -429,44 +425,44 @@ if (token) {
     .limit(1)
     .single();
 
-
-    if (error || !data) {
-      console.error(error);
-      setStatus("Kein Artist mit deinem Account verknüpft.", "error");
-      saveButton.disabled = true;
-      previewButton.disabled = true;
-      deletePhotoButton.disabled = true;
-      return;
-    }
-
-    console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
-
-    if (!data.stage_unlocked) {
-      setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
-      saveButton.disabled = true;
-      previewButton.disabled = true;
-      deletePhotoButton.disabled = true;
-      return;
-    }
-
-    currentArtistId = data.id;
-    currentPhotoPath = data.stage_photo_path || null;
-
-    artistNameDisplay.textContent = "Angemeldet als: " + (data.name || "Unbekannter Artist");
-    musicConnectionEl.value = data.stage_music_connection || "";
-    ugMessageEl.value = data.stage_ug_message || "";
-    soundEl.value = data.stage_sound || "";
-    specialSkillEl.value = data.stage_special_skill || "";
-    activeSinceEl.value = data.stage_active_since || "";
-    collab1El.value = data.stage_collab_1 || "";
-    collab2El.value = data.stage_collab_2 || "";
-    collab3El.value = data.stage_collab_3 || "";
-    contactEl.value = data.stage_contact || "";
-    paletteEl.value = data.stage_palette || "neon";
-
-    updateCounters();
-    setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
+  if (error || !data) {
+    console.error(error);
+    setStatus("Kein Artist mit deinem Account verknüpft.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
   }
+
+  console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
+
+  if (!data.stage_unlocked) {
+    setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
+    saveButton.disabled = true;
+    previewButton.disabled = true;
+    deletePhotoButton.disabled = true;
+    return;
+  }
+
+  currentArtistId = data.id;
+  currentPhotoPath = data.stage_photo_path || null;
+
+  artistNameDisplay.textContent = "Angemeldet als: " + (data.name || "Unbekannter Artist");
+  musicConnectionEl.value = data.stage_music_connection || "";
+  ugMessageEl.value = data.stage_ug_message || "";
+  soundEl.value = data.stage_sound || "";
+  specialSkillEl.value = data.stage_special_skill || "";
+  activeSinceEl.value = data.stage_active_since || "";
+  collab1El.value = data.stage_collab_1 || "";
+  collab2El.value = data.stage_collab_2 || "";
+  collab3El.value = data.stage_collab_3 || "";
+  contactEl.value = data.stage_contact || "";
+  paletteEl.value = data.stage_palette || "neon";
+
+  updateCounters();
+  setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
+}
+
 
   saveButton.addEventListener("click", async () => {
     if (!currentArtistId || !currentUser) {
