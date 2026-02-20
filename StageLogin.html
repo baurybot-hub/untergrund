@@ -187,17 +187,20 @@
     }
 
     function loginWithGoogleForStage() {
-      if (!invitedArtist) {
-        setStatus('Keine gültige Einladung geladen.');
-        return;
-      }
+  if (!invitedArtist) {
+    setStatus('Keine gültige Einladung geladen.');
+    return;
+  }
 
-      const target = BASE_URL + 'Login.html'
-        + '?from=stage_claim'
-        + '&artist_id=' + encodeURIComponent(invitedArtist.id);
+  const token = getInviteTokenFromUrl();
 
-      window.location.href = target;
-    }
+  const target = BASE_URL + 'Login.html'
+    + '?from=stage_claim'
+    + '&token=' + encodeURIComponent(token);
+
+  window.location.href = target;
+}
+
 
     googleStageButton.addEventListener('click', loginWithGoogleForStage);
 
