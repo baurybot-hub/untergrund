@@ -389,16 +389,17 @@
   if (token) {
     console.log("Claim TRY", { token, userId: user.id });
 
-    const {  claimData, error: claimError } = await client
-      .from("artists")
-      .update({
-        user_id: user.id,
-        invite_token_used: true
-      })
-      .eq("id", 1) // Test: Doktor Eule, später wieder invite_token
-      .select("id, user_id, invite_token_used");
+    console.log('Claim TRY', { token, userId });
 
-    console.log("Claim RESULT", { claimData, claimError });
+const {  claimData, error: claimError } = await client
+  .from('artists')
+  .select('id, user_id, invite_token_used, invite_token')
+  .eq('invite_token', token)
+  .or('invite_token_used.is.null,invite_token_used.eq.false')
+  .limit(1);
+
+console.log('Claim RESULT', { claimData, claimError });
+
 
     if (claimError) {
       console.error("Invite-Claim-Error:", claimError);
