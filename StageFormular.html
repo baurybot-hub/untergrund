@@ -364,7 +364,7 @@
     specialSkillCounterEl.textContent = specialSkillEl.value.length + " / 75";
   }
 
-    async function loadArtist() {
+      async function loadArtist() {
     const user = await getCurrentUser();
     if (!user) {
       setStatus("Bitte melde dich zuerst mit deinem UnterGrund-Account an.", "error");
@@ -374,9 +374,48 @@
       return;
     }
 
-    const artistId = getArtistIdFromSessionOrUrl();
+    const params = new URLSearchParams(window.location.search);
+    const urlArtistId = params.get("artist_id");
+    let artistId = urlArtistId || null;
+
+    // 1) Wenn artist_id in der URL: einmaligen Claim versuchen
+    if (urlArtistId) {
+      const { error: claimError } = await client
+        .from("artists")
+        .update({
+          user_id: user.id,
+          invite_token_used: true
+        })
+        .eq("id", urlArtistId);
+
+      if (claimError) {
+        console.error("Stage-Claim-Error:", claimError);
+        // Wir versuchen trotzdem, den Artist zu laden, zeigen aber Hinweis
+        setStatus("Deine Stage-Einladung konnte nicht sauber verbunden werden. Bitte melde dich bei UnterGrund, wenn das öfter passiert.", "error");
+      }
+    }
+
+    // 2) Wenn kein artist_id in der URL (oder Claim fehlgeschlagen): Artist über user_id suchen
     if (!artistId) {
-      setStatus("Kein gültiger Stage‑Zugang gefunden. Bitte über deine Einladung einsteigen.", "error");
+      const { data: artists, error: loadByUserError } = await client
+        .from("artists")
+        .select("id")
+        .eq("user_id", user.id)
+        .limit(1);
+
+      if (loadByUserError || !artists || !artists[0]) {
+        setStatus("Kein Artist mit deinem Account verknüpft.", "error");
+        saveButton.disabled = true;
+        previewButton.disabled = true;
+        deletePhotoButton.disabled = true;
+        return;
+      }
+
+      artistId = artists[0].id;
+    }
+
+    if (!artistId) {
+      setStatus("Kein gültiger Stage‑Zugang gefunden.", "error");
       saveButton.disabled = true;
       previewButton.disabled = true;
       deletePhotoButton.disabled = true;
