@@ -383,48 +383,6 @@
   }
   currentUser = user;
 
-        const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
-
-  if (token) {
-    const userId = user.id;
-    console.log("Claim TRY", { token, userId });
-
-    const {  claimRows, error: claimError } = await client
-      .from("artists")
-      .select("id, user_id, invite_token_used, invite_token")
-      .eq("invite_token", token)
-      .or("invite_token_used.is.null,invite_token_used.eq.false")
-      .limit(1);
-
-    const claimData = claimRows && claimRows[0] ? claimRows[0] : null;
-    console.log("Claim RESULT", { claimData, claimError });
-
-    if (claimError) {
-      console.error("Invite-Claim-Select-Error:", claimError);
-    } else if (claimData) {
-      const { error: updateError } = await client
-        .from("artists")
-        .update({
-          user_id: userId,
-          invite_token_used: true,
-        })
-        .eq("id", claimData.id);
-
-      if (updateError) {
-        console.error("Invite-Claim-Update-Error:", updateError);
-      } else {
-        console.log("Invite erfolgreich mit Account verknüpft.");
-      }
-    } else {
-      console.warn("Keine passende Einladung gefunden oder schon benutzt.");
-    }
-  }
-
-
-
-
-  // Danach IMMER über user_id laden
   const { data, error } = await client
     .from("artists")
     .select(`
@@ -436,10 +394,11 @@
       stage_contact, stage_palette
     `)
     .eq("user_id", user.id)
-    .limit(1)
-    .single();
+    .limit(1);
 
-  if (error || !data) {
+  const artist = data && data[0] ? data[0] : null;
+
+  if (error || !artist) {
     console.error(error);
     setStatus("Kein Artist mit deinem Account verknüpft.", "error");
     saveButton.disabled = true;
@@ -448,9 +407,7 @@
     return;
   }
 
-  console.log("Loaded artist", data.id, "stage_unlocked:", data.stage_unlocked);
-
-  if (!data.stage_unlocked) {
+  if (!artist.stage_unlocked) {
     setStatus("Dieser Artist ist noch nicht für die Stage freigeschaltet.", "error");
     saveButton.disabled = true;
     previewButton.disabled = true;
@@ -458,24 +415,25 @@
     return;
   }
 
-  currentArtistId = data.id;
-  currentPhotoPath = data.stage_photo_path || null;
+  currentArtistId = artist.id;
+  currentPhotoPath = artist.stage_photo_path || null;
 
-  artistNameDisplay.textContent = "Angemeldet als: " + (data.name || "Unbekannter Artist");
-  musicConnectionEl.value = data.stage_music_connection || "";
-  ugMessageEl.value = data.stage_ug_message || "";
-  soundEl.value = data.stage_sound || "";
-  specialSkillEl.value = data.stage_special_skill || "";
-  activeSinceEl.value = data.stage_active_since || "";
-  collab1El.value = data.stage_collab_1 || "";
-  collab2El.value = data.stage_collab_2 || "";
-  collab3El.value = data.stage_collab_3 || "";
-  contactEl.value = data.stage_contact || "";
-  paletteEl.value = data.stage_palette || "neon";
+  artistNameDisplay.textContent = "Angemeldet als: " + (artist.name || "Unbekannter Artist");
+  musicConnectionEl.value = artist.stage_music_connection || "";
+  ugMessageEl.value = artist.stage_ug_message || "";
+  soundEl.value = artist.stage_sound || "";
+  specialSkillEl.value = artist.stage_special_skill || "";
+  activeSinceEl.value = artist.stage_active_since || "";
+  collab1El.value = artist.stage_collab_1 || "";
+  collab2El.value = artist.stage_collab_2 || "";
+  collab3El.value = artist.stage_collab_3 || "";
+  contactEl.value = artist.stage_contact || "";
+  paletteEl.value = artist.stage_palette || "neon";
 
   updateCounters();
   setStatus("Stage‑Karte geladen. Du kannst deine Angaben bearbeiten.", "success");
 }
+
 
 
   saveButton.addEventListener("click", async () => {
