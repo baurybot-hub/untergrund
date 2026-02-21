@@ -383,6 +383,39 @@
   }
   currentUser = user;
 
+  // 1) Token aus URL lesen
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get("token");
+
+  // 2) Wenn Token da ist: Artist damit claimen (user_id setzen)
+  if (token) {
+    console.log("STAGE FORM CLAIM TRY", { token, userId: user.id });
+
+    const {  tokenRows, error: tokenSelectError } = await client
+      .from("artists")
+      .select("id, user_id, invite_token_used, invite_token")
+      .eq("invite_token", token)
+      .limit(1);
+
+    const tokenArtist = tokenRows && tokenRows[0] ? tokenRows[0] : null;
+    console.log("STAGE FORM CLAIM ROW", { tokenRows, tokenArtist, tokenSelectError });
+
+    if (!tokenSelectError && tokenArtist) {
+      const { error: tokenUpdateError } = await client
+        .from("artists")
+        .update({
+          user_id: user.id,
+          invite_token_used: true,
+        })
+        .eq("id", tokenArtist.id);
+
+      console.log("STAGE FORM CLAIM UPDATE", { tokenUpdateError });
+    } else {
+      console.warn("STAGE FORM: kein Artist zu diesem Token gefunden oder Fehler beim Select.");
+    }
+  }
+
+  // 3) Danach IMMER über user_id laden (wie beim manuellen user_id-Setzen)
   const { data, error } = await client
     .from("artists")
     .select(`
@@ -399,7 +432,7 @@
   const artist = data && data[0] ? data[0] : null;
 
   if (error || !artist) {
-    console.error(error);
+    console.error("STAGE FORM LOAD ERROR", error);
     setStatus("Kein Artist mit deinem Account verknüpft.", "error");
     saveButton.disabled = true;
     previewButton.disabled = true;
