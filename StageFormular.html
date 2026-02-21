@@ -304,7 +304,6 @@
 
 <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
 <script>
-  console.log("STAGE FORMULAR SCRIPT LOADED");
 
   const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
   const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
@@ -389,39 +388,39 @@
   const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
 
-  // 2) Wenn Token da ist: Artist damit claimen (user_id setzen)
-  // 2) Wenn Token da ist: Artist damit claimen (user_id setzen)
+ 
+
+      // 2) Wenn Token da ist: Artist damit claimen (user_id setzen)
   if (token) {
-  console.log("STAGE FORM CLAIM TRY", { token, userId: user.id });
+    console.log("STAGE FORM CLAIM TRY", { token, userId: user.id });
 
-  const result = await client
-    .from("artists")
-    .select("*")
-    .eq("invite_token", token);
-
-  console.log("STAGE FORM RAW RESULT", result);
-}
-
-
-  if (tokenSelectError) {
-    console.error("STAGE FORM TOKEN SELECT ERROR", tokenSelectError);
-  } else if (!tokenRows || tokenRows.length === 0) {
-    console.warn("STAGE FORM: kein Artist mit diesem Token gefunden.");
-  } else {
-    const tokenArtist = tokenRows[0];
-    console.log("STAGE FORM CLAIM ARTIST", tokenArtist);
-
-    const { error: tokenUpdateError } = await client
+    const {  tokenRows, error: tokenSelectError } = await client
       .from("artists")
-      .update({
-        user_id: user.id,
-        invite_token_used: true,
-      })
-      .eq("id", tokenArtist.id);
+      .select("*")
+      .eq("invite_token", token);
 
-    console.log("STAGE FORM CLAIM UPDATE", { tokenUpdateError });
+    console.log("STAGE FORM RAW DATA", { tokenRows, tokenSelectError });
+
+    if (tokenSelectError) {
+      console.error("STAGE FORM TOKEN SELECT ERROR", tokenSelectError);
+    } else if (!tokenRows || tokenRows.length === 0) {
+      console.warn("STAGE FORM: kein Artist mit diesem Token gefunden.");
+    } else {
+      const tokenArtist = tokenRows[0];
+      console.log("STAGE FORM CLAIM ARTIST", tokenArtist);
+
+      const { error: tokenUpdateError } = await client
+        .from("artists")
+        .update({
+          user_id: user.id,
+          invite_token_used: true,
+        })
+        .eq("id", tokenArtist.id);
+
+      console.log("STAGE FORM CLAIM UPDATE", { tokenUpdateError });
+    }
   }
-}
+
 
 
   // 3) Danach IMMER über user_id laden (wie beim manuellen user_id-Setzen)
