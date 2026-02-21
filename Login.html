@@ -201,7 +201,7 @@
       const session = data?.session || null;
       if (session) {
         await claimStageInviteIfNeeded(session);
-       // window.location.replace(getNextUrl()); //
+       // window.location.replace(getNextUrl());
       }
     }
 
@@ -209,7 +209,7 @@
       if (event === 'SIGNED_IN' && session) {
         (async () => {
           await claimStageInviteIfNeeded(session);
-        //  window.location.replace(getNextUrl()); //
+        //  window.location.replace(getNextUrl());
         })();
       }
     });
@@ -217,7 +217,7 @@
     (async () => {
       setHintText();
       await handleAuthFromHash();
-      await redirectIfLoggedIn();
+     // await redirectIfLoggedIn();
     })();
   </script>
 </body>
