@@ -82,36 +82,36 @@
   );
 
   function getNextUrl() {
-  const params = new URLSearchParams(window.location.search);
-  const from = params.get('from');
-  const artistId = params.get('artist_id');
-  const token = params.get('token');
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('from');
+    const artistId = params.get('artist_id');
+    const token = params.get('token');
 
-  if (from === 'stage_claim' && token) {
-    return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
+    if (from === 'stage_claim' && token) {
+      // Token wird nur noch zur Info weitergegeben, Formular lädt über user_id
+      return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
+    }
+
+    if (from === 'collection') {
+      return BASE_URL + 'MeineSammlung.html';
+    }
+
+    if (from === 'stage' && artistId) {
+      return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
+        artistId
+      )}&auto_collect=true`;
+    }
+
+    if (from === 'gate') {
+      return BASE_URL + 'Gate.html';
+    }
+
+    if (from === 'gate_album') {
+      return BASE_URL + 'GateAlbum.html';
+    }
+
+    return BASE_URL + 'index.html';
   }
-
-  if (from === 'collection') {
-    return BASE_URL + 'MeineSammlung.html';
-  }
-
-  if (from === 'stage' && artistId) {
-    return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
-      artistId
-    )}&auto_collect=true`;
-  }
-
-  if (from === 'gate') {
-    return BASE_URL + 'Gate.html';
-  }
-
-  if (from === 'gate_album') {
-    return BASE_URL + 'GateAlbum.html';
-  }
-
-  return BASE_URL + 'index.html';
-}
-
 
   function setHintText() {
     const params = new URLSearchParams(window.location.search);
@@ -156,17 +156,64 @@
     }
   }
 
+  // NEU: Invite-Claim nach Login
+  async function claimStageInviteIfNeeded() {
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('from');
+    const token = params.get('token');
+
+    if (from !== 'stage_claim' || !token) return;
+
+    const {  userData, error: userError } = await client.auth.getUser();
+    const user = userData?.user;
+    if (userError || !user) {
+      console.error('STAGE CLAIM user error', userError);
+      return;
+    }
+
+    const userId = user.id;
+    console.log('STAGE CLAIM TRY', { token, userId });
+
+    const {  rows, error: selectError } = await client
+      .from('artists')
+      .select('id, user_id, invite_token_used, invite_token')
+      .eq('invite_token', token)
+      .limit(1);
+
+    const artist = rows && rows[0] ? rows[0] : null;
+    console.log('STAGE CLAIM ROW', { artist, selectError });
+
+    if (selectError || !artist) {
+      console.warn('STAGE CLAIM no matching artist for token');
+      return;
+    }
+
+    const { error: updateError } = await client
+      .from('artists')
+      .update({
+        user_id: userId,
+        invite_token_used: true,
+      })
+      .eq('id', artist.id);
+
+    console.log('STAGE CLAIM UPDATE', { updateError });
+  }
+
   async function redirectIfLoggedIn() {
     const { data } = await client.auth.getSession();
     const session = data?.session || null;
     if (session) {
+      await claimStageInviteIfNeeded();      // NEU
       window.location.replace(getNextUrl());
     }
   }
 
   client.auth.onAuthStateChange((event, session) => {
     if (event === 'SIGNED_IN' && session) {
-      window.location.replace(getNextUrl());
+      (async () => {
+        await claimStageInviteIfNeeded();    // NEU
+        window.location.replace(getNextUrl());
+      })();
     }
   });
 
@@ -176,5 +223,6 @@
     await redirectIfLoggedIn();
   })();
 </script>
+
 </body>
 </html>
