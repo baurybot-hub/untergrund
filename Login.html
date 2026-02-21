@@ -157,44 +157,44 @@
 
     // Claim-Funktion, nutzt die Session direkt
     async function claimStageInviteIfNeeded(session) {
-      const params = new URLSearchParams(window.location.search);
-      const from = params.get('from');
-      const token = params.get('token');
+  const params = new URLSearchParams(window.location.search);
+  const from = params.get('from');
+  const token = params.get('token');
 
-      if (from !== 'stage_claim' || !token) return;
-      if (!session || !session.user) {
-        console.error('STAGE CLAIM: no session user');
-        return;
-      }
+  if (from !== 'stage_claim' || !token) return;
+  if (!session || !session.user) {
+    console.error('STAGE CLAIM: no session user');
+    return;
+  }
 
-      const userId = session.user.id;
-      console.log('STAGE CLAIM TRY', { token, userId });
+  const userId = session.user.id;
+  console.log('STAGE CLAIM TRY', { token, userId });
 
-      const {  rows, error: selectError } = await client
-        .from('artists')
-        .select('id, user_id, invite_token_used, invite_token')
-        .eq('invite_token', token)
-        .limit(1);
+  const {  rows, error: selectError } = await client
+    .from('artists')
+    .select('id, user_id, invite_token_used, invite_token')
+    .eq('invite_token', token)
+    .limit(1);
 
-      const artist = rows && rows[0] ? rows[0] : null;
-      console.log('STAGE CLAIM ROW', { rows, artist, selectError });
+  const artist = rows && rows[0] ? rows[0] : null;
+  console.log('STAGE CLAIM ROW', { rows, artist, selectError });
 
+  if (selectError || !artist) {
+    console.warn('STAGE CLAIM no matching artist for token');
+    return;
+  }
 
-      if (selectError || !artist) {
-        console.warn('STAGE CLAIM no matching artist for token');
-        return;
-      }
+  const { error: updateError } = await client
+    .from('artists')
+    .update({
+      user_id: userId,
+      invite_token_used: true,
+    })
+    .eq('id', artist.id);
 
-      const { error: updateError } = await client
-        .from('artists')
-        .update({
-          user_id: userId,
-          invite_token_used: true,
-        })
-        .eq('id', artist.id);
+  console.log('STAGE CLAIM UPDATE', { updateError });
+}
 
-      console.log('STAGE CLAIM UPDATE', { updateError });
-    }
 
     async function redirectIfLoggedIn() {
       const { data } = await client.auth.getSession();
