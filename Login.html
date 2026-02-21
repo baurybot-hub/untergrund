@@ -69,156 +69,113 @@
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
-  <script>
-    const { createClient } = supabase;
+<script>
+  const { createClient } = supabase;
 
-    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
-    const CURRENT_SEARCH = window.location.search || '';
-    const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
+  const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
+  const CURRENT_SEARCH = window.location.search || '';
+  const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
 
-    const client = createClient(
-      'https://tyflhzwrwzfakwedipig.supabase.co',
-      'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
-    );
+  const client = createClient(
+    'https://tyflhzwrwzfakwedipig.supabase.co',
+    'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
+  );
 
-    function getNextUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const from = params.get('from');
-      const artistId = params.get('artist_id');
-      const token = params.get('token');
+  function getNextUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('from');
+    const artistId = params.get('artist_id');
+    const token = params.get('token');
 
-      if (from === 'stage_claim' && token) {
-        return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
-      }
-
-      if (from === 'collection') {
-        return BASE_URL + 'MeineSammlung.html';
-      }
-
-      if (from === 'stage' && artistId) {
-        return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
-          artistId
-        )}&auto_collect=true`;
-      }
-
-      if (from === 'gate') {
-        return BASE_URL + 'Gate.html';
-      }
-
-      if (from === 'gate_album') {
-        return BASE_URL + 'GateAlbum.html';
-      }
-
-      return BASE_URL + 'index.html';
+    if (from === 'stage_claim' && token) {
+      // nur noch durchreichen – Claim passiert im StageFormular
+      return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
     }
 
-    function setHintText() {
-      const params = new URLSearchParams(window.location.search);
-      const from = params.get('from');
-      const hintEl = document.getElementById('login-hint');
-
-      if (from === 'collection') {
-        hintEl.textContent = 'Melde dich an, um deine gesammelten Stage-Karten zu sehen.';
-      } else if (from === 'stage') {
-        hintEl.textContent = 'Melde dich an, um diese Stage-Karte zu deiner Sammlung hinzuzufügen.';
-      } else if (from === 'gate') {
-        hintEl.textContent = 'Melde dich an, um das Gate zu öffnen und eine Gate-Karte zu erstellen.';
-      } else if (from === 'gate_album') {
-        hintEl.textContent = 'Melde dich an, um dein Gate-Album zu öffnen.';
-      } else if (from === 'stage_claim') {
-        hintEl.textContent = 'Melde dich mit deinem UnterGrund-Account an, um deine Stage-Einladung zu claimen.';
-      } else {
-        hintEl.textContent = '';
-      }
+    if (from === 'collection') {
+      return BASE_URL + 'MeineSammlung.html';
     }
 
-    async function loginWithProvider(provider) {
-      const { error } = await client.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: REDIRECT
-        }
-      });
-      if (error) {
-        console.error(provider + ' login error:', error);
-      }
+    if (from === 'stage' && artistId) {
+      return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
+        artistId
+      )}&auto_collect=true`;
     }
 
-    async function handleAuthFromHash() {
-      if (window.location.hash.includes('access_token')) {
-        await client.auth.getUser();
-        const cleanUrl =
-          window.location.origin +
-          window.location.pathname +
-          window.location.search;
-        history.replaceState(null, '', cleanUrl);
-      }
+    if (from === 'gate') {
+      return BASE_URL + 'Gate.html';
     }
 
-    // Claim-Funktion, nutzt die Session direkt
-    async function claimStageInviteIfNeeded(session) {
-  const params = new URLSearchParams(window.location.search);
-  const from = params.get('from');
-  const token = params.get('token');
+    if (from === 'gate_album') {
+      return BASE_URL + 'GateAlbum.html';
+    }
 
-  if (from !== 'stage_claim' || !token) return;
-  if (!session || !session.user) {
-    console.error('STAGE CLAIM: no session user');
-    return;
+    return BASE_URL + 'index.html';
   }
 
-  const userId = session.user.id;
-  console.log('STAGE CLAIM TRY', { token, userId });
+  function setHintText() {
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('from');
+    const hintEl = document.getElementById('login-hint');
 
-  const {  rows, error: selectError } = await client
-    .from('artists')
-    .select('id, user_id, invite_token_used, invite_token')
-    .eq('invite_token', token)
-    .limit(1);
-
-  const artist = rows && rows[0] ? rows[0] : null;
-  console.log('STAGE CLAIM ROW', { rows, artist, selectError });
-
-  if (selectError || !artist) {
-    console.warn('STAGE CLAIM no matching artist for token');
-    return;
+    if (from === 'collection') {
+      hintEl.textContent = 'Melde dich an, um deine gesammelten Stage-Karten zu sehen.';
+    } else if (from === 'stage') {
+      hintEl.textContent = 'Melde dich an, um diese Stage-Karte zu deiner Sammlung hinzuzufügen.';
+    } else if (from === 'gate') {
+      hintEl.textContent = 'Melde dich an, um das Gate zu öffnen und eine Gate-Karte zu erstellen.';
+    } else if (from === 'gate_album') {
+      hintEl.textContent = 'Melde dich an, um dein Gate-Album zu öffnen.';
+    } else if (from === 'stage_claim') {
+      hintEl.textContent = 'Melde dich mit deinem UnterGrund-Account an, um deine Stage-Einladung zu claimen.';
+    } else {
+      hintEl.textContent = '';
+    }
   }
 
-  const { error: updateError } = await client
-    .from('artists')
-    .update({
-      user_id: userId,
-      invite_token_used: true,
-    })
-    .eq('id', artist.id);
-
-  console.log('STAGE CLAIM UPDATE', { updateError });
-}
-
-
-    async function redirectIfLoggedIn() {
-      const { data } = await client.auth.getSession();
-      const session = data?.session || null;
-      if (session) {
-        await claimStageInviteIfNeeded(session);
-       // window.location.replace(getNextUrl());
-      }
-    }
-
-    client.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        (async () => {
-          await claimStageInviteIfNeeded(session);
-        //  window.location.replace(getNextUrl());
-        })();
+  async function loginWithProvider(provider) {
+    const { error } = await client.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: REDIRECT
       }
     });
+    if (error) {
+      console.error(provider + ' login error:', error);
+    }
+  }
 
-    (async () => {
-      setHintText();
-      await handleAuthFromHash();
-     // await redirectIfLoggedIn();
-    })();
-  </script>
+  async function handleAuthFromHash() {
+    if (window.location.hash.includes('access_token')) {
+      await client.auth.getUser();
+      const cleanUrl =
+        window.location.origin +
+        window.location.pathname +
+        window.location.search;
+      history.replaceState(null, '', cleanUrl);
+    }
+  }
+
+  async function redirectIfLoggedIn() {
+    const { data } = await client.auth.getSession();
+    const session = data?.session || null;
+    if (session) {
+      window.location.replace(getNextUrl());
+    }
+  }
+
+  client.auth.onAuthStateChange((event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      window.location.replace(getNextUrl());
+    }
+  });
+
+  (async () => {
+    setHintText();
+    await handleAuthFromHash();
+    await redirectIfLoggedIn();
+  })();
+</script>
+
 </body>
 </html>
