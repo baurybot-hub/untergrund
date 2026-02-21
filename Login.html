@@ -177,7 +177,8 @@
         .limit(1);
 
       const artist = rows && rows[0] ? rows[0] : null;
-      console.log('STAGE CLAIM ROW', { artist, selectError });
+      console.log('STAGE CLAIM ROW', { rows, artist, selectError });
+
 
       if (selectError || !artist) {
         console.warn('STAGE CLAIM no matching artist for token');
