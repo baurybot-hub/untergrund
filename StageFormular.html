@@ -394,10 +394,11 @@
   if (token) {
   console.log("STAGE FORM CLAIM TRY", { token, userId: user.id });
 
-  const {  tokenRows, error: tokenSelectError } = await client
-    .from("artists")
-    .select("*")
-    .eq("invite_token", token);
+  const { data: tokenRows, error: tokenSelectError } = await client
+  .from("artists")
+  .select("*")
+  .eq("invite_token", token);
+
 
   console.log("STAGE FORM RAW DATA", { tokenRows, tokenSelectError });
 
