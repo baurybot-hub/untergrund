@@ -240,36 +240,40 @@ input:focus {
 </video>
 
   <div class="app">
-    <header>
-  <div class="logo-text">UnterGrund</div>
-  <div style="display:flex; gap:8px; align-items:center;">
+    <header style="flex-direction:column; align-items:stretch; gap:0; padding:0;">
 
-    <!-- ✅ ARTIST-BANNER: nur sichtbar wenn eingeloggt + Artist verknüpft -->
-    <div id="artist-banner"
-         style="display:none; align-items:center; gap:8px;
-                background:rgba(28,255,136,0.08);
-                border:1px solid rgba(28,255,136,0.35);
-                border-radius:999px; padding:5px 14px 5px 10px;">
-      <span style="font-size:0.7rem; color:#9effc7; white-space:nowrap;">
-        🎤 <strong id="artist-banner-name" style="color:#1cff88;"></strong>
-      </span>
-      <a href="StageFormular.html"
-         style="font-size:0.72rem; color:#9effc7; text-decoration:none;
-                background:rgba(28,255,136,0.15); border-radius:999px;
-                padding:3px 10px; border:1px solid rgba(28,255,136,0.3);
-                white-space:nowrap;">
-        Stage&nbsp;✏️
-      </a>
+  <!-- Zeile 1: Logo + Buttons -->
+  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px;">
+    <div class="logo-text">UnterGrund</div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button id="collection-btn" class="pill-btn" style="background:#0b1120;color:#e5e7eb;">
+        📚 Meine Sammlung
+      </button>
+      <button id="login-btn" class="pill-btn">
+        Anmelden
+      </button>
     </div>
-
-    <button id="collection-btn" class="pill-btn" style="background:#0b1120;color:#e5e7eb;">
-      📚 Meine Sammlung
-    </button>
-    <button id="login-btn" class="pill-btn">
-      Anmelden
-    </button>
   </div>
+
+  <!-- Zeile 2: Artist-Banner (nur sichtbar wenn Artist eingeloggt) -->
+  <div id="artist-banner"
+       style="display:none; align-items:center; justify-content:space-between;
+              padding:6px 14px 8px;
+              background:rgba(28,255,136,0.07);
+              border-top:1px solid rgba(28,255,136,0.15);">
+    <span style="font-size:0.78rem; color:#9effc7;">
+      🎤 Artist-Bereich &nbsp;·&nbsp; <strong id="artist-banner-name" style="color:#1cff88;"></strong>
+    </span>
+    <a href="StageFormular.html"
+       style="font-size:0.75rem; color:#1cff88; text-decoration:none;
+              background:rgba(28,255,136,0.12); border-radius:999px;
+              padding:4px 12px; border:1px solid rgba(28,255,136,0.3);">
+      Stage ✏️
+    </a>
+  </div>
+
 </header>
+
 
 
     <div class="card">
