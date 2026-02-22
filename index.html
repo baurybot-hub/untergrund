@@ -1418,6 +1418,7 @@ input:focus {
         const {  { user } } = await client.auth.getUser();
         if (!user) return;
 
+
         const { data } = await client
           .from('artists')
           .select('name')
