@@ -241,16 +241,36 @@ input:focus {
 
   <div class="app">
     <header>
-      <div class="logo-text">UnterGrund</div>
-      <div style="display:flex; gap:8px;">
-        <button id="collection-btn" class="pill-btn" style="background:#0b1120;color:#e5e7eb;">
-          📚 Meine Sammlung
-        </button>
-        <button id="login-btn" class="pill-btn">
-          Anmelden
-        </button>
-      </div>
-    </header>
+  <div class="logo-text">UnterGrund</div>
+  <div style="display:flex; gap:8px; align-items:center;">
+
+    <!-- ✅ ARTIST-BANNER: nur sichtbar wenn eingeloggt + Artist verknüpft -->
+    <div id="artist-banner"
+         style="display:none; align-items:center; gap:8px;
+                background:rgba(28,255,136,0.08);
+                border:1px solid rgba(28,255,136,0.35);
+                border-radius:999px; padding:5px 14px 5px 10px;">
+      <span style="font-size:0.7rem; color:#9effc7; white-space:nowrap;">
+        🎤 <strong id="artist-banner-name" style="color:#1cff88;"></strong>
+      </span>
+      <a href="StageFormular.html"
+         style="font-size:0.72rem; color:#9effc7; text-decoration:none;
+                background:rgba(28,255,136,0.15); border-radius:999px;
+                padding:3px 10px; border:1px solid rgba(28,255,136,0.3);
+                white-space:nowrap;">
+        Stage&nbsp;✏️
+      </a>
+    </div>
+
+    <button id="collection-btn" class="pill-btn" style="background:#0b1120;color:#e5e7eb;">
+      📚 Meine Sammlung
+    </button>
+    <button id="login-btn" class="pill-btn">
+      Anmelden
+    </button>
+  </div>
+</header>
+
 
     <div class="card">
       <button class="pill-btn" style="width:100%;justify-content:center;margin-bottom:12px;background:#0b1120;color:#e5e7eb;" onclick="openSubmit()">
@@ -1393,6 +1413,28 @@ input:focus {
     
     window.addEventListener("load", () => {
       initApp();
+
+      // Artist-Banner im Header laden
+(async function initArtistBanner() {
+  const { { user } } = await client.auth.getUser();
+  if (!user) return;
+
+  const { data } = await client
+    .from('artists')
+    .select('name')
+    .eq('user_id', user.id)
+    .limit(1);
+
+  const artist = data && data[0];
+  if (!artist) return;
+
+  const banner = document.getElementById('artist-banner');
+  const nameEl = document.getElementById('artist-banner-name');
+  nameEl.textContent = artist.name;
+  banner.style.display = 'flex';
+})();
+
+      
     });
   </script>
 </body>
