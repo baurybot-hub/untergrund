@@ -1415,8 +1415,10 @@ input:focus {
       initApp();
 
       (async function() {
-        const {  { user } } = await client.auth.getUser();
-        if (!user) return;
+        const session = await client.auth.getSession();
+const user = session?.data?.session?.user;
+if (!user) return;
+
 
 
         const { data } = await client
