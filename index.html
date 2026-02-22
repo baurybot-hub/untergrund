@@ -1411,30 +1411,26 @@ input:focus {
       }
     }
     
-    window.addEventListener("load", () => {
+        window.addEventListener("load", () => {
       initApp();
 
-      // Artist-Banner im Header laden
-(async function initArtistBanner() {
-  const { { user } } = await client.auth.getUser();
-  if (!user) return;
+      (async function() {
+        const {  { user } } = await client.auth.getUser();
+        if (!user) return;
 
-  const { data } = await client
-    .from('artists')
-    .select('name')
-    .eq('user_id', user.id)
-    .limit(1);
+        const { data } = await client
+          .from('artists')
+          .select('name')
+          .eq('user_id', user.id)
+          .limit(1);
 
-  const artist = data && data[0];
-  if (!artist) return;
+        const artist = data && data[0];
+        if (!artist) return;
 
-  const banner = document.getElementById('artist-banner');
-  const nameEl = document.getElementById('artist-banner-name');
-  nameEl.textContent = artist.name;
-  banner.style.display = 'flex';
-})();
+        document.getElementById('artist-banner-name').textContent = artist.name;
+        document.getElementById('artist-banner').style.display = 'flex';
+      })();
 
-      
     });
   </script>
 </body>
