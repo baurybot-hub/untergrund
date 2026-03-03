@@ -26,156 +26,210 @@
       padding: 40px 30px;
       text-align: center;
     }
+    .brand {
+      font-size: 13px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #9effc7;
+      margin-bottom: 8px;
+    }
     h1 { font-size: 28px; margin: 0 0 8px; }
-    .subtitle { font-size: 14px; color: #c0c0c0; margin-bottom: 24px; }
+    .subtitle {
+      font-size: 14px;
+      color: #c0c0c0;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
     .hint {
       font-size: 12px;
       color: #9ca3af;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       min-height: 1.2em;
     }
-    .login-button {
+    .divider {
+      font-size: 12px;
+      color: #555;
+      margin: 4px 0 16px;
+    }
+
+    /* Google Button – offizielles Branding */
+    .google-btn {
       width: 100%;
-      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #fff;
+      color: #3c4043;
+      border: 1px solid #dadce0;
       border-radius: 12px;
-      padding: 14px 20px;
-      font-weight: 600;
+      padding: 13px 20px;
       font-size: 15px;
+      font-weight: 500;
+      font-family: 'Google Sans', system-ui, sans-serif;
       cursor: pointer;
       margin-bottom: 12px;
+      transition: box-shadow 0.2s, background 0.2s;
     }
-    .google { background: #4285F4; color: #fff; }
-    .spotify { background: #1DB954; color: #fff; }
+    .google-btn:hover {
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      background: #f8f9fa;
+    }
+    .google-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Spotify Button */
+    .spotify-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #1DB954;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .spotify-btn:hover {
+      background: #17a349;
+      box-shadow: 0 2px 10px rgba(29, 185, 84, 0.35);
+    }
+    .spotify-btn svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .legal {
+      font-size: 11px;
+      color: #555;
+      margin-top: 20px;
+      line-height: 1.5;
+    }
+    .legal a { color: #9effc7; text-decoration: none; }
   </style>
 </head>
 <body>
   <div class="login-container">
-    <div style="font-size:14px;letter-spacing:0.2em;text-transform:uppercase;color:#9effc7;margin-bottom:8px;">
-      🎴 UNTERGRUND
-    </div>
+    <div class="brand">🎴 UNTERGRUND</div>
     <h1>Deine Sammlung</h1>
     <div class="subtitle">
       Melde dich an, um Stage-Karten zu sammeln und dein persönliches Underground-Album aufzubauen.
     </div>
     <div id="login-hint" class="hint"></div>
 
-    <button class="login-button google" onclick="loginWithProvider('google')">
-      🔵 Mit Google anmelden
+    <!-- Google – offizielles SVG Logo -->
+    <button class="google-btn" onclick="loginWithProvider('google')">
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+      Mit Google anmelden
     </button>
 
-    <button class="login-button spotify" onclick="loginWithProvider('spotify')">
-      🎵 Mit Spotify anmelden
+    <div class="divider">oder</div>
+
+    <!-- Spotify – offizielles SVG Logo -->
+    <button class="spotify-btn" onclick="loginWithProvider('spotify')">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white">
+        <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+      </svg>
+      Mit Spotify anmelden
     </button>
+
+    <div class="legal">
+      Mit der Anmeldung stimmst du unseren
+      <a href="agb.html">AGB</a> und der
+      <a href="datenschutz.html">Datenschutzerklärung</a> zu.
+    </div>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
-<script>
-  const { createClient } = supabase;
+  <script>
+    const { createClient } = supabase;
 
-  const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
-  const CURRENT_SEARCH = window.location.search || '';
-  const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
+    const BASE_URL = 'https://baurybot-hub.github.io/untergrund/';
+    const CURRENT_SEARCH = window.location.search || '';
+    const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
 
-  const client = createClient(
-    'https://tyflhzwrwzfakwedipig.supabase.co',
-    'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
-  );
+    const client = createClient(
+      'https://tyflhzwrwzfakwedipig.supabase.co',
+      'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
+    );
 
-  function getNextUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const from = params.get('from');
-    const artistId = params.get('artist_id');
-    const token = params.get('token');
+    function getNextUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const from = params.get('from');
+      const artistId = params.get('artist_id');
+      const token = params.get('token');
 
-    if (from === 'stage_claim' && token) {
-      // nur noch durchreichen – Claim passiert im StageFormular
-      return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
-    }
-
-    if (from === 'collection') {
-      return BASE_URL + 'MeineSammlung.html';
-    }
-
-    if (from === 'stage' && artistId) {
-      return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(
-        artistId
-      )}&auto_collect=true`;
-    }
-
-    if (from === 'gate') {
-      return BASE_URL + 'Gate.html';
-    }
-
-    if (from === 'gate_album') {
-      return BASE_URL + 'GateAlbum.html';
-    }
-
-    return BASE_URL + 'index.html';
-  }
-
-  function setHintText() {
-    const params = new URLSearchParams(window.location.search);
-    const from = params.get('from');
-    const hintEl = document.getElementById('login-hint');
-
-    if (from === 'collection') {
-      hintEl.textContent = 'Melde dich an, um deine gesammelten Stage-Karten zu sehen.';
-    } else if (from === 'stage') {
-      hintEl.textContent = 'Melde dich an, um diese Stage-Karte zu deiner Sammlung hinzuzufügen.';
-    } else if (from === 'gate') {
-      hintEl.textContent = 'Melde dich an, um das Gate zu öffnen und eine Gate-Karte zu erstellen.';
-    } else if (from === 'gate_album') {
-      hintEl.textContent = 'Melde dich an, um dein Gate-Album zu öffnen.';
-    } else if (from === 'stage_claim') {
-      hintEl.textContent = 'Melde dich mit deinem UnterGrund-Account an, um deine Stage-Einladung zu claimen.';
-    } else {
-      hintEl.textContent = '';
-    }
-  }
-
-  async function loginWithProvider(provider) {
-    const { error } = await client.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: REDIRECT
+      if (from === 'stage_claim' && token) {
+        return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
       }
+      if (from === 'collection') return BASE_URL + 'MeineSammlung.html';
+      if (from === 'stage' && artistId) {
+        return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(artistId)}&auto_collect=true`;
+      }
+      if (from === 'gate') return BASE_URL + 'Gate.html';
+      if (from === 'gate_album') return BASE_URL + 'GateAlbum.html';
+      return BASE_URL + 'index.html';
+    }
+
+    function setHintText() {
+      const params = new URLSearchParams(window.location.search);
+      const from = params.get('from');
+      const hintEl = document.getElementById('login-hint');
+      const hints = {
+        collection: 'Melde dich an, um deine gesammelten Stage-Karten zu sehen.',
+        stage: 'Melde dich an, um diese Stage-Karte zu deiner Sammlung hinzuzufügen.',
+        gate: 'Melde dich an, um das Gate zu öffnen und eine Gate-Karte zu erstellen.',
+        gate_album: 'Melde dich an, um dein Gate-Album zu öffnen.',
+        stage_claim: 'Melde dich an, um deine Stage-Einladung zu claimen.'
+      };
+      hintEl.textContent = hints[from] || '';
+    }
+
+    async function loginWithProvider(provider) {
+      const { error } = await client.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: REDIRECT }
+      });
+      if (error) console.error(provider + ' login error:', error);
+    }
+
+    async function handleAuthFromHash() {
+      if (window.location.hash.includes('access_token')) {
+        await client.auth.getUser();
+        history.replaceState(null, '', window.location.origin + window.location.pathname + window.location.search);
+      }
+    }
+
+    async function redirectIfLoggedIn() {
+      const { data } = await client.auth.getSession();
+      if (data?.session) window.location.replace(getNextUrl());
+    }
+
+    client.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) window.location.replace(getNextUrl());
     });
-    if (error) {
-      console.error(provider + ' login error:', error);
-    }
-  }
 
-  async function handleAuthFromHash() {
-    if (window.location.hash.includes('access_token')) {
-      await client.auth.getUser();
-      const cleanUrl =
-        window.location.origin +
-        window.location.pathname +
-        window.location.search;
-      history.replaceState(null, '', cleanUrl);
-    }
-  }
-
-  async function redirectIfLoggedIn() {
-    const { data } = await client.auth.getSession();
-    const session = data?.session || null;
-    if (session) {
-      window.location.replace(getNextUrl());
-    }
-  }
-
-  client.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-      window.location.replace(getNextUrl());
-    }
-  });
-
-  (async () => {
-    setHintText();
-    await handleAuthFromHash();
-    await redirectIfLoggedIn();
-  })();
-</script>
-
+    (async () => {
+      setHintText();
+      await handleAuthFromHash();
+      await redirectIfLoggedIn();
+    })();
+  </script>
 </body>
 </html>
