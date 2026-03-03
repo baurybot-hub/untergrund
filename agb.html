@@ -22,52 +22,14 @@
       border: 1px solid rgba(28,255,136,0.35);
       padding: 40px 36px;
     }
-    .brand {
-      font-size: 13px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #9effc7;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 26px;
-      margin: 0 0 6px;
-    }
-    .updated {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 32px;
-    }
-    h2 {
-      font-size: 16px;
-      color: #1cff88;
-      margin: 32px 0 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    p, li {
-      font-size: 14px;
-      color: #c0c0c0;
-      line-height: 1.7;
-      margin: 0 0 10px;
-    }
-    ul {
-      padding-left: 20px;
-      margin: 0 0 10px;
-    }
-    a {
-      color: #9effc7;
-      text-decoration: none;
-    }
-    .back {
-      display: inline-block;
-      margin-top: 32px;
-      font-size: 13px;
-      color: #9effc7;
-      border: 1px solid rgba(28,255,136,0.35);
-      border-radius: 8px;
-      padding: 8px 16px;
-    }
+    .brand { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #9effc7; margin-bottom: 12px; }
+    h1 { font-size: 26px; margin: 0 0 6px; }
+    .updated { font-size: 12px; color: #666; margin-bottom: 32px; }
+    h2 { font-size: 16px; color: #1cff88; margin: 32px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    p, li { font-size: 14px; color: #c0c0c0; line-height: 1.7; margin: 0 0 10px; }
+    ul { padding-left: 20px; margin: 0 0 10px; }
+    a { color: #9effc7; text-decoration: none; }
+    .back { display: inline-block; margin-top: 32px; font-size: 13px; color: #9effc7; border: 1px solid rgba(28,255,136,0.35); border-radius: 8px; padding: 8px 16px; }
   </style>
 </head>
 <body>
@@ -92,11 +54,12 @@
       <li>Sammeln von digitalen Stage-Karten</li>
       <li>Vergabe von Focus-Punkten durch Community-Interaktion</li>
       <li>Artist-Onboarding via Einladungs-Token nach Erreichen eines Schwellenwerts</li>
+      <li>Erstellen von KI-generierten Gate-Karten über das Secret Gate</li>
     </ul>
 
     <h2>3. Registrierung & Account</h2>
     <ul>
-      <li>Die Nutzung erfordert einen Account via Google oder Spotify Login</li>
+      <li>Die Nutzung erfordert einen Account via Google Login</li>
       <li>Du bist für die Sicherheit deines Accounts selbst verantwortlich</li>
       <li>Pro Person ist nur ein Account erlaubt</li>
       <li>Der Betreiber behält sich vor, Accounts bei Missbrauch zu sperren</li>
@@ -121,24 +84,38 @@
       <li>Bei Schließung der Plattform besteht kein Anspruch auf Entschädigung für gesammelte Karten</li>
     </ul>
 
-    <h2>6. Verbotene Nutzung</h2>
+    <h2>6. Gate-Karten & KI-generierte Inhalte</h2>
+    <p>
+      Über das Secret Gate können eingeloggte Nutzer einmal täglich eine KI-generierte Gate-Karte erstellen,
+      die sich in den UnterGrund-Pool mischt. Für diese Funktion gelten folgende Regeln:
+    </p>
+    <ul>
+      <li>Das Limit von einer Gate-Karte pro Tag und Account dient der Qualitätssicherung und darf nicht durch technische Mittel, Mehrfachaccounts oder andere Tricks umgangen werden</li>
+      <li>Mit dem Erstellen einer Karte bestätigst du, dass deine Eingaben keine Rechte Dritter verletzen und keine beleidigenden, diskriminierenden, sexuellen oder anderweitig rechtswidrigen Inhalte enthalten</li>
+      <li>Der Betreiber behält sich vor, Karten ohne Angabe von Gründen zu entfernen oder den Zugang zum Secret Gate zu sperren</li>
+      <li>KI-generierte Bilder werden über den Dienst Puter.js erzeugt – du stimmst zu, dass dein eingegebener Text-Prompt zur Bildgenerierung an diesen Dienst übermittelt wird</li>
+      <li>Die erstellten Gate-Karten werden öffentlich auf der Plattform angezeigt; ein Anspruch auf dauerhafte Speicherung besteht nicht</li>
+    </ul>
+
+    <h2>7. Verbotene Nutzung</h2>
     <p>Folgendes ist ausdrücklich untersagt:</p>
     <ul>
       <li>Manipulation von Focus-Punkten durch Bots oder automatisierte Tools</li>
-      <li>Mehrfachaccounts zur künstlichen Erhöhung von Punkten</li>
-      <li>Veröffentlichung von rechtswidrigen, beleidigenden oder urheberrechtlich geschützten Inhalten</li>
+      <li>Mehrfachaccounts zur künstlichen Erhöhung von Punkten oder zur Umgehung des Gate-Karten-Limits</li>
+      <li>Veröffentlichung von rechtswidrigen, beleidigenden oder urheberrechtlich geschützten Inhalten – insbesondere in KI-Prompts für Gate-Karten</li>
       <li>Missbrauch des Einladungssystems</li>
+      <li>Technische Manipulation des Secret Gates oder der Tageslimit-Prüfung</li>
     </ul>
 
-    <h2>7. Verfügbarkeit & Haftung</h2>
+    <h2>8. Verfügbarkeit & Haftung</h2>
     <ul>
       <li>Die Plattform wird ohne Gewährleistung auf Verfügbarkeit betrieben</li>
       <li>Der Betreiber haftet nicht für Datenverlust oder Ausfälle</li>
-      <li>Eine Haftung für Inhalte Dritter (Artists, Nutzer) wird ausgeschlossen</li>
+      <li>Eine Haftung für Inhalte Dritter (Artists, Nutzer, KI-generierte Bilder) wird ausgeschlossen</li>
       <li>Die Plattform ist kostenlos – es besteht kein vertraglicher Anspruch auf Weiterführung</li>
     </ul>
 
-    <h2>8. Urheberrecht</h2>
+    <h2>9. Urheberrecht</h2>
     <p>
       Artists, die sich auf UnterGrund registrieren, erteilen dem Betreiber das
       Recht, ihre öffentlich verfügbaren Informationen (Name, Spotify-Daten, Bilder)
@@ -146,19 +123,17 @@
       Widerruf der Teilnahme.
     </p>
 
-    <h2>9. Änderungen der AGB</h2>
+    <h2>10. Änderungen der AGB</h2>
     <p>
       Der Betreiber behält sich vor, diese AGB jederzeit zu ändern. Änderungen
       werden auf der Plattform bekannt gegeben. Die weitere Nutzung nach
       Bekanntgabe gilt als Zustimmung.
     </p>
 
-    <h2>10. Anwendbares Recht</h2>
-    <p>
-      Es gilt deutsches Recht. Gerichtsstand ist Berlin.
-    </p>
+    <h2>11. Anwendbares Recht</h2>
+    <p>Es gilt deutsches Recht. Gerichtsstand ist Berlin.</p>
 
-    <h2>11. Kontakt</h2>
+    <h2>12. Kontakt</h2>
     <p>
       Bei Fragen oder Widerruf der Artist-Teilnahme:<br/>
       <a href="mailto:baurybot@googlemail.com">baurybot@googlemail.com</a>
