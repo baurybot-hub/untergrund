@@ -22,52 +22,14 @@
       border: 1px solid rgba(28,255,136,0.35);
       padding: 40px 36px;
     }
-    .brand {
-      font-size: 13px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #9effc7;
-      margin-bottom: 12px;
-    }
-    h1 {
-      font-size: 26px;
-      margin: 0 0 6px;
-    }
-    .updated {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 32px;
-    }
-    h2 {
-      font-size: 16px;
-      color: #1cff88;
-      margin: 32px 0 8px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    p, li {
-      font-size: 14px;
-      color: #c0c0c0;
-      line-height: 1.7;
-      margin: 0 0 10px;
-    }
-    ul {
-      padding-left: 20px;
-      margin: 0 0 10px;
-    }
-    a {
-      color: #9effc7;
-      text-decoration: none;
-    }
-    .back {
-      display: inline-block;
-      margin-top: 32px;
-      font-size: 13px;
-      color: #9effc7;
-      border: 1px solid rgba(28,255,136,0.35);
-      border-radius: 8px;
-      padding: 8px 16px;
-    }
+    .brand { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #9effc7; margin-bottom: 12px; }
+    h1 { font-size: 26px; margin: 0 0 6px; }
+    .updated { font-size: 12px; color: #666; margin-bottom: 32px; }
+    h2 { font-size: 16px; color: #1cff88; margin: 32px 0 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+    p, li { font-size: 14px; color: #c0c0c0; line-height: 1.7; margin: 0 0 10px; }
+    ul { padding-left: 20px; margin: 0 0 10px; }
+    a { color: #9effc7; text-decoration: none; }
+    .back { display: inline-block; margin-top: 32px; font-size: 13px; color: #9effc7; border: 1px solid rgba(28,255,136,0.35); border-radius: 8px; padding: 8px 16px; }
   </style>
 </head>
 <body>
@@ -85,17 +47,19 @@
     <h2>2. Welche Daten wir erheben</h2>
     <p>Beim Login und der Nutzung von UnterGrund werden folgende Daten verarbeitet:</p>
     <ul>
-      <li>Name und E-Mail-Adresse (über Google oder Spotify Login)</li>
-      <li>Profilbild (sofern vom Login-Anbieter übermittelt)</li>
+      <li>Name und E-Mail-Adresse (über Google Login)</li>
+      <li>Profilbild (sofern von Google übermittelt)</li>
       <li>Gesammelte Karten und Interaktionen auf der Plattform</li>
       <li>Technische Daten (IP-Adresse, Browsertyp, Zeitstempel)</li>
+      <li>Anonyme Client-ID im localStorage zur Begrenzung von Focus-Punkten pro Browser</li>
     </ul>
 
     <h2>3. Zweck der Datenverarbeitung</h2>
     <ul>
       <li>Bereitstellung des Nutzeraccounts und der Sammel-Funktionen</li>
-      <li>Anzeige deiner gesammelten Stage-Karten</li>
+      <li>Anzeige deiner gesammelten Stage- und Gate-Karten</li>
       <li>Sicherheit und Missbrauchsverhinderung</li>
+      <li>Einhaltung des Gate-Karten-Tageslimits</li>
     </ul>
 
     <h2>4. Rechtsgrundlage</h2>
@@ -105,11 +69,23 @@
       am sicheren Betrieb der Plattform).
     </p>
 
-    <h2>5. Drittanbieter & Dienste</h2>
+    <h2>5. KI-Bildgenerierung (Gate-Karten)</h2>
+    <p>
+      Beim Erstellen einer Gate-Karte über das Secret Gate wird dein eingegebener Text-Prompt
+      zur Bildgenerierung an <strong>Puter.js</strong> übermittelt. Puter.js ist ein
+      clientseitiger KI-Dienst, der die Bildgenerierung im Browser ermöglicht.
+      Es werden dabei keine personenbezogenen Daten im Prompt übertragen – du bist
+      selbst dafür verantwortlich, keine personenbezogenen Daten einzugeben.
+      Das generierte Bild wird anschließend in Supabase Storage gespeichert und
+      ist als Teil des öffentlichen Gate-Pools abrufbar.
+      Weitere Informationen zu Puter.js: <a href="https://puter.com" target="_blank">puter.com</a>
+    </p>
+
+    <h2>6. Drittanbieter & Dienste</h2>
     <p>Wir nutzen folgende externe Dienste:</p>
     <ul>
       <li>
-        <strong>Supabase</strong> (Datenbank & Authentifizierung) –
+        <strong>Supabase</strong> (Datenbank, Authentifizierung & Storage) –
         Server in der EU. Datenschutz: <a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a>
       </li>
       <li>
@@ -117,23 +93,28 @@
         Datenschutz: <a href="https://policies.google.com/privacy" target="_blank">policies.google.com/privacy</a>
       </li>
       <li>
-        <strong>Spotify OAuth</strong> (Login) –
-        Datenschutz: <a href="https://www.spotify.com/de/legal/privacy-policy/" target="_blank">spotify.com/legal/privacy-policy</a>
-      </li>
-      <li>
         <strong>GitHub Pages</strong> (Hosting) –
         Datenschutz: <a href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement" target="_blank">GitHub Privacy Statement</a>
       </li>
+      <li>
+        <strong>Spotify</strong> (eingebettete Player) –
+        Beim Laden eines Spotify-Embeds kann Spotify personenbezogene Daten verarbeiten.
+        Datenschutz: <a href="https://www.spotify.com/de/legal/privacy-policy/" target="_blank">spotify.com/legal/privacy-policy</a>
+      </li>
+      <li>
+        <strong>Puter.js</strong> (KI-Bildgenerierung für Gate-Karten) –
+        Datenschutz: <a href="https://puter.com/privacy" target="_blank">puter.com/privacy</a>
+      </li>
     </ul>
 
-    <h2>6. Speicherdauer</h2>
+    <h2>7. Speicherdauer</h2>
     <p>
       Deine Daten werden gespeichert, solange du einen aktiven Account auf UnterGrund hast.
       Du kannst jederzeit die Löschung deines Accounts per E-Mail an
       <a href="mailto:baurybot@googlemail.com">baurybot@googlemail.com</a> beantragen.
     </p>
 
-    <h2>7. Deine Rechte</h2>
+    <h2>8. Deine Rechte</h2>
     <p>Du hast nach DSGVO folgende Rechte:</p>
     <ul>
       <li>Auskunft über gespeicherte Daten (Art. 15)</li>
@@ -148,17 +129,18 @@
       <a href="mailto:baurybot@googlemail.com">baurybot@googlemail.com</a>
     </p>
 
-    <h2>8. Beschwerderecht</h2>
+    <h2>9. Beschwerderecht</h2>
     <p>
       Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren,
       z.B. beim Berliner Beauftragten für Datenschutz und Informationsfreiheit:
       <a href="https://www.datenschutz-berlin.de" target="_blank">datenschutz-berlin.de</a>
     </p>
 
-    <h2>9. Cookies</h2>
+    <h2>10. Cookies & lokale Speicherung</h2>
     <p>
       UnterGrund verwendet technisch notwendige Cookies und localStorage ausschließlich
-      für die Session-Verwaltung. Es werden keine Tracking- oder Werbe-Cookies eingesetzt.
+      für die Session-Verwaltung sowie eine anonyme Client-ID zur Begrenzung von
+      Focus-Punkten pro Browser. Es werden keine Tracking- oder Werbe-Cookies eingesetzt.
     </p>
 
     <a class="back" href="index.html">← Zurück zur Startseite</a>
