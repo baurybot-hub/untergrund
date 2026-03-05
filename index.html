@@ -243,17 +243,26 @@ input:focus {
     <header style="flex-direction:column; align-items:stretch; gap:0; padding:0;">
 
   <!-- Zeile 1: Logo + Buttons -->
-  <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 14px;">
-    <div class="logo-text">UnterGrund</div>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <button id="collection-btn" class="pill-btn" style="background:#0b1120;color:#e5e7eb;">
-        📚 Meine Sammlung
-      </button>
-      <button id="login-btn" class="pill-btn">
-        Anmelden
-      </button>
+    <div style="padding:10px 14px 4px 14px;">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <div class="logo-text">UnterGrund</div>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="collection-btn" class="pill-btn" style="background:#0b1120;color:#e5e7eb;">
+          📚 Meine Sammlung
+        </button>
+        <button id="login-btn" class="pill-btn">
+          Anmelden
+        </button>
+      </div>
     </div>
+
+    <!-- Hook unter dem Logo -->
+    <p style="font-size:0.8rem;color:#9ca3af;margin:4px 0 0 0;">
+      Gebaut im Labor von Doktor Eule &amp; FREEDOM.
+      <a href="manifest.html" style="color:#9effc7;text-decoration:underline;">Zum Manifest 🚀</a>
+    </p>
   </div>
+
 
   <!-- Zeile 2: Artist-Banner (nur sichtbar wenn Artist eingeloggt) -->
   <div id="artist-banner"
