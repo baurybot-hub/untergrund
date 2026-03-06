@@ -1,0 +1,23 @@
+{
+  "name": "UnterGrund – Explorer",
+  "short_name": "UnterGrund",
+  "lang": "de",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "description": "UnterGrund Explorer: Finde deutsche Artists, die unter dem Radar fliegen, und pushe sie nach oben.",
+  "icons": [
+    {
+      "src": "/icons/untergrund-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/untergrund-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
