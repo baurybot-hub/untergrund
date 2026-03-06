@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const message =
     'Secret VOX: Im UnterGrund formt sich eine Stimme, die bald viele Nachrichten durch den Explorer flüstert.';
 
-  // Mute-Status aus localStorage lesen
   const isMuted = localStorage.getItem('secretVoxMuted') === 'true';
 
   root.innerHTML = `
