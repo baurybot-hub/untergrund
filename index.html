@@ -635,54 +635,20 @@ border-top:none;
       if ((row.jump_count || 0) >= MAX_JUMP_POINTS) return;
 
       const remainingJump = MAX_JUMP_POINTS - (row.jump_count || 0);
-      const boost = remainingJump;
+      let gained = 0;
 
-      const resEvent = await fetch(
-        `${SUPABASE_URL}/rest/v1/focus_events?id=eq.${row.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-          },
-          body: JSON.stringify({ jump_count: (row.jump_count || 0) + boost })
-        }
-      );
-      if (!resEvent.ok) {
-        console.error("Cheat-Boost event Fehler:", await resEvent.text());
-        return;
+      for (let i = 0; i < remainingJump; i++) {
+        const res = await addFocus(currentArtist, "jump");
+        if (!res.ok) break;
+        gained += 1;
       }
 
-      const newScore = (currentArtist.focus_score || 0) + boost;
-      const resArtist = await fetch(
-        `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${currentArtist.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-          },
-          body: JSON.stringify({ focus_score: newScore })
-        }
-      );
-      if (!resArtist.ok) {
-        console.error("Cheat-Boost artist Fehler:", await resArtist.text());
-        return;
-      }
+      if (gained <= 0) return;
 
-      currentArtist.focus_score = newScore;
       cheatUsedForArtist = currentArtist.id;
-
       updateFocusBackground();
-      alert(`UnterGrund‑Boost! +${boost} Focus für ${currentArtist.name || "den Artist"}.`);
-
+      alert(`UnterGrund‑Boost! +${gained} Focus für ${currentArtist.name || "den Artist"}.`);
       await updateFocusUI();
-       // NEU: Stage ggf. freischalten
-    await unlockStageIfNeeded(currentArtist);
     }
 
     // STAGE: öffentlicher Stage-Link
