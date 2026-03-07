@@ -450,6 +450,7 @@ border-top:none;
     const ARTISTS_TABLE = "artists";
     const ARTISTS_PUBLIC_VIEW = "artists_public";
     const GATE_TABLE = "gate_cards";
+    const GATE_PUBLIC_VIEW = "gate_cards_public";
 
     let gatePool = [];
     let currentGate = null;
@@ -534,115 +535,47 @@ border-top:none;
 
     async function getFocusRow(artistId) {
       const clientId = getClientId();
-      const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/focus_events?artist_id=eq.${artistId}&client_id=eq.${encodeURIComponent(clientId)}&select=*`,
-        {
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
-          }
-        }
-      );
-      if (!res.ok) {
-        console.error("focus_events GET Fehler:", await res.text());
+      const { data, error } = await client.rpc('get_focus_state', {
+        p_artist_id: artistId,
+        p_client_id: clientId
+      });
+      if (error) {
+        console.error('get_focus_state Fehler:', error);
         return null;
       }
-      const rows = await res.json();
-      return rows[0] || null;
+      return data && data[0]
+        ? data[0]
+        : { play_count: 0, jump_count: 0, follow_used: false };
     }
 
     async function ensureFocusRow(artistId) {
-      let row = await getFocusRow(artistId);
-      if (row) return row;
-
-      const clientId = getClientId();
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/focus_events`, {
-        method: "POST",
-        headers: {
-          "apikey": SUPABASE_ANON_KEY,
-          "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=representation"
-        },
-        body: JSON.stringify({
-          artist_id: artistId,
-          client_id: clientId
-        })
-      });
-      if (!res.ok) {
-        console.error("focus_events INIT Fehler:", await res.text());
-        return null;
-      }
-      const created = await res.json();
-      return created[0];
+      return await getFocusRow(artistId);
     }
 
     async function addFocus(artist, type) {
-      if (!artist) return { ok: false, reason: "no-artist" };
-
-      let row = await ensureFocusRow(artist.id);
-      if (!row) return { ok: false, reason: "no-row" };
-
-      let update = {};
-      if (type === "play") {
-        if (row.play_count >= MAX_PLAY_POINTS) return { ok: false, reason: "limit-play" };
-        update.play_count = row.play_count + 1;
-      } else if (type === "jump") {
-        if (row.jump_count >= MAX_JUMP_POINTS) return { ok: false, reason: "limit-jump" };
-        update.jump_count = row.jump_count + 1;
-      } else if (type === "follow") {
-        if (row.follow_used) return { ok: false, reason: "limit-follow" };
-        update.follow_used = true;
-      } else {
-        return { ok: false, reason: "unknown-type" };
+      if (!artist) return { ok: false, reason: 'no-artist' };
+      const clientId = getClientId();
+      const { data, error } = await client.rpc('push_focus', {
+        p_artist_id: artist.id,
+        p_client_id: clientId,
+        p_type: type
+      });
+      if (error) {
+        console.error('push_focus Fehler:', error);
+        return { ok: false, reason: 'rpc-error' };
       }
-
-      const resEvent = await fetch(
-        `${SUPABASE_URL}/rest/v1/focus_events?id=eq.${row.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-          },
-          body: JSON.stringify(update)
-        }
-      );
-      if (!resEvent.ok) {
-        console.error("focus_events UPDATE Fehler:", await resEvent.text());
-        return { ok: false, reason: "event-update" };
+      const row = data && data[0] ? data[0] : null;
+      if (!row || !row.ok) {
+        return { ok: false, reason: row?.reason || 'rpc-failed' };
       }
-
-      const newScore = (artist.focus_score || 0) + 1;
-      const resArtist = await fetch(
-        `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${artist.id}`,
-        {
-          method: "PATCH",
-          headers: {
-            "apikey": SUPABASE_ANON_KEY,
-            "Authorization": `Bearer ${SUPABASE_ANON_KEY}`,
-            "Content-Type": "application/json",
-            "Prefer": "return=minimal"
-          },
-          body: JSON.stringify({ focus_score: newScore })
-        }
-      );
-      if (!resArtist.ok) {
-        console.error("artists focus_score UPDATE Fehler:", await resArtist.text());
-        return { ok: false, reason: "artist-update" };
-      }
-
-            artist.focus_score = newScore;
-      if (artist === currentArtist) {
-        updateFocusBackground();
-      }
-
-      return { ok: true, newScore };
+      artist.focus_score = row.new_score;
+      artist.stage_unlocked = row.stage_unlocked;
+      if (artist === currentArtist) updateFocusBackground();
+      return { ok: true, newScore: row.new_score };
     }
 
    async function unlockStageIfNeeded(artist) {
+  return; // serverseitig in push_focus RPC
   if (!artist) return;
 
   const score = artist.focus_score || 0;
@@ -950,7 +883,7 @@ border-top:none;
     async function loadGatePool() {
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/${GATE_TABLE}?select=id,name,description,image_path,share_slug&status=eq.archived`,
+          `${SUPABASE_URL}/rest/v1/${GATE_PUBLIC_VIEW}?select=id,name,description,image_path,share_slug`,
           {
             headers: {
               "apikey": SUPABASE_ANON_KEY,

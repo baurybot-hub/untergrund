@@ -427,7 +427,7 @@ const userId = session.user.id;
       // 2) korrespondierende Gate-Karten holen (inkl. share_slug)
       const gateIds = collections.map(c => c.gate_card_id);
       const { data: gates, error: gatesError } = await client
-        .from('gate_cards')
+        .from('gate_cards_public')
         .select('id, name, image_path, share_slug')
         .in('id', gateIds);
 
