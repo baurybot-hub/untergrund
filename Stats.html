@@ -381,7 +381,7 @@
       statsCard.style.display = 'block';
 
       const { data: topArtists, error: artistError } = await client
-        .from('artists')
+        .from('artists_public')
         .select('id, name, focus_score')
         .order('focus_score', { ascending: false })
         .limit(10);

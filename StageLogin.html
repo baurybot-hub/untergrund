@@ -144,10 +144,7 @@
       setStatus('Prüfe deine Einladung …');
 
       const { data, error } = await client
-        .from('artists')
-        .select('id, name, invite_token_used')
-        .eq('invite_token', token)
-        .limit(1);
+        .rpc('validate_stage_invite', { p_token: token });
 
       const artist = data && data[0];
 

@@ -721,7 +721,7 @@
       setStatus("Stage‑Karte wird geladen …");
 
       const { data, error } = await client
-        .from("artists")
+        .from("artists_public")
         .select(`
           id,
           name,

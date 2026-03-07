@@ -448,6 +448,7 @@ border-top:none;
     const SUPABASE_URL = "https://tyflhzwrwzfakwedipig.supabase.co";
     const SUPABASE_ANON_KEY = "sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb";
     const ARTISTS_TABLE = "artists";
+    const ARTISTS_PUBLIC_VIEW = "artists_public";
     const GATE_TABLE = "gate_cards";
 
     let gatePool = [];
@@ -651,7 +652,7 @@ border-top:none;
   if (artist.stage_unlocked) return;     // verhindert mehrfaches Triggern
 
   try {
-    const inviteToken = artist.invite_token || crypto.randomUUID();
+    const inviteToken = crypto.randomUUID();
 
     const res = await fetch(
       `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${artist.id}`,
@@ -927,7 +928,7 @@ border-top:none;
 
         async function loadAllArtists() {
       const res = await fetch(
-        `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?select=*`,
+        `${SUPABASE_URL}/rest/v1/${ARTISTS_PUBLIC_VIEW}?select=*`,
         {
           headers: {
             "apikey": SUPABASE_ANON_KEY,
@@ -990,7 +991,7 @@ border-top:none;
 
       try {
         const res = await fetch(
-          `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?id=eq.${encodeURIComponent(id)}&select=*`,
+          `${SUPABASE_URL}/rest/v1/${ARTISTS_PUBLIC_VIEW}?id=eq.${encodeURIComponent(id)}&select=*`,
           {
             headers: {
               "apikey": SUPABASE_ANON_KEY,
@@ -1231,7 +1232,7 @@ border-top:none;
 
       try {
         const checkRes = await fetch(
-          `${SUPABASE_URL}/rest/v1/${ARTISTS_TABLE}?spotify_url=eq.${encodeURIComponent(cleanUrl)}&select=id`,
+          `${SUPABASE_URL}/rest/v1/${ARTISTS_PUBLIC_VIEW}?spotify_url=eq.${encodeURIComponent(cleanUrl)}&select=id`,
           {
             headers: {
               "apikey": SUPABASE_ANON_KEY,

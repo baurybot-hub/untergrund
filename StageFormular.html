@@ -394,31 +394,15 @@
   if (token) {
   console.log("STAGE FORM CLAIM TRY", { token, userId: user.id });
 
-  const { data: tokenRows, error: tokenSelectError } = await client
-  .from("artists")
-  .select("*")
-  .eq("invite_token", token);
+  const { data: claimRows, error: claimError } = await client
+    .rpc("claim_stage_invite", { p_token: token });
 
+  console.log("STAGE FORM CLAIM RPC", { claimRows, claimError });
 
-  console.log("STAGE FORM RAW DATA", { tokenRows, tokenSelectError });
-
-  if (tokenSelectError) {
-    console.error("STAGE FORM TOKEN SELECT ERROR", tokenSelectError);
-  } else if (!tokenRows || tokenRows.length === 0) {
-    console.warn("STAGE FORM: kein Artist mit diesem Token gefunden.");
-  } else {
-    const tokenArtist = tokenRows[0];
-    console.log("STAGE FORM CLAIM ARTIST", tokenArtist);
-
-    const { error: tokenUpdateError } = await client
-      .from("artists")
-      .update({
-        user_id: user.id,
-        invite_token_used: true,
-      })
-      .eq("id", tokenArtist.id);
-
-    console.log("STAGE FORM CLAIM UPDATE", { tokenUpdateError });
+  if (claimError) {
+    console.error("STAGE FORM CLAIM ERROR", claimError);
+  } else if (!claimRows || claimRows.length === 0) {
+    console.warn("STAGE FORM: kein Artist mit diesem Token gefunden oder Token bereits verwendet.");
   }
 }
 

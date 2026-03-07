@@ -723,7 +723,7 @@
       // 2) Artists holen
       const artistIds = collections.map(c => c.artist_id);
       const { data: artists, error: artistError } = await client
-        .from('artists')
+        .from('artists_public')
         .select('id, name, stage_photo_path')
         .in('id', artistIds);
 
