@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   root.innerHTML = `
     <div class="secret-vox-ticker ${isMuted ? 'secret-vox-ticker--muted' : ''}">
-      <div class="secret-vox-track">Secret VOX bootet …</div>
+      <div class="secret-vox-track"><span class="secret-vox-segment">Secret VOX bootet …</span><span class="secret-vox-segment" aria-hidden="true">Secret VOX bootet …</span></div>
       <button class="secret-vox-mute-btn" type="button">
         ${isMuted ? 'VOX wach' : 'VOX stumm'}
       </button>
@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const ticker = root.querySelector('.secret-vox-ticker');
   const track = root.querySelector('.secret-vox-track');
+  const trackSegments = root.querySelectorAll('.secret-vox-segment');
   const muteBtn = root.querySelector('.secret-vox-mute-btn');
 
   const headers = {
@@ -96,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let refreshTimer = null;
 
   function showLine(text) {
-    track.textContent = text;
+    trackSegments.forEach(seg => { seg.textContent = text + '   •   '; });
   }
 
   function startRotation() {
