@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
 
-  const isMuted = localStorage.getItem('secretVoxMuted') === 'true';
+  let isMuted = localStorage.getItem('secretVoxMuted') === 'true';
 
   root.innerHTML = `
     <div class="secret-vox-ticker ${isMuted ? 'secret-vox-ticker--muted' : ''}">
@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let lines = fallbackLines;
   let idx = 0;
   let timer = null;
+  let refreshTimer = null;
 
   function showLine(text) {
     track.textContent = text;
@@ -103,15 +104,21 @@ document.addEventListener('DOMContentLoaded', () => {
     showLine(lines[0] || fallbackLines[0]);
     idx = 1;
     timer = setInterval(() => {
+      if (isMuted) return;
       showLine(lines[idx % lines.length]);
       idx += 1;
     }, 14000);
   }
 
   muteBtn.addEventListener('click', () => {
-    const currentlyMuted = ticker.classList.toggle('secret-vox-ticker--muted');
-    localStorage.setItem('secretVoxMuted', currentlyMuted ? 'true' : 'false');
-    muteBtn.textContent = currentlyMuted ? 'VOX wach' : 'VOX stumm';
+    isMuted = ticker.classList.toggle('secret-vox-ticker--muted');
+    localStorage.setItem('secretVoxMuted', isMuted ? 'true' : 'false');
+    muteBtn.textContent = isMuted ? 'VOX wach' : 'VOX stumm';
+
+    if (!isMuted) {
+      showLine(lines[idx % lines.length] || lines[0] || fallbackLines[0]);
+      idx += 1;
+    }
   });
 
   (async () => {
@@ -119,11 +126,13 @@ document.addEventListener('DOMContentLoaded', () => {
     startRotation();
 
     // alle 3 Minuten neue Stats ziehen
-    setInterval(async () => {
+    refreshTimer = setInterval(async () => {
       lines = await buildVoxLines();
       idx = 0;
-      showLine(lines[0]);
-      idx = 1;
+      if (!isMuted) {
+        showLine(lines[0]);
+        idx = 1;
+      }
     }, 180000);
   })();
 });
