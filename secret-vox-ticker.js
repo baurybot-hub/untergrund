@@ -48,7 +48,7 @@
     let lines = [...fallbackLines];
     let idx = 0;
     let loopsOnCurrentLine = 0;
-    const LOOPS_PER_LINE = 2; // Nachricht läuft 2 komplette Zyklen, dann nächste
+    const LOOPS_PER_LINE = 2; // jede Nachricht 2 Loops, dann nächste
     let pendingLines = null;
 
     function formatInt(n) {
@@ -124,10 +124,10 @@
       segA.textContent = t;
       segB.textContent = t;
 
-      // konstante px/s statt fixer Dauer -> ruhiger bei langen/kurzen Texten
+      // konstante Geschwindigkeit in px/s
       const speedPxPerSec = 80;
-      const w = segA.scrollWidth || 600;
-      const duration = Math.max(10, Math.min(40, w / speedPxPerSec));
+      const width = segA.scrollWidth || 600;
+      const duration = Math.max(10, Math.min(40, width / speedPxPerSec));
       track.style.setProperty('--vox-duration', `${duration.toFixed(2)}s`);
     }
 
@@ -135,6 +135,7 @@
       isPaused = !!nextPaused;
       ticker.classList.toggle('secret-vox-ticker--paused', isPaused);
       ticker.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
+
       try {
         localStorage.setItem('secretVoxPaused', isPaused ? 'true' : 'false');
       } catch (_) {}
@@ -147,7 +148,7 @@
       setLine(text);
     }
 
-    // Beim nahtlosen Loop-Ende entscheiden, ob nächste Nachricht kommt
+    // Nahtloser Übergang am Ende jedes Loops
     track.addEventListener('animationiteration', () => {
       if (isPaused) return;
 
@@ -177,14 +178,13 @@
       }
     });
 
-    // Init
     (async () => {
       lines = await buildVoxLines();
       idx = 0;
       loopsOnCurrentLine = 0;
       nextLine();
 
-      // Stats im Hintergrund aktualisieren; sichtbar erst am Zyklus-Übergang
+      // Neue Daten im Hintergrund holen, sichtbarer Wechsel erst am Loop-Übergang
       setInterval(async () => {
         pendingLines = await buildVoxLines();
       }, 180000);
