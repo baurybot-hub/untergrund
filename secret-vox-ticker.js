@@ -4,12 +4,87 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
+  const ANIMATION_DURATION_MS = 10000;
 
   let isMuted = localStorage.getItem('secretVoxMuted') === 'true';
 
   root.innerHTML = `
+    <style>
+      .secret-vox-ticker {
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.35rem 1rem;
+        background: #050505;
+        color: #f5f5f5;
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 0.95rem;
+        border-radius: 999px;
+        box-shadow: 0 0 28px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+      }
+
+      .secret-vox-track {
+        flex: 1;
+        min-height: 1.5em;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .secret-vox-marquee {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        white-space: nowrap;
+        will-change: transform;
+        animation-name: secret-vox-marquee;
+        animation-duration: var(--secret-vox-duration, 10s);
+        animation-timing-function: linear;
+        animation-fill-mode: forwards;
+        animation-iteration-count: 1;
+        padding-right: 2rem;
+      }
+
+      .secret-vox-marquee.is-animating {
+        animation-play-state: running;
+      }
+
+      .secret-vox-ticker--muted .secret-vox-marquee {
+        animation-play-state: paused;
+      }
+
+      .secret-vox-mute-btn {
+        border: none;
+        background: #1a1a1a;
+        color: #f5f5f5;
+        padding: 0.45rem 0.9rem;
+        border-radius: 999px;
+        cursor: pointer;
+        font: inherit;
+        transition: background 0.2s ease;
+      }
+
+      .secret-vox-mute-btn:hover {
+        background: #303030;
+      }
+
+      @keyframes secret-vox-marquee {
+        0% {
+          transform: translate(100%, -50%);
+        }
+        100% {
+          transform: translate(-100%, -50%);
+        }
+      }
+    </style>
     <div class="secret-vox-ticker ${isMuted ? 'secret-vox-ticker--muted' : ''}">
-      <div class="secret-vox-track"><span class="secret-vox-segment">Secret VOX bootet …</span><span class="secret-vox-segment" aria-hidden="true">Secret VOX bootet …</span></div>
+      <div class="secret-vox-track">
+        <span class="secret-vox-marquee is-animating" aria-live="polite" role="status">Secret VOX bootet …</span>
+      </div>
       <button class="secret-vox-mute-btn" type="button">
         ${isMuted ? 'VOX wach' : 'VOX stumm'}
       </button>
@@ -17,8 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
 
   const ticker = root.querySelector('.secret-vox-ticker');
-  const track = root.querySelector('.secret-vox-track');
-  const trackSegments = root.querySelectorAll('.secret-vox-segment');
+  const marquee = root.querySelector('.secret-vox-marquee');
   const muteBtn = root.querySelector('.secret-vox-mute-btn');
 
   const headers = {
@@ -80,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
         lines.push(`Secret VOX: Verfolger‑Echo: ${second.name} liegt auf der Fährte zur Spitze.`);
       }
 
-      // kleine „Geheimnis“-Drops
       lines.push('Secret VOX: Manche entdecken nach vier Pushes einen versteckten Boost…');
       lines.push('Secret VOX: Im Gate warten Hinweise, die nur Sammler wirklich lesen.');
 
@@ -93,22 +166,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let lines = fallbackLines;
   let idx = 0;
-  let timer = null;
-  let refreshTimer = null;
+  let rotationTimer = null;
 
   function showLine(text) {
-    trackSegments.forEach(seg => { seg.textContent = text + '   •   '; });
+    marquee.classList.remove('is-animating');
+    marquee.style.setProperty('--secret-vox-duration', `${ANIMATION_DURATION_MS}ms`);
+    marquee.textContent = text;
+    void marquee.offsetWidth;
+    marquee.classList.add('is-animating');
+
+    clearTimeout(rotationTimer);
+    rotationTimer = setTimeout(() => {
+      rotationTimer = null;
+      if (!isMuted) {
+        showLine(lines[idx]);
+        idx = (idx + 1) % lines.length;
+      }
+    }, ANIMATION_DURATION_MS + 600);
   }
 
   function startRotation() {
-    if (timer) clearInterval(timer);
-    showLine(lines[0] || fallbackLines[0]);
-    idx = 1;
-    timer = setInterval(() => {
-      if (isMuted) return;
-      showLine(lines[idx % lines.length]);
-      idx += 1;
-    }, 14000);
+    clearTimeout(rotationTimer);
+    rotationTimer = null;
+    idx = 0;
+    if (!isMuted) {
+      showLine(lines[idx]);
+      idx = (idx + 1) % lines.length;
+    }
   }
 
   muteBtn.addEventListener('click', () => {
@@ -116,9 +200,13 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('secretVoxMuted', isMuted ? 'true' : 'false');
     muteBtn.textContent = isMuted ? 'VOX wach' : 'VOX stumm';
 
-    if (!isMuted) {
-      showLine(lines[idx % lines.length] || lines[0] || fallbackLines[0]);
-      idx += 1;
+    if (isMuted) {
+      clearTimeout(rotationTimer);
+      rotationTimer = null;
+      marquee.classList.remove('is-animating');
+    } else {
+      showLine(lines[idx]);
+      idx = (idx + 1) % lines.length;
     }
   });
 
@@ -126,14 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
     lines = await buildVoxLines();
     startRotation();
 
-    // alle 3 Minuten neue Stats ziehen
-    refreshTimer = setInterval(async () => {
+    rotationTimer = setInterval(async () => {
       lines = await buildVoxLines();
-      idx = 0;
-      if (!isMuted) {
-        showLine(lines[0]);
-        idx = 1;
-      }
+      startRotation();
     }, 180000);
   })();
 });
