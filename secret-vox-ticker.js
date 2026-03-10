@@ -3,9 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
   if (!root) return;
 
   const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
-  const SUPABASE_ANON_KEY =
-    'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
-  const ANIMATION_DURATION_MS = 10000; // Dauer der Scroll-Animation
+  const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
+  const ANIMATION_DURATION_MS = 9000;
 
   let isMuted = localStorage.getItem('secretVoxMuted') === 'true';
 
@@ -13,24 +12,23 @@ document.addEventListener('DOMContentLoaded', () => {
     <style>
       .secret-vox-ticker {
         width: 100%;
-        max-width: 100%;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
-        padding: 0.45rem 1rem;
+        padding: 0.4rem 1rem;
         background: #050505;
-        color: #f1f1f1;
+        color: #f5f5f5;
         font-family: 'Inter', system-ui, sans-serif;
         font-size: 0.95rem;
         border-radius: 999px;
-        box-shadow: 0 0 30px rgba(0, 0, 0, 0.35);
+        box-shadow: 0 0 32px rgba(0, 0, 0, 0.35);
         overflow: hidden;
       }
 
       .secret-vox-track {
         flex: 1;
-        min-height: 1.6em;
+        min-height: 1.4em;
         position: relative;
         overflow: hidden;
       }
@@ -40,13 +38,16 @@ document.addEventListener('DOMContentLoaded', () => {
         left: 0;
         top: 50%;
         transform: translateY(-50%);
+        display: inline-block;
         white-space: nowrap;
+        padding-right: 2rem;
         will-change: transform;
         animation-name: secret-vox-marquee;
-        animation-duration: var(--secret-vox-duration, 10s);
+        animation-duration: var(--secret-vox-duration, 9s);
         animation-timing-function: linear;
         animation-fill-mode: forwards;
         animation-iteration-count: 1;
+        animation-play-state: paused;
       }
 
       .secret-vox-marquee.is-animating {
@@ -59,18 +60,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       .secret-vox-mute-btn {
         border: none;
-        background: #1a1a1a;
+        background: #1f1f1f;
         color: inherit;
         padding: 0.35rem 0.9rem;
         border-radius: 999px;
         cursor: pointer;
         font: inherit;
-        letter-spacing: 0.02em;
         transition: background 0.2s ease;
       }
 
       .secret-vox-mute-btn:hover {
-        background: #2b2b2b;
+        background: #2f2f2f;
       }
 
       @keyframes secret-vox-marquee {
@@ -82,9 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     </style>
-    <div class="secret-vox-ticker ${
-      isMuted ? 'secret-vox-ticker--muted' : ''
-    }">
+    <div class="secret-vox-ticker ${isMuted ? 'secret-vox-ticker--muted' : ''}">
       <div class="secret-vox-track">
         <span class="secret-vox-marquee" aria-live="polite" role="status">
           Secret VOX bootet …
@@ -102,13 +100,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const headers = {
     apikey: SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`
   };
 
   const fallbackLines = [
     'Secret VOX: Im UnterGrund formt sich eine Stimme zwischen Fokus und Schatten.',
     'Secret VOX: Jede Stage beginnt mit einem einzigen Push.',
-    'Secret VOX: Was heute unter dem Radar fliegt, kann morgen die Stage tragen.',
+    'Secret VOX: Was heute unter dem Radar fliegt, kann morgen die Stage tragen.'
   ];
 
   function formatInt(n) {
@@ -125,27 +123,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function fetchJson(path) {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-      headers,
-    });
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers });
     if (!res.ok) throw new Error(`${res.status}`);
     return res.json();
   }
 
   async function buildVoxLines() {
     try {
-      const [
-        topArtists,
-        stageArtists,
-        artistsCountRes,
-        cardsCountRes,
-      ] = await Promise.all([
-        fetchJson(
-          'artists_public?select=name,focus_score&order=focus_score.desc&limit=3'
-        ),
+      const [topArtists, stageArtists, artistsCountRes, cardsCountRes] = await Promise.all([
+        fetchJson('artists_public?select=name,focus_score&order=focus_score.desc&limit=3'),
         fetchJson('artists_public?select=id&stage_unlocked=eq.true'),
         fetchJson('artists_public?select=id'),
-        fetchJson('gate_cards_public?select=id'),
+        fetchJson('gate_cards_public?select=id')
       ]);
 
       const artistCount = artistsCountRes.length;
@@ -156,36 +145,20 @@ document.addEventListener('DOMContentLoaded', () => {
       const second = topArtists[1];
 
       const lines = [
-        `Secret VOX: ${formatInt(
-          artistCount
-        )} Artists wurden bisher im UnterGrund verzeichnet.`,
-        `Secret VOX: ${formatInt(
-          stageCount
-        )} Artists haben bereits die Stage freigeschaltet.`,
-        `Secret VOX: ${formatInt(
-          gateCount
-        )} Secret Gates treiben aktuell durch den UnterGrund.`,
+        `Secret VOX: ${formatInt(artistCount)} Artists wurden bisher im UnterGrund verzeichnet.`,
+        `Secret VOX: ${formatInt(stageCount)} Artists haben bereits die Stage freigeschaltet.`,
+        `Secret VOX: ${formatInt(gateCount)} Secret Gates treiben aktuell durch den UnterGrund.`
       ];
 
       if (top?.name) {
-        lines.push(
-          `Secret VOX: Highscore führt gerade ${top.name} mit ${formatInt(
-            top.focus_score
-          )} Focus.`
-        );
+        lines.push(`Secret VOX: Highscore führt gerade ${top.name} mit ${formatInt(top.focus_score)} Focus.`);
       }
       if (second?.name) {
-        lines.push(
-          `Secret VOX: Verfolger-Echo: ${second.name} liegt auf der Fährte zur Spitze.`
-        );
+        lines.push(`Secret VOX: Verfolger‑Echo: ${second.name} liegt auf der Fährte zur Spitze.`);
       }
 
-      lines.push(
-        'Secret VOX: Manche entdecken nach vier Pushes einen versteckten Boost…'
-      );
-      lines.push(
-        'Secret VOX: Im Gate warten Hinweise, die nur Sammler wirklich lesen.'
-      );
+      lines.push('Secret VOX: Manche entdecken nach vier Pushes einen versteckten Boost…');
+      lines.push('Secret VOX: Im Gate warten Hinweise, die nur Sammler wirklich lesen.');
 
       return shuffle(lines);
     } catch (err) {
@@ -199,33 +172,33 @@ document.addEventListener('DOMContentLoaded', () => {
   let lineTimer = null;
   let refreshTimer = null;
 
-  function scheduleNextLine() {
+  function queueNextLine() {
     if (lineTimer) {
       clearTimeout(lineTimer);
-      lineTimer = null;
     }
 
     lineTimer = setTimeout(() => {
+      lineTimer = null;
       if (!isMuted) {
-        showLine(lines[idx]);
-        idx = (idx + 1) % lines.length;
+        displayNextLine();
       }
     }, ANIMATION_DURATION_MS + 600);
   }
 
-  function showLine(text) {
-    marquee.classList.remove('is-animating');
-    marquee.style.setProperty(
-      '--secret-vox-duration',
-      `${ANIMATION_DURATION_MS}ms`
-    );
+  function playLine(text) {
     marquee.textContent = text;
+    marquee.style.setProperty('--secret-vox-duration', `${ANIMATION_DURATION_MS / 1000}s`);
+    marquee.classList.remove('is-animating');
     void marquee.offsetWidth;
     marquee.classList.add('is-animating');
+    queueNextLine();
+  }
 
-    if (!isMuted) {
-      scheduleNextLine();
-    }
+  function displayNextLine() {
+    if (isMuted) return;
+    const line = lines[idx] || fallbackLines[0];
+    idx = (idx + 1) % lines.length;
+    playLine(line);
   }
 
   function startRotation() {
@@ -235,10 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     idx = 0;
-
     if (!isMuted) {
-      showLine(lines[idx]);
-      idx = (idx + 1) % lines.length;
+      displayNextLine();
     }
   }
 
@@ -254,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       marquee.classList.remove('is-animating');
     } else {
-      startRotation();
+      displayNextLine();
     }
   });
 
@@ -265,12 +236,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (refreshTimer) {
       clearInterval(refreshTimer);
     }
+
     refreshTimer = setInterval(async () => {
       lines = await buildVoxLines();
       idx = 0;
       if (!isMuted) {
-        showLine(lines[idx]);
-        idx = (idx + 1) % lines.length;
+        displayNextLine();
       }
     }, 180000);
   })();
