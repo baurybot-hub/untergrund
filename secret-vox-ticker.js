@@ -10,6 +10,19 @@
   const PAUSE_KEY = 'svx2Paused';
   const REFRESH_MS = 180000;
 
+  // Debug-Modus: ?svx2debug in URL oder localStorage svx2Debug=true
+  let DEBUG = false;
+  try {
+    DEBUG = window.location.search.includes('svx2debug') || localStorage.getItem('svx2Debug') === 'true';
+  } catch (_) {}
+
+  function log(...args) {
+    if (DEBUG) console.log('[SVX2 DEBUG]', ...args);
+  }
+  function err(...args) {
+    if (DEBUG) console.error('[SVX2 ERROR]', ...args);
+  }
+
   const fallbackLines = [
     'Secret VOX: Im UnterGrund formt sich eine Stimme zwischen Fokus und Schatten.',
     'Secret VOX: Jede Stage beginnt mit einem einzigen Push.',
@@ -33,6 +46,7 @@
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 9000);
     try {
+      log('Fetching:', path);
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         headers: {
           apikey: SUPABASE_ANON_KEY,
@@ -41,7 +55,12 @@
         signal: ctrl.signal
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}: ${path}`);
-      return await res.json();
+      const data = await res.json();
+      log('Got:', path, '→', Array.isArray(data) ? data.length + ' items' : data);
+      return data;
+    } catch (e) {
+      err('Fetch failed:', path, e.message);
+      throw e;
     } finally {
       clearTimeout(timeoutId);
     }
@@ -81,7 +100,10 @@
 
       return shuffle(out);
     } catch (err) {
-      console.warn('[SVX2] Fallback aktiv:', err);
+      err('[SVX2] Fallback aktiv:', err.message);
+      if (DEBUG) {
+        return [`⚠️ DEBUG: Fetch-Fehler - ${err.message}`, ...fallbackLines];
+      }
       return [...fallbackLines];
     }
   }
@@ -100,13 +122,14 @@
     root.innerHTML = `
       <div
         class="svx2-ticker ${isPaused ? 'svx2-ticker--paused' : ''}"
+        ${DEBUG ? 'data-svx2-debug="1"' : ''}
         role="button"
         tabindex="0"
         aria-label="Secret VOX Ticker pausieren oder fortsetzen"
         aria-pressed="${isPaused ? 'true' : 'false'}"
       >
         <div class="svx2-viewport" aria-live="polite">
-          <span class="svx2-line">Secret VOX bootet …</span>
+          <span class="svx2-line">${DEBUG ? '⚡ DEBUG-MODUS - ' : ''}Secret VOX bootet …</span>
         </div>
       </div>
     `;
