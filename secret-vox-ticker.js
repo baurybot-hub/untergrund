@@ -1,7 +1,6 @@
 (() => {
   'use strict';
 
-  // Doppel-Init-Schutz (wenn Script versehentlich 2x eingebunden ist)
   if (window.__SVX2_TICKER_INITIALIZED__) return;
   window.__SVX2_TICKER_INITIALIZED__ = true;
 
@@ -9,7 +8,6 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
 
   const PAUSE_KEY = 'svx2Paused';
-  const LOOPS_PER_LINE = 2;
   const REFRESH_MS = 180000;
 
   const fallbackLines = [
@@ -34,7 +32,6 @@
   async function fetchJson(path) {
     const ctrl = new AbortController();
     const timeoutId = setTimeout(() => ctrl.abort(), 9000);
-
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         headers: {
@@ -89,11 +86,10 @@
     }
   }
 
-  function initTicker() {
+  function init() {
     const root = document.getElementById('secret-vox-ticker-root');
     if (!root) return;
 
-    // Sicherheits-Cleanup: alten Inhalt + alte mögliche Button-Reste entfernen
     root.innerHTML = '';
 
     let isPaused = false;
@@ -109,23 +105,21 @@
         aria-label="Secret VOX Ticker pausieren oder fortsetzen"
         aria-pressed="${isPaused ? 'true' : 'false'}"
       >
-        <div class="svx2-track">
-          <span class="svx2-segment">Secret VOX bootet …</span>
-          <span class="svx2-segment" aria-hidden="true">Secret VOX bootet …</span>
+        <div class="svx2-viewport" aria-live="polite">
+          <span class="svx2-line">Secret VOX bootet …</span>
         </div>
       </div>
     `;
 
     const ticker = root.querySelector('.svx2-ticker');
-    const track = root.querySelector('.svx2-track');
-    const [segA, segB] = root.querySelectorAll('.svx2-segment');
+    const viewport = root.querySelector('.svx2-viewport');
+    const line = root.querySelector('.svx2-line');
 
     let lines = [...fallbackLines];
     let idx = 0;
-    let loopsOnCurrentLine = 0;
     let pendingLines = null;
 
-    function applyPause(next) {
+    function setPaused(next) {
       isPaused = !!next;
       ticker.classList.toggle('svx2-ticker--paused', isPaused);
       ticker.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
@@ -134,45 +128,49 @@
       } catch (_) {}
     }
 
-    function setLine(text) {
-      const content = `${text}   •   `;
-      segA.textContent = content;
-      segB.textContent = content;
+    function runLine(text) {
+      line.classList.remove('svx2-line--run');
+      line.textContent = text;
 
-      // Konstante Geschwindigkeit für konsistente Wahrnehmung
-      const speedPxPerSec = 80;
-      const width = segA.scrollWidth || 600;
-      const durationSec = Math.max(10, Math.min(40, width / speedPxPerSec));
-      track.style.setProperty('--svx2-duration', `${durationSec.toFixed(2)}s`);
+      // Reflow für sicheren Restart der Animation
+      void line.offsetWidth;
+
+      const viewportWidth = viewport.clientWidth || 320;
+      const lineWidth = line.scrollWidth || 320;
+
+      const speedPxPerSec = 80; // ruhige Geschwindigkeit
+      const distance = viewportWidth + lineWidth;
+      const durationSec = Math.max(8, Math.min(45, distance / speedPxPerSec));
+
+      line.style.setProperty('--svx2-start', `${viewportWidth}px`);
+      line.style.setProperty('--svx2-end', `${-lineWidth}px`);
+      line.style.setProperty('--svx2-duration', `${durationSec.toFixed(2)}s`);
+
+      line.classList.add('svx2-line--run');
     }
 
-    function nextLine() {
+    function playNext() {
       if (!lines.length) lines = [...fallbackLines];
+
+      if (pendingLines) {
+        lines = pendingLines;
+        pendingLines = null;
+        idx = 0;
+      }
+
       const text = lines[idx % lines.length];
       idx++;
-      setLine(text);
+      runLine(text);
     }
+
+    line.addEventListener('animationend', () => {
+      if (isPaused) return;
+      playNext();
+    });
 
     function togglePause() {
-      applyPause(!isPaused);
+      setPaused(!isPaused);
     }
-
-    track.addEventListener('animationiteration', () => {
-      if (isPaused) return;
-
-      loopsOnCurrentLine++;
-      if (loopsOnCurrentLine >= LOOPS_PER_LINE) {
-        loopsOnCurrentLine = 0;
-
-        if (pendingLines) {
-          lines = pendingLines;
-          pendingLines = null;
-          idx = 0;
-        }
-
-        nextLine();
-      }
-    });
 
     ticker.addEventListener('click', togglePause);
     ticker.addEventListener('keydown', (e) => {
@@ -185,8 +183,7 @@
     (async () => {
       lines = await buildVoxLines();
       idx = 0;
-      loopsOnCurrentLine = 0;
-      nextLine();
+      playNext();
 
       setInterval(async () => {
         pendingLines = await buildVoxLines();
@@ -195,8 +192,8 @@
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initTicker);
+    document.addEventListener('DOMContentLoaded', init);
   } else {
-    initTicker();
+    init();
   }
 })();
