@@ -4,89 +4,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
-  const ANIMATION_DURATION_MS = 9000;
 
   let isMuted = localStorage.getItem('secretVoxMuted') === 'true';
 
+  // HTML mit ZWEI Segmenten für Endlos-Effekt
   root.innerHTML = `
-    <style>
-      .secret-vox-ticker {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.4rem 1rem;
-        background: #050505;
-        color: #f5f5f5;
-        font-family: 'Inter', system-ui, sans-serif;
-        font-size: 0.95rem;
-        border-radius: 999px;
-        box-shadow: 0 0 32px rgba(0, 0, 0, 0.35);
-        overflow: hidden;
-      }
-
-      .secret-vox-track {
-        flex: 1;
-        min-height: 1.4em;
-        position: relative;
-        overflow: hidden;
-      }
-
-      .secret-vox-marquee {
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        display: inline-block;
-        white-space: nowrap;
-        padding-right: 2rem;
-        will-change: transform;
-        animation-name: secret-vox-marquee;
-        animation-duration: var(--secret-vox-duration, 9s);
-        animation-timing-function: linear;
-        animation-fill-mode: forwards;
-        animation-iteration-count: 1;
-        animation-play-state: paused;
-      }
-
-      .secret-vox-marquee.is-animating {
-        animation-play-state: running;
-      }
-
-      .secret-vox-ticker--muted .secret-vox-marquee {
-        animation-play-state: paused;
-      }
-
-      .secret-vox-mute-btn {
-        border: none;
-        background: #1f1f1f;
-        color: inherit;
-        padding: 0.35rem 0.9rem;
-        border-radius: 999px;
-        cursor: pointer;
-        font: inherit;
-        transition: background 0.2s ease;
-      }
-
-      .secret-vox-mute-btn:hover {
-        background: #2f2f2f;
-      }
-
-      @keyframes secret-vox-marquee {
-        0% {
-          transform: translate(100%, -50%);
-        }
-        100% {
-          transform: translate(-100%, -50%);
-        }
-      }
-    </style>
     <div class="secret-vox-ticker ${isMuted ? 'secret-vox-ticker--muted' : ''}">
       <div class="secret-vox-track">
-        <span class="secret-vox-marquee" aria-live="polite" role="status">
-          Secret VOX bootet …
-        </span>
+        <span class="secret-vox-segment">Secret VOX bootet …</span>
+        <span class="secret-vox-segment" aria-hidden="true">Secret VOX bootet …</span>
       </div>
       <button class="secret-vox-mute-btn" type="button">
         ${isMuted ? 'VOX wach' : 'VOX stumm'}
@@ -95,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   `;
 
   const ticker = root.querySelector('.secret-vox-ticker');
-  const marquee = root.querySelector('.secret-vox-marquee');
+  const trackSegments = root.querySelectorAll('.secret-vox-segment');
   const muteBtn = root.querySelector('.secret-vox-mute-btn');
 
   const headers = {
@@ -115,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function shuffle(arr) {
     const a = [...arr];
-    for (let i = a.length - 1; i > 0; i -= 1) {
+    for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [a[i], a[j]] = [a[j], a[i]];
     }
@@ -169,80 +95,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let lines = fallbackLines;
   let idx = 0;
-  let lineTimer = null;
+  let rotationTimer = null;
   let refreshTimer = null;
 
-  function queueNextLine() {
-    if (lineTimer) {
-      clearTimeout(lineTimer);
-    }
-
-    lineTimer = setTimeout(() => {
-      lineTimer = null;
-      if (!isMuted) {
-        displayNextLine();
-      }
-    }, ANIMATION_DURATION_MS + 600);
-  }
-
-  function playLine(text) {
-    marquee.textContent = text;
-    marquee.style.setProperty('--secret-vox-duration', `${ANIMATION_DURATION_MS / 1000}s`);
-    marquee.classList.remove('is-animating');
-    void marquee.offsetWidth;
-    marquee.classList.add('is-animating');
-    queueNextLine();
-  }
-
-  function displayNextLine() {
-    if (isMuted) return;
-    const line = lines[idx] || fallbackLines[0];
-    idx = (idx + 1) % lines.length;
-    playLine(line);
+  function showLine(text) {
+    const lineWithSpace = text + '   •   ';
+    trackSegments.forEach(seg => {
+      seg.textContent = lineWithSpace;
+    });
   }
 
   function startRotation() {
-    if (lineTimer) {
-      clearTimeout(lineTimer);
-      lineTimer = null;
-    }
-
-    idx = 0;
-    if (!isMuted) {
-      displayNextLine();
-    }
+    if (rotationTimer) clearInterval(rotationTimer);
+    
+    // Zeige erste Zeile
+    showLine(lines[0] || fallbackLines[0]);
+    idx = 1;
+    
+    // Alle 14 Sekunden neue Zeile (passt zur CSS-Animation von 26s)
+    rotationTimer = setInterval(() => {
+      if (!isMuted) {
+        showLine(lines[idx % lines.length]);
+        idx++;
+      }
+    }, 14000);
   }
 
+  // Mute-Button
   muteBtn.addEventListener('click', () => {
     isMuted = ticker.classList.toggle('secret-vox-ticker--muted');
     localStorage.setItem('secretVoxMuted', isMuted ? 'true' : 'false');
     muteBtn.textContent = isMuted ? 'VOX wach' : 'VOX stumm';
-
-    if (isMuted) {
-      if (lineTimer) {
-        clearTimeout(lineTimer);
-        lineTimer = null;
-      }
-      marquee.classList.remove('is-animating');
-    } else {
-      displayNextLine();
-    }
   });
 
+  // Initialisieren
   (async () => {
-    lines = await buildVoxLines();
-    startRotation();
-
-    if (refreshTimer) {
-      clearInterval(refreshTimer);
-    }
-
-    refreshTimer = setInterval(async () => {
+    try {
       lines = await buildVoxLines();
-      idx = 0;
-      if (!isMuted) {
-        displayNextLine();
-      }
-    }, 180000);
+      startRotation();
+
+      // Alle 3 Minuten neue Stats
+      refreshTimer = setInterval(async () => {
+        lines = await buildVoxLines();
+        idx = 0;
+      }, 180000);
+    } catch (err) {
+      console.error('Secret VOX init error:', err);
+    }
   })();
 });
