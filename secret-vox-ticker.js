@@ -8,29 +8,31 @@
     const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
 
-    // Wie oft jede Nachricht hintereinander laufen soll (ruhigeres Verhalten)
-    const REPEAT_EACH_LINE = 2;
-
-    let isMuted = false;
+    // true = pausiert
+    let isPaused = false;
     try {
-      isMuted = localStorage.getItem('secretVoxMuted') === 'true';
+      isPaused = localStorage.getItem('secretVoxPaused') === 'true';
     } catch (_) {}
 
     root.innerHTML = `
-      <div class="secret-vox-ticker ${isMuted ? 'secret-vox-ticker--muted' : ''}">
-        <button class="secret-vox-mute-btn" type="button" aria-pressed="${isMuted ? 'true' : 'false'}">
-          ${isMuted ? 'VOX aktivieren' : 'VOX stumm'}
-        </button>
-        <div class="secret-vox-viewport" aria-live="polite">
-          <span class="secret-vox-line">Secret VOX bootet …</span>
+      <div
+        class="secret-vox-ticker ${isPaused ? 'secret-vox-ticker--paused' : ''}"
+        role="button"
+        tabindex="0"
+        aria-label="Secret VOX Ticker pausieren oder fortsetzen"
+        aria-pressed="${isPaused ? 'true' : 'false'}"
+        title="Klicken zum Pausieren/Fortsetzen"
+      >
+        <div class="secret-vox-track">
+          <span class="secret-vox-segment">Secret VOX bootet …</span>
+          <span class="secret-vox-segment" aria-hidden="true">Secret VOX bootet …</span>
         </div>
       </div>
     `;
 
     const ticker = root.querySelector('.secret-vox-ticker');
-    const viewport = root.querySelector('.secret-vox-viewport');
-    const lineEl = root.querySelector('.secret-vox-line');
-    const muteBtn = root.querySelector('.secret-vox-mute-btn');
+    const track = root.querySelector('.secret-vox-track');
+    const [segA, segB] = root.querySelectorAll('.secret-vox-segment');
 
     const headers = {
       apikey: SUPABASE_ANON_KEY,
@@ -45,8 +47,9 @@
 
     let lines = [...fallbackLines];
     let idx = 0;
-    let repeatCounter = 0;
-    let refreshTimer = null;
+    let loopsOnCurrentLine = 0;
+    const LOOPS_PER_LINE = 2; // Nachricht läuft 2 komplette Zyklen, dann nächste
+    let pendingLines = null;
 
     function formatInt(n) {
       return new Intl.NumberFormat('de-DE').format(Number(n) || 0);
@@ -116,66 +119,74 @@
       }
     }
 
-    function runLine(text) {
-      lineEl.classList.remove('secret-vox-line--run');
-      lineEl.textContent = text;
-      void lineEl.offsetWidth;
+    function setLine(text) {
+      const t = `${text}   •   `;
+      segA.textContent = t;
+      segB.textContent = t;
 
-      const viewportWidth = viewport.clientWidth || 320;
-      const lineWidth = lineEl.scrollWidth || 320;
-
-      // langsamer & ruhiger
-      const speedPxPerSec = 75;
-      const distance = viewportWidth + lineWidth;
-      const durationSec = Math.max(14, Math.min(32, distance / speedPxPerSec));
-
-      lineEl.style.setProperty('--vox-start', `${viewportWidth}px`);
-      lineEl.style.setProperty('--vox-end', `${-lineWidth}px`);
-      lineEl.style.setProperty('--vox-duration', `${durationSec.toFixed(2)}s`);
-
-      lineEl.classList.add('secret-vox-line--run');
+      // konstante px/s statt fixer Dauer -> ruhiger bei langen/kurzen Texten
+      const speedPxPerSec = 80;
+      const w = segA.scrollWidth || 600;
+      const duration = Math.max(10, Math.min(40, w / speedPxPerSec));
+      track.style.setProperty('--vox-duration', `${duration.toFixed(2)}s`);
     }
 
-    function playNext() {
-      if (!lines.length) lines = [...fallbackLines];
-
-      const currentText = lines[idx % lines.length];
-      runLine(currentText);
-
-      repeatCounter++;
-      if (repeatCounter >= REPEAT_EACH_LINE) {
-        repeatCounter = 0;
-        idx++;
-      }
-    }
-
-    function setMuted(nextMuted) {
-      isMuted = !!nextMuted;
-      ticker.classList.toggle('secret-vox-ticker--muted', isMuted);
-      muteBtn.textContent = isMuted ? 'VOX aktivieren' : 'VOX stumm';
-      muteBtn.setAttribute('aria-pressed', isMuted ? 'true' : 'false');
-
+    function applyPauseState(nextPaused) {
+      isPaused = !!nextPaused;
+      ticker.classList.toggle('secret-vox-ticker--paused', isPaused);
+      ticker.setAttribute('aria-pressed', isPaused ? 'true' : 'false');
       try {
-        localStorage.setItem('secretVoxMuted', isMuted ? 'true' : 'false');
+        localStorage.setItem('secretVoxPaused', isPaused ? 'true' : 'false');
       } catch (_) {}
     }
 
-    muteBtn.addEventListener('click', () => setMuted(!isMuted));
+    function nextLine() {
+      if (!lines.length) lines = [...fallbackLines];
+      const text = lines[idx % lines.length];
+      idx++;
+      setLine(text);
+    }
 
-    lineEl.addEventListener('animationend', () => {
-      if (!isMuted) playNext();
+    // Beim nahtlosen Loop-Ende entscheiden, ob nächste Nachricht kommt
+    track.addEventListener('animationiteration', () => {
+      if (isPaused) return;
+
+      loopsOnCurrentLine++;
+      if (loopsOnCurrentLine >= LOOPS_PER_LINE) {
+        loopsOnCurrentLine = 0;
+
+        if (pendingLines) {
+          lines = pendingLines;
+          pendingLines = null;
+          idx = 0;
+        }
+
+        nextLine();
+      }
     });
 
+    function togglePause() {
+      applyPauseState(!isPaused);
+    }
+
+    ticker.addEventListener('click', togglePause);
+    ticker.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        togglePause();
+      }
+    });
+
+    // Init
     (async () => {
       lines = await buildVoxLines();
       idx = 0;
-      repeatCounter = 0;
-      playNext();
+      loopsOnCurrentLine = 0;
+      nextLine();
 
-      refreshTimer = setInterval(async () => {
-        lines = await buildVoxLines();
-        idx = 0;
-        repeatCounter = 0;
+      // Stats im Hintergrund aktualisieren; sichtbar erst am Zyklus-Übergang
+      setInterval(async () => {
+        pendingLines = await buildVoxLines();
       }, 180000);
     })();
   });
