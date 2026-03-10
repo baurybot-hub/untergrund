@@ -8,6 +8,9 @@
     const SUPABASE_URL = 'https://tyflhzwrwzfakwedipig.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb';
 
+    // Wie oft jede Nachricht hintereinander laufen soll (ruhigeres Verhalten)
+    const REPEAT_EACH_LINE = 2;
+
     let isMuted = false;
     try {
       isMuted = localStorage.getItem('secretVoxMuted') === 'true';
@@ -18,7 +21,6 @@
         <button class="secret-vox-mute-btn" type="button" aria-pressed="${isMuted ? 'true' : 'false'}">
           ${isMuted ? 'VOX aktivieren' : 'VOX stumm'}
         </button>
-
         <div class="secret-vox-viewport" aria-live="polite">
           <span class="secret-vox-line">Secret VOX bootet …</span>
         </div>
@@ -43,6 +45,7 @@
 
     let lines = [...fallbackLines];
     let idx = 0;
+    let repeatCounter = 0;
     let refreshTimer = null;
 
     function formatInt(n) {
@@ -113,21 +116,18 @@
       }
     }
 
-    // Genau eine Nachricht läuft komplett durch, dann nächste.
     function runLine(text) {
       lineEl.classList.remove('secret-vox-line--run');
       lineEl.textContent = text;
-
-      // Reflow erzwingen, damit Animation neu startet
       void lineEl.offsetWidth;
 
       const viewportWidth = viewport.clientWidth || 320;
       const lineWidth = lineEl.scrollWidth || 320;
 
-      // Geschwindigkeit
-      const speedPxPerSec = 120;
+      // langsamer & ruhiger
+      const speedPxPerSec = 75;
       const distance = viewportWidth + lineWidth;
-      const durationSec = Math.max(5.5, Math.min(20, distance / speedPxPerSec));
+      const durationSec = Math.max(14, Math.min(32, distance / speedPxPerSec));
 
       lineEl.style.setProperty('--vox-start', `${viewportWidth}px`);
       lineEl.style.setProperty('--vox-end', `${-lineWidth}px`);
@@ -138,8 +138,15 @@
 
     function playNext() {
       if (!lines.length) lines = [...fallbackLines];
-      runLine(lines[idx % lines.length]);
-      idx++;
+
+      const currentText = lines[idx % lines.length];
+      runLine(currentText);
+
+      repeatCounter++;
+      if (repeatCounter >= REPEAT_EACH_LINE) {
+        repeatCounter = 0;
+        idx++;
+      }
     }
 
     function setMuted(nextMuted) {
@@ -159,23 +166,16 @@
       if (!isMuted) playNext();
     });
 
-    // Bei Resize aktuelle Nachricht neu berechnen (sauberer Lauf)
-    let resizeRaf = null;
-    window.addEventListener('resize', () => {
-      if (resizeRaf) cancelAnimationFrame(resizeRaf);
-      resizeRaf = requestAnimationFrame(() => {
-        if (!isMuted) runLine(lines[(idx - 1 + lines.length) % lines.length] || fallbackLines[0]);
-      });
-    });
-
     (async () => {
       lines = await buildVoxLines();
       idx = 0;
+      repeatCounter = 0;
       playNext();
 
       refreshTimer = setInterval(async () => {
         lines = await buildVoxLines();
         idx = 0;
+        repeatCounter = 0;
       }, 180000);
     })();
   });
