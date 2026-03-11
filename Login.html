@@ -323,7 +323,19 @@
     }
 
     client.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) window.location.replace(getNextUrl());
+      console.log('Auth event:', event);
+      if (event === 'PASSWORD_RECOVERY') {
+        document.getElementById('reset-password-ui').style.display = 'block';
+        document.getElementById('email-login-btn').style.display = 'none';
+        document.getElementById('email-register-btn').style.display = 'none';
+        document.getElementById('email-reset-btn').style.display = 'none';
+        setAuthStatus('Bitte neues Passwort vergeben.');
+      } else if (event === 'SIGNED_IN' && session) {
+        // Falls wir gerade ein Passwort-Update gemacht haben, nicht sofort wegspringen
+        if (document.getElementById('reset-password-ui').style.display !== 'block') {
+          window.location.replace(getNextUrl());
+        }
+      }
     });
 
     document.getElementById('email-login-btn')?.addEventListener('click', loginWithEmailPassword);
