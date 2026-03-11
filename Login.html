@@ -117,8 +117,8 @@
 <body>
   <div class="login-container">
     <div class="brand">🎴 UNTERGRUND</div>
-    <h1>Deine Sammlung</h1>
-    <div class="subtitle">
+    <h1 id="login-title">Deine Sammlung</h1>
+    <div id="login-subtitle" class="subtitle">
       Melde dich an oder registriere dich per Google oder mit E‑Mail + Passwort, um Stage-Karten zu sammeln und dein persönliches Underground-Album aufzubauen.
     </div>
     <div id="login-hint" class="hint"></div>
@@ -150,10 +150,6 @@
 
       <div id="auth-status" class="auth-status"></div>
     </div>
-
-    <div id="legal-section" class="legal">
-      Mit der Anmeldung stimmst du unseren <a href="agb.html">AGB</a> und der <a href="datenschutz.html">Datenschutzerklärung</a> zu.
-    </div>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
@@ -161,7 +157,6 @@
     const { createClient } = supabase;
     const client = createClient('https://tyflhzwrwzfakwedipig.supabase.co', 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb');
     const BASE_URL = 'https://untergrund.app/';
-    const REDIRECT = BASE_URL + 'Login.html' + (window.location.search || '');
 
     function setAuthStatus(msg, isError = false) {
       const el = document.getElementById('auth-status');
@@ -169,67 +164,60 @@
     }
 
     function showResetUI() {
-      console.log('🧪 UNTERGRUND: Show Recovery UI');
+      console.log('🏁 RESET MODE ENABLED');
       document.getElementById('reset-password-ui').style.display = 'block';
       document.getElementById('auth-fields').style.display = 'none';
       document.getElementById('google-btn').style.display = 'none';
-      setAuthStatus('🔐 Neues Passwort vergeben', false);
+      document.getElementById('login-title').textContent = 'Passwort zurücksetzen';
+      document.getElementById('login-subtitle').textContent = 'Vergib jetzt dein neues Passwort für den Untergrund.';
+      setAuthStatus('🔐 Bitte neues Passwort eingeben', false);
     }
 
-    async function updatePassword() {
-      const pw = document.getElementById('new-password-input').value;
-      if (pw.length < 6) return setAuthStatus('Min. 6 Zeichen!', true);
-      setAuthStatus('🔒 Aktualisiere...');
-      const { error } = await client.auth.updateUser({ password: pw });
-      if (error) return setAuthStatus(error.message, true);
-      setAuthStatus('✅ Fertig! Leite weiter...');
-      setTimeout(() => window.location.replace(BASE_URL + 'index.html'), 1500);
+    // CHECK FOR HASH IMMEDIATELY (V5 AGGRESSIVE)
+    if (window.location.hash.length > 5) {
+       const h = window.location.hash;
+       console.log('🔍 URL HASH FOUND:', h);
+       if (h.includes('recovery') || h.includes('access_token') || h.includes('type=recovery')) {
+          showResetUI();
+       }
     }
-
-    async function loginWithProvider(provider) {
-      await client.auth.signInWithOAuth({ provider, options: { redirectTo: REDIRECT } });
-    }
-
-    // CHECK RECOVERY IMMEDIATELY (Before anything else)
-    const isRecovery = window.location.hash.includes('type=recovery') || window.location.hash.includes('recovery');
-    if (isRecovery) { showResetUI(); }
 
     client.auth.onAuthStateChange((event, session) => {
-      console.log('🔹 Event:', event);
+      console.log('🔹 Supabase Event:', event);
       if (event === 'PASSWORD_RECOVERY') { showResetUI(); }
-      else if (event === 'SIGNED_IN' && session && !isRecovery) {
-         window.location.replace(BASE_URL + 'index.html');
+      else if (event === 'SIGNED_IN' && session) {
+         // Auto-Redirect only if NOT in recovery mode
+         if (document.getElementById('reset-password-ui').style.display !== 'block') {
+            window.location.replace(BASE_URL + 'index.html');
+         }
       }
     });
 
+    document.getElementById('email-update-pw-btn').onclick = async () => {
+      const pw = document.getElementById('new-password-input').value;
+      if (pw.length < 6) return setAuthStatus('Min. 6 Zeichen!', true);
+      const { error } = await client.auth.updateUser({ password: pw });
+      if (error) setAuthStatus(error.message, true);
+      else { setAuthStatus('✅ Passwort geändert! Leite weiter...'); setTimeout(() => window.location.replace(BASE_URL + 'index.html'), 1500); }
+    };
+
     document.getElementById('email-login-btn').onclick = async () => {
-      const email = document.getElementById('email-input').value;
-      const pass = document.getElementById('password-input').value;
-      const { error } = await client.auth.signInWithPassword({ email, password: pass });
+      const { error } = await client.auth.signInWithPassword({ email: document.getElementById('email-input').value, password: document.getElementById('password-input').value });
       if (error) setAuthStatus(error.message, true);
     };
 
     document.getElementById('email-register-btn').onclick = async () => {
-      const email = document.getElementById('email-input').value;
-      const pass = document.getElementById('password-input').value;
-      const { data, error } = await client.auth.signUp({ email, password: pass, options: { emailRedirectTo: REDIRECT } });
+      const { data, error } = await client.auth.signUp({ email: document.getElementById('email-input').value, password: document.getElementById('password-input').value });
       if (error) setAuthStatus(error.message, true);
-      else setAuthStatus(data?.session ? 'Login!' : 'Check deine Mails!');
+      else setAuthStatus(data?.session ? 'Login!' : 'Mails prüfen!');
     };
 
     document.getElementById('email-reset-btn').onclick = async () => {
       const email = document.getElementById('email-input').value;
       if (!email) return setAuthStatus('Mail fehlt!', true);
-      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: REDIRECT });
+      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: BASE_URL + 'Login.html' });
       setAuthStatus(error ? error.message : 'Reset-Mail gesendet!', !!error);
     };
-
-    document.getElementById('email-update-pw-btn').onclick = updatePassword;
-
-    // Hint text
-    const params = new URLSearchParams(window.location.search);
-    const hints = { collection: 'Stage-Karten sehen.', stage: 'Karte sammeln.', gate: 'Gate öffnen.', gate_album: 'Gate-Album öffnen.', stage_claim: 'Einladung claimen.' };
-    document.getElementById('login-hint').textContent = hints[params.get('from')] ? 'Melde dich an, um ' + hints[params.get('from')] : '';
   </script>
 </body>
 </html>
