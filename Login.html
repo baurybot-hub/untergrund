@@ -7,110 +7,36 @@
   <style>
     * { box-sizing: border-box; }
     body {
-      margin: 0;
-      min-height: 100vh;
+      margin: 0; min-height: 100vh;
       background: radial-gradient(circle at top, #1cff88 0, #020202 55%, #000 100%);
-      font-family: system-ui, -apple-system, sans-serif;
-      color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif; color: #f5f5f5;
+      display: flex; justify-content: center; align-items: center; padding: 20px;
     }
     .login-container {
-      width: 100%;
-      max-width: 420px;
-      background: rgba(0, 0, 0, 0.88);
-      border-radius: 20px;
-      border: 1px solid rgba(28, 255, 136, 0.35);
-      padding: 40px 30px;
-      text-align: center;
+      width: 100%; max-width: 420px;
+      background: rgba(0, 0, 0, 0.88); border-radius: 20px;
+      border: 1px solid rgba(28, 255, 136, 0.35); padding: 40px 30px; text-align: center;
     }
-    .brand {
-      font-size: 13px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: #9effc7;
-      margin-bottom: 8px;
-    }
+    .brand { font-size: 13px; letter-spacing: 0.2em; text-transform: uppercase; color: #9effc7; margin-bottom: 8px; }
     h1 { font-size: 28px; margin: 0 0 8px; }
-    .subtitle {
-      font-size: 14px;
-      color: #c0c0c0;
-      margin-bottom: 24px;
-      line-height: 1.5;
-    }
-    .hint {
-      font-size: 12px;
-      color: #9ca3af;
-      margin-bottom: 20px;
-      min-height: 1.2em;
-    }
+    .subtitle { font-size: 14px; color: #c0c0c0; margin-bottom: 24px; line-height: 1.5; }
+    .hint { font-size: 12px; color: #9ca3af; margin-bottom: 20px; min-height: 1.2em; }
     .google-btn {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      background: #fff;
-      color: #3c4043;
-      border: 1px solid #dadce0;
-      border-radius: 12px;
-      padding: 13px 20px;
-      font-size: 15px;
-      font-weight: 500;
-      font-family: 'Google Sans', system-ui, sans-serif;
-      cursor: pointer;
-      margin-bottom: 12px;
-      transition: box-shadow 0.2s, background 0.2s;
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: 12px;
+      background: #fff; color: #3c4043; border: 1px solid #dadce0; border-radius: 12px;
+      padding: 13px 20px; font-size: 15px; font-weight: 500; cursor: pointer; margin-bottom: 12px;
     }
-    .google-btn:hover {
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-      background: #f8f9fa;
-    }
-    .google-btn svg {
-      width: 20px;
-      height: 20px;
-      flex-shrink: 0;
-    }
-    .email-wrap {
-      margin-top: 10px;
-      border-top: 1px solid rgba(148,163,184,0.2);
-      padding-top: 12px;
-    }
+    .email-wrap { margin-top: 10px; border-top: 1px solid rgba(148,163,184,0.2); padding-top: 12px; }
     .email-input {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(148,163,184,0.45);
-      background: rgba(2,6,23,0.9);
-      color: #e5e7eb;
-      padding: 11px 12px;
-      font-size: 14px;
-      margin-bottom: 8px;
+      width: 100%; border-radius: 10px; border: 1px solid rgba(148,163,184,0.45);
+      background: rgba(2,6,23,0.9); color: #e5e7eb; padding: 11px 12px; font-size: 14px; margin-bottom: 8px;
     }
     .email-btn {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid rgba(148,163,184,0.45);
-      background: rgba(15,23,42,0.95);
-      color: #e5e7eb;
-      padding: 11px 12px;
-      font-size: 14px;
-      cursor: pointer;
-      margin-bottom: 6px;
+      width: 100%; border-radius: 10px; border: 1px solid rgba(148,163,184,0.45);
+      background: rgba(15,23,42,0.95); color: #e5e7eb; padding: 11px 12px; font-size: 14px; cursor: pointer; margin-bottom: 6px;
     }
-    .auth-status {
-      min-height: 1.2em;
-      font-size: 12px;
-      color: #9ca3af;
-      margin-top: 4px;
-    }
-    .legal {
-      font-size: 11px;
-      color: #555;
-      margin-top: 20px;
-      line-height: 1.5;
-    }
+    .auth-status { min-height: 1.2em; font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .legal { font-size: 11px; color: #555; margin-top: 20px; line-height: 1.5; }
     .legal a { color: #9effc7; text-decoration: none; }
   </style>
 </head>
@@ -118,37 +44,31 @@
   <div class="login-container">
     <div class="brand">🎴 UNTERGRUND</div>
     <h1 id="login-title">Deine Sammlung</h1>
-    <div id="login-subtitle" class="subtitle">
-      Melde dich an oder registriere dich per Google oder mit E‑Mail + Passwort, um Stage-Karten zu sammeln und dein persönliches Underground-Album aufzubauen.
-    </div>
+    <div id="login-subtitle" class="subtitle">Melde dich an oder registriere dich, um Stage-Karten zu sammeln und dein Album aufzubauen.</div>
     <div id="login-hint" class="hint"></div>
 
     <button id="google-btn" class="google-btn" onclick="loginWithProvider('google')">
-      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        <path fill="none" d="M0 0h48v48H0z"/>
-      </svg>
+      <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
       Mit Google anmelden
     </button>
 
-    <div id="email-section" class="email-wrap">
+    <div class="email-wrap">
       <div id="auth-fields">
-        <input id="email-input" class="email-input" type="email" placeholder="deine@email.de" autocomplete="email" />
-        <input id="password-input" class="email-input" type="password" placeholder="Passwort" autocomplete="current-password" />
-        <button id="email-login-btn" class="email-btn" type="button">🔐 Mit E‑Mail anmelden</button>
-        <button id="email-register-btn" class="email-btn" type="button">🆕 Registrieren (E‑Mail + Passwort)</button>
-        <button id="email-reset-btn" class="email-btn" type="button">📩 Passwort vergessen</button>
+        <input id="email-input" class="email-input" type="email" placeholder="deine@email.de" />
+        <input id="password-input" class="email-input" type="password" placeholder="Passwort" />
+        <button id="email-login-btn" class="email-btn">🔐 Mit E‑Mail anmelden</button>
+        <button id="email-register-btn" class="email-btn">🆕 Registrieren</button>
+        <button id="email-reset-btn" class="email-btn">📩 Passwort vergessen</button>
       </div>
-      
       <div id="reset-password-ui" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(28, 255, 136, 0.3); padding-top: 15px;">
         <input id="new-password-input" class="email-input" type="password" placeholder="Neues Passwort" />
-        <button id="email-update-pw-btn" class="email-btn" type="button" style="background: rgba(28, 255, 136, 0.1); border-color: #1cff88; color: #1cff88;">🆕 Passwort jetzt ändern</button>
+        <button id="email-update-pw-btn" class="email-btn" style="border-color: #1cff88; color: #1cff88;">🆕 Passwort ändern</button>
       </div>
-
       <div id="auth-status" class="auth-status"></div>
+    </div>
+
+    <div id="legal-links" class="legal">
+      Mit der Anmeldung stimmst du unseren <a href="agb.html">AGB</a> und der <a href="datenschutz.html">Datenschutzerklärung</a> zu.
     </div>
   </div>
 
@@ -164,41 +84,32 @@
     }
 
     function showResetUI() {
-      console.log('🏁 RESET MODE ENABLED');
       document.getElementById('reset-password-ui').style.display = 'block';
       document.getElementById('auth-fields').style.display = 'none';
       document.getElementById('google-btn').style.display = 'none';
-      document.getElementById('login-title').textContent = 'Passwort zurücksetzen';
-      document.getElementById('login-subtitle').textContent = 'Vergib jetzt dein neues Passwort für den Untergrund.';
-      setAuthStatus('🔐 Bitte neues Passwort eingeben', false);
+      document.getElementById('login-title').textContent = 'Neues Passwort';
+      setAuthStatus('🔐 Vergib jetzt dein neues Passwort.');
     }
 
-    // CHECK FOR HASH IMMEDIATELY (V5 AGGRESSIVE)
-    if (window.location.hash.length > 5) {
-       const h = window.location.hash;
-       console.log('🔍 URL HASH FOUND:', h);
-       if (h.includes('recovery') || h.includes('access_token') || h.includes('type=recovery')) {
-          showResetUI();
-       }
+    // Hash Logic
+    const h = window.location.hash;
+    if (h.includes('error_code=otp_expired')) {
+       setAuthStatus('❌ Link abgelaufen! Fordere bitte einen neuen an.', true);
+    } else if (h.includes('recovery') || h.includes('access_token')) {
+       showResetUI();
     }
 
     client.auth.onAuthStateChange((event, session) => {
-      console.log('🔹 Supabase Event:', event);
-      if (event === 'PASSWORD_RECOVERY') { showResetUI(); }
-      else if (event === 'SIGNED_IN' && session) {
-         // Auto-Redirect only if NOT in recovery mode
-         if (document.getElementById('reset-password-ui').style.display !== 'block') {
-            window.location.replace(BASE_URL + 'index.html');
-         }
+      if (event === 'PASSWORD_RECOVERY') showResetUI();
+      else if (event === 'SIGNED_IN' && session && !window.location.hash.includes('recovery')) {
+         window.location.replace(BASE_URL + 'index.html');
       }
     });
 
     document.getElementById('email-update-pw-btn').onclick = async () => {
-      const pw = document.getElementById('new-password-input').value;
-      if (pw.length < 6) return setAuthStatus('Min. 6 Zeichen!', true);
-      const { error } = await client.auth.updateUser({ password: pw });
+      const { error } = await client.auth.updateUser({ password: document.getElementById('new-password-input').value });
       if (error) setAuthStatus(error.message, true);
-      else { setAuthStatus('✅ Passwort geändert! Leite weiter...'); setTimeout(() => window.location.replace(BASE_URL + 'index.html'), 1500); }
+      else { setAuthStatus('✅ Geändert! Leite weiter...'); setTimeout(() => window.location.replace(BASE_URL + 'index.html'), 1500); }
     };
 
     document.getElementById('email-login-btn').onclick = async () => {
@@ -207,9 +118,9 @@
     };
 
     document.getElementById('email-register-btn').onclick = async () => {
-      const { data, error } = await client.auth.signUp({ email: document.getElementById('email-input').value, password: document.getElementById('password-input').value });
+      const { data, error } = await client.auth.signUp({ email: document.getElementById('email-input').value, password: document.getElementById('password-input').value, options: { emailRedirectTo: BASE_URL + 'Login.html' } });
       if (error) setAuthStatus(error.message, true);
-      else setAuthStatus(data?.session ? 'Login!' : 'Mails prüfen!');
+      else setAuthStatus(data?.session ? 'Eingeloggt!' : 'Bestätigungs-Mail prüfen!');
     };
 
     document.getElementById('email-reset-btn').onclick = async () => {
@@ -218,6 +129,10 @@
       const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: BASE_URL + 'Login.html' });
       setAuthStatus(error ? error.message : 'Reset-Mail gesendet!', !!error);
     };
+
+    async function loginWithProvider(provider) {
+      await client.auth.signInWithOAuth({ provider, options: { redirectTo: BASE_URL + 'Login.html' } });
+    }
   </script>
 </body>
 </html>
