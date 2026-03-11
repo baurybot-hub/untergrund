@@ -140,6 +140,12 @@
       <button id="email-login-btn" class="email-btn" type="button">🔐 Mit E‑Mail anmelden</button>
       <button id="email-register-btn" class="email-btn" type="button">🆕 Registrieren (E‑Mail + Passwort)</button>
       <button id="email-reset-btn" class="email-btn" type="button">📩 Passwort vergessen</button>
+      
+      <div id="reset-password-ui" style="display: none; margin-top: 15px; border-top: 1px dashed rgba(28, 255, 136, 0.3); padding-top: 15px;">
+        <input id="new-password-input" class="email-input" type="password" placeholder="Neues Passwort" />
+        <button id="email-update-pw-btn" class="email-btn" type="button" style="background: rgba(28, 255, 136, 0.1); border-color: #1cff88; color: #1cff88;">🆕 Passwort jetzt ändern</button>
+      </div>
+
       <div id="auth-status" class="auth-status"></div>
     </div>
 
@@ -280,10 +286,34 @@
       setAuthStatus('Passwort-Reset gesendet. Bitte E‑Mail prüfen.');
     }
 
+    async function updatePassword() {
+      const newPassword = document.getElementById('new-password-input')?.value;
+      if (!newPassword || newPassword.length < 6) {
+        setAuthStatus('Passwort muss mindestens 6 Zeichen haben.', true);
+        return;
+      }
+      setAuthStatus('Aktualisiere Passwort …');
+      const { error } = await client.auth.updateUser({ password: newPassword });
+      if (error) {
+        setAuthStatus(error.message || 'Fehler beim Update.', true);
+        return;
+      }
+      setAuthStatus('Passwort erfolgreich geändert.');
+      setTimeout(() => window.location.replace(getNextUrl()), 1500);
+    }
+
     async function handleAuthFromHash() {
-      if (window.location.hash.includes('access_token')) {
+      const hash = window.location.hash;
+      if (hash.includes('access_token')) {
+        if (hash.includes('type=recovery')) {
+          document.getElementById('reset-password-ui').style.display = 'block';
+          document.getElementById('email-login-btn').style.display = 'none';
+          document.getElementById('email-register-btn').style.display = 'none';
+          document.getElementById('email-reset-btn').style.display = 'none';
+          setAuthStatus('Bitte neues Passwort vergeben.');
+        }
         await client.auth.getUser();
-        history.replaceState(null, '', window.location.origin + window.location.pathname + window.location.search);
+        // history.replaceState(null, '', window.location.origin + window.location.pathname + window.location.search);
       }
     }
 
@@ -299,6 +329,7 @@
     document.getElementById('email-login-btn')?.addEventListener('click', loginWithEmailPassword);
     document.getElementById('email-register-btn')?.addEventListener('click', registerWithEmailPassword);
     document.getElementById('email-reset-btn')?.addEventListener('click', resetPasswordByEmail);
+    document.getElementById('email-update-pw-btn')?.addEventListener('click', updatePassword);
 
     (async () => {
       setHintText();
