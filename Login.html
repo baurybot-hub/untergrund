@@ -134,7 +134,7 @@
       Mit Google anmelden
     </button>
 
-    <div class="email-wrap">
+    <div id="email-section" class="email-wrap">
       <div id="auth-fields">
         <input id="email-input" class="email-input" type="email" placeholder="deine@email.de" autocomplete="email" />
         <input id="password-input" class="email-input" type="password" placeholder="Passwort" autocomplete="current-password" />
@@ -151,126 +151,82 @@
       <div id="auth-status" class="auth-status"></div>
     </div>
 
-    <div class="legal">
-      Mit der Anmeldung stimmst du unseren
-      <a href="agb.html">AGB</a> und der
-      <a href="datenschutz.html">Datenschutzerklärung</a> zu.
+    <div id="legal-section" class="legal">
+      Mit der Anmeldung stimmst du unseren <a href="agb.html">AGB</a> und der <a href="datenschutz.html">Datenschutzerklärung</a> zu.
     </div>
   </div>
 
   <script src="https://unpkg.com/@supabase/supabase-js@2.48.0/dist/umd/supabase.js"></script>
   <script>
     const { createClient } = supabase;
-
+    const client = createClient('https://tyflhzwrwzfakwedipig.supabase.co', 'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb');
     const BASE_URL = 'https://untergrund.app/';
-    const CURRENT_SEARCH = window.location.search || '';
-    const REDIRECT = BASE_URL + 'Login.html' + CURRENT_SEARCH;
-
-    const client = createClient(
-      'https://tyflhzwrwzfakwedipig.supabase.co',
-      'sb_publishable_OkJhaPak_fd0nNg1vxRLPQ_gOiaI6Tb'
-    );
+    const REDIRECT = BASE_URL + 'Login.html' + (window.location.search || '');
 
     function setAuthStatus(msg, isError = false) {
       const el = document.getElementById('auth-status');
-      if (!el) return;
-      el.textContent = msg || '';
-      el.style.color = isError ? '#fca5a5' : '#9ca3af';
+      if (el) { el.textContent = msg || ''; el.style.color = isError ? '#fca5a5' : '#1cff88'; }
     }
 
     function showResetUI() {
+      console.log('🧪 UNTERGRUND: Show Recovery UI');
       document.getElementById('reset-password-ui').style.display = 'block';
       document.getElementById('auth-fields').style.display = 'none';
       document.getElementById('google-btn').style.display = 'none';
-      setAuthStatus('🔐 Bitte neues Passwort vergeben.');
-    }
-
-    function getNextUrl() {
-      const params = new URLSearchParams(window.location.search);
-      const from = params.get('from');
-      const artistId = params.get('artist_id');
-      const token = params.get('token');
-
-      if (from === 'stage_claim' && token) {
-        return BASE_URL + `StageFormular.html?token=${encodeURIComponent(token)}`;
-      }
-      if (from === 'collection') return BASE_URL + 'MeineSammlung.html';
-      if (from === 'stage' && artistId) {
-        return BASE_URL + `Stage.html?artist_id=${encodeURIComponent(artistId)}&auto_collect=true`;
-      }
-      if (from === 'gate') return BASE_URL + 'Gate.html';
-      if (from === 'gate_album') return BASE_URL + 'GateAlbum.html';
-      return BASE_URL + 'index.html';
-    }
-
-    async function loginWithProvider(provider) {
-      const { error } = await client.auth.signInWithOAuth({
-        provider,
-        options: { redirectTo: REDIRECT }
-      });
-      if (error) console.error(provider + ' login error:', error);
-    }
-
-    async function loginWithEmailPassword() {
-      const email = document.getElementById('email-input').value.trim();
-      const password = document.getElementById('password-input').value;
-      if (!email || !password) return setAuthStatus('E-Mail und Passwort fehlen.', true);
-      setAuthStatus('Anmeldung läuft …');
-      const { error } = await client.auth.signInWithPassword({ email, password });
-      if (error) setAuthStatus(error.message, true);
-    }
-
-    async function registerWithEmailPassword() {
-      const email = document.getElementById('email-input').value.trim();
-      const password = document.getElementById('password-input').value;
-      if (!email || password.length < 6) return setAuthStatus('E-Mail/Passwort (min 6 Zeichen) prüfen.', true);
-      setAuthStatus('Registrierung läuft …');
-      const { data, error } = await client.auth.signUp({ email, password, options: { emailRedirectTo: REDIRECT } });
-      if (error) return setAuthStatus(error.message, true);
-      setAuthStatus(data?.session ? 'Erfolgreich eingeloggt.' : 'Bitte Bestätigungs-E-Mail prüfen.');
-    }
-
-    async function resetPasswordByEmail() {
-      const email = document.getElementById('email-input').value.trim();
-      if (!email) return setAuthStatus('Bitte zuerst E-Mail eingeben.', true);
-      setAuthStatus('Sende Passwort-Reset …');
-      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: REDIRECT });
-      if (error) setAuthStatus(error.message, true);
-      else setAuthStatus('Reset gesendet. Bitte E-Mails prüfen.');
+      setAuthStatus('🔐 Neues Passwort vergeben', false);
     }
 
     async function updatePassword() {
-      const newPassword = document.getElementById('new-password-input').value;
-      if (newPassword.length < 6) return setAuthStatus('Mindestens 6 Zeichen.', true);
-      setAuthStatus('Aktualisiere Passwort …');
-      const { error } = await client.auth.updateUser({ password: newPassword });
+      const pw = document.getElementById('new-password-input').value;
+      if (pw.length < 6) return setAuthStatus('Min. 6 Zeichen!', true);
+      setAuthStatus('🔒 Aktualisiere...');
+      const { error } = await client.auth.updateUser({ password: pw });
       if (error) return setAuthStatus(error.message, true);
-      setAuthStatus('Passwort geändert!');
-      setTimeout(() => window.location.replace(getNextUrl()), 1500);
+      setAuthStatus('✅ Fertig! Leite weiter...');
+      setTimeout(() => window.location.replace(BASE_URL + 'index.html'), 1500);
     }
 
+    async function loginWithProvider(provider) {
+      await client.auth.signInWithOAuth({ provider, options: { redirectTo: REDIRECT } });
+    }
+
+    // CHECK RECOVERY IMMEDIATELY (Before anything else)
+    const isRecovery = window.location.hash.includes('type=recovery') || window.location.hash.includes('recovery');
+    if (isRecovery) { showResetUI(); }
+
     client.auth.onAuthStateChange((event, session) => {
-      console.log('🔹 Auth Event:', event);
-      if (event === 'PASSWORD_RECOVERY') {
-        showResetUI();
-      } else if (event === 'SIGNED_IN' && session) {
-        if (document.getElementById('reset-password-ui').style.display !== 'block') {
-          window.location.replace(getNextUrl());
-        }
+      console.log('🔹 Event:', event);
+      if (event === 'PASSWORD_RECOVERY') { showResetUI(); }
+      else if (event === 'SIGNED_IN' && session && !isRecovery) {
+         window.location.replace(BASE_URL + 'index.html');
       }
     });
 
-    // Fallback: Check hash immediately
-    if (window.location.hash.includes('type=recovery') || window.location.hash.includes('recovery')) {
-      showResetUI();
-    }
+    document.getElementById('email-login-btn').onclick = async () => {
+      const email = document.getElementById('email-input').value;
+      const pass = document.getElementById('password-input').value;
+      const { error } = await client.auth.signInWithPassword({ email, password: pass });
+      if (error) setAuthStatus(error.message, true);
+    };
 
-    document.getElementById('email-login-btn').addEventListener('click', loginWithEmailPassword);
-    document.getElementById('email-register-btn').addEventListener('click', registerWithEmailPassword);
-    document.getElementById('email-reset-btn').addEventListener('click', resetPasswordByEmail);
-    document.getElementById('email-update-pw-btn').addEventListener('click', updatePassword);
+    document.getElementById('email-register-btn').onclick = async () => {
+      const email = document.getElementById('email-input').value;
+      const pass = document.getElementById('password-input').value;
+      const { data, error } = await client.auth.signUp({ email, password: pass, options: { emailRedirectTo: REDIRECT } });
+      if (error) setAuthStatus(error.message, true);
+      else setAuthStatus(data?.session ? 'Login!' : 'Check deine Mails!');
+    };
 
-    // Initial setup
+    document.getElementById('email-reset-btn').onclick = async () => {
+      const email = document.getElementById('email-input').value;
+      if (!email) return setAuthStatus('Mail fehlt!', true);
+      const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: REDIRECT });
+      setAuthStatus(error ? error.message : 'Reset-Mail gesendet!', !!error);
+    };
+
+    document.getElementById('email-update-pw-btn').onclick = updatePassword;
+
+    // Hint text
     const params = new URLSearchParams(window.location.search);
     const hints = { collection: 'Stage-Karten sehen.', stage: 'Karte sammeln.', gate: 'Gate öffnen.', gate_album: 'Gate-Album öffnen.', stage_claim: 'Einladung claimen.' };
     document.getElementById('login-hint').textContent = hints[params.get('from')] ? 'Melde dich an, um ' + hints[params.get('from')] : '';
