@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Die Schatzsuche des Kapitän Salzwasser</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0604; font-family: 'Crimson Text', Georgia, serif; overflow: hidden; height: 100vh; }
+  
+  /* === GAME CONTAINER === */
+  #game { position: relative; width: 100vw; height: 100vh; overflow: hidden; }
+  .vignette { position: fixed; inset: 0; background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.5)); pointer-events: none; z-index: 90; }
+  
+  /* === UI === */
+  #ui-top { position: fixed; top: 0; left: 0; right: 0; padding: 20px 30px; z-index: 100; background: linear-gradient(180deg, rgba(0,0,0,0.5), transparent); }
+  #chapter { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #7a7570; }
+  #location { font-family: 'Cinzel', serif; font-size: 22px; color: #f5e6d3; text-shadow: 0 2px 8px rgba(0,0,0,0.8); }
+  
+  /* === INVENTAR === */
+  #inventory { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; padding: 14px 20px; background: linear-gradient(180deg, rgba(45,24,16,0.95), rgba(26,14,8,0.98)); border: 2px solid #6b3d22; border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.6); z-index: 100; }
+  .inv-slot { width: 50px; height: 50px; background: rgba(0,0,0,0.3); border: 1px solid #4a2c1a; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; cursor: pointer; }
+  .inv-slot.has-item { border-color: #d4a84b; box-shadow: 0 0 10px rgba(212,168,75,0.3); }
+  .inv-slot.selected { border-color: #fff; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+  .inv-item { font-size: 24px; }
+  
+  /* === DIALOG === */
+  #dialog { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(10px); max-width: 600px; width: 90%; padding: 20px 28px; background: linear-gradient(180deg, rgba(10,22,40,0.95), rgba(5,11,20,0.98)); border: 1px solid rgba(212,168,75,0.3); border-radius: 4px; color: #f5e6d3; font-size: 17px; line-height: 1.6; opacity: 0; visibility: hidden; transition: all 0.4s; z-index: 150; text-align: center; cursor: pointer; }
+  #dialog.visible { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  #dialog .speaker { font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #d4a84b; margin-bottom: 10px; }
+  
+  /* === ROOMS (alle versteckt, nur aktiver sichtbar) === */
+  .room { position: absolute; inset: 0; display: none; }
+  .room.active { display: block; }
+  
+  /* === HOTSPOT === */
+  .hotspot { position: absolute; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; z-index: 10; }
+  .hotspot:hover { transform: scale(1.05); }
+  .hotspot::after { content: ''; position: absolute; inset: -5px; border: 2px solid transparent; border-radius: 6px; transition: all 0.2s; pointer-events: none; }
+  .hotspot:hover::after { border-color: rgba(212,168,75,0.6); box-shadow: 0 0 15px rgba(212,168,75,0.2); }
+  
+  /* === NAVIGATION ARROWS === */
+  .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); font-size: 40px; color: #d4a84b; cursor: pointer; z-index: 50; opacity: 0.5; transition: all 0.3s; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+  .nav-arrow:hover { opacity: 1; transform: translateY(-50%) scale(1.2); }
+  .nav-left { left: 20px; }
+  .nav-right { right: 20px; }
+  .nav-up { top: auto; bottom: 120px; left: 50%; transform: translateX(-50%); }
+  .nav-down { top: 80px; left: 50%; transform: translateX(-50%); }
+  
+  /* ========== KABINE ========== */
+  #cabin { background: linear-gradient(180deg, #1a0f0a 0%, #2d1810 30%, #3d2518 60%, #1a0f0a 100%); }
+  .wall { position: absolute; width: 100%; height: 65%; background: repeating-linear-gradient(0deg, #3d2518 0px, #3d2518 38px, #2d1810 38px, #2d1810 40px); }
+  .floor { position: absolute; bottom: 0; width: 100%; height: 35%; background: linear-gradient(180deg, #4a2c1a, #2d1810 50%, #1a0f0a); }
+  .beam { position: absolute; width: 20px; height: 65%; background: linear-gradient(90deg, #1a0f0a, #4a2c1a, #1a0f0a); top: 0; }
+  .hatch { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 120px; height: 80px; background: linear-gradient(180deg, #1a3a5c, #2a5a8c); border: 8px solid #1a0f0a; border-radius: 8px; z-index: 2; }
+  .light-beam { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 200px; height: 100%; background: linear-gradient(180deg, rgba(255,240,200,0.3), rgba(255,220,150,0.1) 30%, transparent 70%); clip-path: polygon(40% 0%, 60% 0%, 75% 100%, 25% 100%); pointer-events: none; z-index: 1; }
+  
+  /* Bett */
+  .bed { left: 8%; bottom: 25%; width: 220px; height: 120px; }
+  .bed-frame { position: absolute; bottom: 0; left: 15px; right: 15px; height: 50px; background: #4a2c1a; border-radius: 4px 4px 0 0; }
+  .bed-post { position: absolute; width: 15px; height: 120px; background: linear-gradient(90deg, #2d1810, #4a2c1a, #2d1810); bottom: 0; }
+  .mattress { position: absolute; bottom: 10px; left: 20px; right: 20px; height: 35px; background: linear-gradient(180deg, #8B7355, #6b5344); border-radius: 6px; }
+  .blanket { position: absolute; bottom: 15px; left: 70px; right: 10px; height: 25px; background: linear-gradient(180deg, #6B5344, #4a3a2a); border-radius: 4px; transform: skewX(-5deg); }
+  .pillow { position: absolute; bottom: 18px; left: 25px; width: 45px; height: 20px; background: #a89880; border-radius: 4px; }
+  
+  /* Münze */
+  .coin { left: 20%; bottom: 22%; display: none; animation: coinShine 2s infinite; }
+  .coin.visible { display: block; }
+  @keyframes coinShine { 50% { filter: brightness(1.3) drop-shadow(0 0 8px #f5d76e); } }
+  .coin-body { width: 30px; height: 30px; background: radial-gradient(circle at 30% 30%, #f5d76e, #d4a84b); border-radius: 50%; border: 2px solid #b8903f; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #8a6a2f; font-size: 14px; box-shadow: 0 3px 8px rgba(0,0,0,0.4); }
+  
+  /* Schiffsauge */
+  .eye { left: 30%; top: 28%; width: 60px; height: 60px; }
+  .eye-ring { width: 60px; height: 60px; border: 4px solid #d4a84b; border-radius: 50%; background: #f5f5f0; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+  .eye-iris { width: 30px; height: 30px; background: radial-gradient(circle at 40% 40%, #4a8abd, #1a4a7a); border-radius: 50%; position: relative; }
+  .eye-pupil { width: 14px; height: 14px; background: #0a0a0a; border-radius: 50%; position: absolute; top: 8px; left: 10px; }
+  .eye-glint { width: 5px; height: 5px; background: #fff; border-radius: 50%; position: absolute; top: 6px; left: 16px; }
+  
+  /* Tür */
+  .door { right: 8%; bottom: 30%; width: 80px; height: 180px; }
+  .door-frame { position: absolute; inset: -6px; background: #1a0f0a; border-radius: 4px; }
+  .door-body { position: absolute; inset: 0; background: linear-gradient(90deg, #3d2518, #4a2c1a 50%, #3d2518); }
+  .door-panel { position: absolute; left: 8px; right: 8px; height: 70px; border: 2px solid #2d1810; }
+  .door-handle { position: absolute; right: 15px; top: 50%; width: 14px; height: 14px; background: radial-gradient(circle at 30% 30%, #f5d76e, #d4a84b); border-radius: 50%; }
+  .door-lock { position: absolute; right: 12px; top: 62%; width: 20px; height: 25px; background: #2a2a2a; border-radius: 2px; }
+  
+  /* Fass */
+  .barrel { right: 25%; bottom: 20%; width: 60px; height: 80px; }
+  .barrel-body { width: 60px; height: 80px; background: linear-gradient(90deg, #3d2518, #5a3a28 50%, #3d2518); border-radius: 8px; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
+  .barrel-band { position: absolute; left: -2px; right: -2px; height: 6px; background: linear-gradient(180deg, #4a4a4a, #2a2a2a); border-radius: 2px; }
+  
+  /* Tisch */
+  .table { left: 50%; bottom: 25%; width: 140px; height: 60px; }
+  .table-top { position: absolute; top: 0; width: 140px; height: 12px; background: linear-gradient(180deg, #5a3a28, #4a2c1a); border-radius: 2px; }
+  .table-leg { position: absolute; top: 12px; width: 8px; height: 38px; background: #3d2518; }
+  
+  /* Pirat */
+  .pirate { position: absolute; z-index: 20; }
+  .pirate-body { position: relative; width: 50px; height: 120px; }
+  .pirate-hat { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); width: 50px; height: 25px; background: #1a1a1a; border-radius: 50% 50% 0 0; }
+  .pirate-hat::before { content: ''; position: absolute; bottom: -4px; left: -5px; width: 60px; height: 8px; background: #1a1a1a; }
+  .pirate-hat::after { content: ''; position: absolute; top: 5px; right: 5px; width: 8px; height: 8px; background: #f5d76e; border-radius: 50%; }
+  .pirate-head { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 36px; height: 40px; background: linear-gradient(180deg, #e8c4a0, #d4a880); border-radius: 50% 50% 45% 45%; }
+  .pirate-eye { position: absolute; top: 14px; width: 6px; height: 6px; background: #2a2a2a; border-radius: 50%; }
+  .pirate-eye-l { left: 8px; } .pirate-eye-r { right: 8px; }
+  .pirate-mouth { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 12px; height: 6px; border: 2px solid #8a6a5a; border-top: none; border-radius: 0 0 10px 10px; }
+  .pirate-beard { position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%); width: 20px; height: 15px; background: #3a2a1a; border-radius: 0 0 50% 50%; }
+  .pirate-torso { position: absolute; top: 52px; left: 50%; transform: translateX(-50%); width: 40px; height: 45px; background: linear-gradient(180deg, #d4d4d4, #a0a0a0); border-radius: 5px 5px 0 0; }
+  .pirate-belt { position: absolute; bottom: 0; left: 0; right: 0; height: 8px; background: #4a3a2a; }
+  .pirate-legs { position: absolute; top: 97px; left: 50%; transform: translateX(-50%); width: 36px; height: 30px; display: flex; gap: 4px; }
+  .pirate-leg { flex: 1; background: #2d2d2d; border-radius: 0 0 3px 3px; position: relative; }
+  .pirate-boot { position: absolute; bottom: 0; left: -2px; right: -2px; height: 10px; background: #1a1a1a; border-radius: 2px 2px 4px 4px; }
+  
+  /* Ratte */
+  .rat { position: absolute; bottom: 18%; z-index: 15; }
+  .rat-body { width: 40px; height: 20px; position: relative; cursor: pointer; }
+  .rat-body:hover { transform: scale(1.2); }
+  .rat-torso { position: absolute; left: 8px; top: 5px; width: 25px; height: 12px; background: linear-gradient(180deg, #6a6a6a, #4a4a4a); border-radius: 60% 40% 40% 60%; }
+  .rat-head { position: absolute; right: 0; top: 3px; width: 14px; height: 10px; background: #7a7a7a; border-radius: 50% 60% 40% 50%; }
+  .rat-ear { position: absolute; top: -4px; width: 8px; height: 8px; background: #9a9a9a; border-radius: 50%; }
+  .rat-ear-r { right: -2px; top: -2px; width: 6px; height: 6px; }
+  .rat-eye { position: absolute; right: 3px; top: 3px; width: 3px; height: 3px; background: #111; border-radius: 50%; }
+  .rat-nose { position: absolute; right: -1px; top: 5px; width: 4px; height: 3px; background: #cc8888; border-radius: 50%; }
+  .rat-tail { position: absolute; left: -20px; top: 8px; width: 25px; height: 3px; background: #aaa; border-radius: 2px; animation: tailWag 0.3s infinite alternate; }
+  @keyframes tailWag { 100% { transform: rotate(20deg); } }
+  
+  /* Öllampe */
+  .lamp { position: absolute; right: 15%; top: 25%; z-index: 10; }
+  .lamp-glow { position: absolute; width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,180,80,0.4), transparent 70%); top: -80px; left: -70px; animation: flicker 3s infinite; }
+  @keyframes flicker { 50% { opacity: 0.85; } }
+  .lamp-body { width: 30px; height: 50px; background: linear-gradient(90deg, #6b5344, #8B7355, #6b5344); border-radius: 0 0 8px 8px; position: relative; }
+  .lamp-flame { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 8px; height: 15px; background: radial-gradient(ellipse, #fff, #ffdd44 40%, #ff8800); border-radius: 50%; animation: flame 0.5s infinite alternate; }
+  @keyframes flame { 100% { transform: translateX(-50%) scaleY(1.2) scaleX(0.9); } }
+  
+  /* ========== DECK ========== */
+  #deck { background: linear-gradient(180deg, #0a1628 0%, #1a3a5c 30%, #2a5a8c 50%, #4a2c1a 75%, #3d2518 100%); }
+  .sky { position: absolute; top: 0; width: 100%; height: 60%; }
+  .stars { position: absolute; width: 2px; height: 2px; background: #fff; border-radius: 50%; box-shadow: 100px 50px 0 #fff, 200px 80px 0 #fff, 350px 30px 0 #fff, 500px 60px 0 #fff, 650px 40px 0 #fff, 800px 70px 0 #fff, 150px 100px 0 #fff, 450px 90px 0 #fff; }
+  .moon { position: absolute; top: 10%; right: 20%; width: 60px; height: 60px; background: radial-gradient(circle at 30% 30%, #fff, #e8e8d0); border-radius: 50%; box-shadow: 0 0 40px rgba(255,255,200,0.5); }
+  .deck-floor { position: absolute; bottom: 0; width: 100%; height: 40%; background: linear-gradient(180deg, #5a3a28, #4a2c1a, #3d2518); }
+  .railing { position: absolute; bottom: 38%; width: 100%; height: 10px; background: #2d1810; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+  .railing-post { position: absolute; bottom: 38%; width: 8px; height: 40px; background: linear-gradient(90deg, #1a0f0a, #3d2518, #1a0f0a); }
+  .mast { position: absolute; bottom: 40%; left: 50%; transform: translateX(-50%); width: 20px; height: 300px; background: linear-gradient(90deg, #3d2518, #5a3a28, #3d2518); }
+  .sail { position: absolute; bottom: 150px; left: 52%; width: 150px; height: 200px; background: rgba(255,250,240,0.85); clip-path: polygon(0 0, 100% 10%, 95% 100%, 5% 90%); }
+  .waves { position: absolute; bottom: 0; width: 100%; height: 20px; background: linear-gradient(0deg, #0a1628, transparent); }
+  .crate { right: 20%; bottom: 42%; width: 60px; height: 50px; background: linear-gradient(180deg, #5a3a28, #4a2c1a); border: 3px solid #3d2518; }
+  
+  /* NPC */
+  .npc { position: absolute; left: 35%; bottom: 42%; z-index: 15; }
+  
+  /* ========== KRÄHENNEST ========== */
+  #crowsnest { background: linear-gradient(180deg, #0a1628 0%, #1a3a5c 40%, #2a5a8c 100%); }
+  .crows-nest { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 120px; height: 80px; background: linear-gradient(180deg, #4a2c1a, #3d2518); border-radius: 0 0 10px 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+  .crows-railing { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); width: 140px; height: 30px; border: 6px solid #4a2c1a; border-bottom: none; border-radius: 8px 8px 0 0; }
+  .telescope { right: 30%; bottom: 55%; width: 80px; height: 20px; background: linear-gradient(90deg, #2a2a2a, #4a4a4a, #2a2a2a); border-radius: 10px; transform: rotate(-15deg); }
+  
+  /* Animierte Wolken */
+  .cloud { position: absolute; background: rgba(255,255,255,0.1); border-radius: 50%; animation: cloudDrift 30s linear infinite; }
+  @keyframes cloudDrift { 100% { transform: translateX(100vw); } }
+</style>
+</head>
+<body>
+
+<div id="game">
+  
+  <!-- ====== RAUM 1: KABINE ====== -->
+  <div class="room active" id="cabin">
+    <div class="wall"></div>
+    <div class="beam" style="left:15%"></div>
+    <div class="beam" style="left:45%"></div>
+    <div class="beam" style="left:75%"></div>
+    <div class="floor"></div>
+    <div class="light-beam"></div>
+    <div class="hatch"></div>
+    
+    <!-- Lampe -->
+    <div class="lamp">
+      <div class="lamp-glow"></div>
+      <div class="lamp-body"><div class="lamp-flame"></div></div>
+    </div>
+    
+    <!-- Schiffsauge -->
+    <div class="hotspot eye" data-action="eye">
+      <div class="eye-ring">
+        <div class="eye-iris"><div class="eye-pupil"></div><div class="eye-glint"></div></div>
+      </div>
+    </div>
+    
+    <!-- Bett -->
+    <div class="hotspot bed" data-action="bed">
+      <div class="bed-post" style="left:0"></div>
+      <div class="bed-post" style="right:0"></div>
+      <div class="bed-frame"></div>
+      <div class="mattress"></div>
+      <div class="blanket"></div>
+      <div class="pillow"></div>
+    </div>
+    
+    <!-- Münze (versteckt) -->
+    <div class="hotspot coin" id="coin" data-action="coin">
+      <div class="coin-body">$</div>
+    </div>
+    
+    <!-- Tisch -->
+    <div class="hotspot table" data-action="table">
+      <div class="table-top"></div>
+      <div class="table-leg" style="left:10px"></div>
+      <div class="table-leg" style="right:10px"></div>
+    </div>
+    
+    <!-- Fass -->
+    <div class="hotspot barrel" data-action="barrel">
+      <div class="barrel-body">
+        <div class="barrel-band" style="top:15%"></div>
+        <div class="barrel-band" style="bottom:15%"></div>
+      </div>
+    </div>
+    
+    <!-- Tür -->
+    <div class="hotspot door" data-action="door">
+      <div class="door-frame"></div>
+      <div class="door-body">
+        <div class="door-panel" style="top:10px"></div>
+        <div class="door-panel" style="bottom:10px"></div>
+        <div class="door-handle"></div>
+        <div class="door-lock"></div>
+      </div>
+    </div>
+    
+    <!-- Pirat -->
+    <div class="pirate" style="left:35%; bottom:32%">
+      <div class="pirate-body">
+        <div class="pirate-hat"></div>
+        <div class="pirate-head">
+          <div class="pirate-eye pirate-eye-l"></div>
+          <div class="pirate-eye pirate-eye-r"></div>
+          <div class="pirate-mouth"></div>
+          <div class="pirate-beard"></div>
+        </div>
+        <div class="pirate-torso"><div class="pirate-belt"></div></div>
+        <div class="pirate-legs">
+          <div class="pirate-leg"><div class="pirate-boot"></div></div>
+          <div class="pirate-leg"><div class="pirate-boot"></div></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Ratte -->
+    <div class="rat" id="rat">
+      <div class="rat-body" data-action="rat">
+        <div class="rat-tail"></div>
+        <div class="rat-torso"></div>
+        <div class="rat-head">
+          <div class="rat-ear" style="right:4px"></div>
+          <div class="rat-ear rat-ear-r"></div>
+          <div class="rat-eye"></div>
+          <div class="rat-nose"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ====== RAUM 2: DECK ====== -->
+  <div class="room" id="deck">
+    <div class="sky"><div class="stars"></div></div>
+    <div class="moon"></div>
+    <div class="deck-floor"></div>
+    <div class="railing"></div>
+    
+    <!-- Reling-Pfosten -->
+    <div class="railing-post" style="left:5%"></div>
+    <div class="railing-post" style="left:20%"></div>
+    <div class="railing-post" style="left:35%"></div>
+    <div class="railing-post" style="left:50%"></div>
+    <div class="railing-post" style="left:65%"></div>
+    <div class="railing-post" style="left:80%"></div>
+    <div class="railing-post" style="left:95%"></div>
+    
+    <div class="mast"></div>
+    <div class="sail"></div>
+    
+    <!-- Kiste -->
+    <div class="hotspot crate" data-action="crate"></div>
+    
+    <!-- NPC -->
+    <div class="npc pirate">
+      <div class="pirate-body">
+        <div class="pirate-hat"></div>
+        <div class="pirate-head">
+          <div class="pirate-eye pirate-eye-l"></div>
+          <div class="pirate-eye pirate-eye-r"></div>
+          <div class="pirate-mouth"></div>
+          <div class="pirate-beard"></div>
+        </div>
+        <div class="pirate-torso"><div class="pirate-belt"></div></div>
+        <div class="pirate-legs">
+          <div class="pirate-leg"><div class="pirate-boot"></div></div>
+          <div class="pirate-leg"><div class="pirate-boot"></div></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Wolken -->
+    <div class="cloud" style="top:10%; left:-200px; width:150px; height:50px; animation-delay:0s"></div>
+    <div class="cloud" style="top:20%; left:-200px; width:100px; height:35px; animation-delay:10s"></div>
+    
+    <div class="waves"></div>
+    
+    <!-- Navigation: Zurück zur Kabine -->
+    <div class="nav-arrow nav-down" data-room="cabin">↓</div>
+  </div>
+  
+  <!-- ====== RAUM 3: KRÄHENNEST ====== -->
+  <div class="room" id="crowsnest">
+    <div class="sky"><div class="stars"></div></div>
+    <div class="moon" style="top:5%; right:30%"></div>
+    
+    <div class="cloud" style="top:15%; left:-200px; width:120px; height:40px; animation-delay:5s"></div>
+    
+    <div class="crows-railing"></div>
+    <div class="crows-nest"></div>
+    
+    <!-- Teleskop -->
+    <div class="hotspot telescope" data-action="telescope"></div>
+    
+    <!-- Navigation: Zurück zum Deck -->
+    <div class="nav-arrow nav-down" data-room="deck">↓</div>
+  </div>
+  
+  <!-- Navigation Pfeile (werden je nach Raum angezeigt) -->
+  <div class="nav-arrow nav-up" id="nav-up" style="display:none" data-room="">↑</div>
+  
+  <div class="vignette"></div>
+</div>
+
+<!-- UI -->
+<div id="ui-top">
+  <div id="chapter">Kapitel I</div>
+  <div id="location">Die Kabine</div>
+</div>
+
+<div id="inventory">
+  <div class="inv-slot" data-slot="0"></div>
+  <div class="inv-slot" data-slot="1"></div>
+  <div class="inv-slot" data-slot="2"></div>
+  <div class="inv-slot" data-slot="3"></div>
+  <div class="inv-slot" data-slot="4"></div>
+</div>
+
+<div id="dialog">
+  <div class="speaker" id="speaker"></div>
+  <div id="text"></div>
+</div>
+
+<script>
+// ====== SPIELSTAND ======
+const state = {
+  currentRoom: 'cabin',
+  inventory: [],
+  selectedItem: null,
+  flags: {
+    coinFound: false,
+    coinTaken: false,
+    barrelChecked: false,
+    doorChecked: false,
+    eyeChecked: false,
+    ratSeen: false,
+    crateChecked: false,
+    telescopeUsed: false,
+    introSeen: false
+  }
+};
+
+// ====== RÄUME ======
+const rooms = {
+  cabin: {
+    name: 'Die Kabine',
+    chapter: 'Kapitel I',
+    connections: { up: 'deck' }
+  },
+  deck: {
+    name: 'Das Deck',
+    chapter: 'Kapitel I',
+    connections: { down: 'cabin', up: 'crowsnest' }
+  },
+  crowsnest: {
+    name: 'Das Krähennest',
+    chapter: 'Kapitel I',
+    connections: { down: 'deck' }
+  }
+};
+
+// ====== DIALOG-SYSTEM ======
+let dialogOpen = false;
+
+function showDialog(speaker, text) {
+  return new Promise(resolve => {
+    if (dialogOpen) return;
+    dialogOpen = true;
+    
+    document.getElementById('speaker').textContent = speaker;
+    const textEl = document.getElementById('text');
+    textEl.textContent = '';
+    document.getElementById('dialog').classList.add('visible');
+    
+    let i = 0;
+    const type = setInterval(() => {
+      if (i < text.length) {
+        textEl.textContent += text[i];
+        i++;
+      } else {
+        clearInterval(type);
+      }
+    }, 25);
+    
+    const close = () => {
+      document.getElementById('dialog').classList.remove('visible');
+      document.getElementById('dialog').removeEventListener('click', close);
+      dialogOpen = false;
+      resolve();
+    };
+    document.getElementById('dialog').addEventListener('click', close);
+  });
+}
+
+// ====== RAUM-WECHSEL ======
+function gotoRoom(roomId) {
+  document.querySelectorAll('.room').forEach(r => r.classList.remove('active'));
+  document.getElementById(roomId).classList.add('active');
+  state.currentRoom = roomId;
+  
+  const room = rooms[roomId];
+  document.getElementById('location').textContent = room.name;
+  document.getElementById('chapter').textContent = room.chapter;
+  
+  // Navigation aktualisieren
+  const navUp = document.getElementById('nav-up');
+  if (room.connections.up) {
+    navUp.style.display = 'block';
+    navUp.dataset.room = room.connections.up;
+  } else {
+    navUp.style.display = 'none';
+  }
+}
+
+// ====== INVENTAR ======
+function updateInventory() {
+  document.querySelectorAll('.inv-slot').forEach((slot, i) => {
+    slot.innerHTML = '';
+    slot.classList.remove('has-item', 'selected');
+    if (state.inventory[i]) {
+      slot.innerHTML = `<span class="inv-item">${state.inventory[i].icon}</span>`;
+      slot.title = state.inventory[i].name;
+      slot.classList.add('has-item');
+      if (state.selectedItem === i) {
+        slot.classList.add('selected');
+      }
+    }
+  });
+}
+
+function addItem(icon, name) {
+  if (state.inventory.length < 5) {
+    state.inventory.push({ icon, name });
+    updateInventory();
+  }
+}
+
+function removeItem(icon) {
+  state.inventory = state.inventory.filter(i => i.icon !== icon);
+  if (state.selectedItem !== null && !state.inventory[state.selectedItem]) {
+    state.selectedItem = null;
+  }
+  updateInventory();
+}
+
+function hasItem(icon) {
+  return state.inventory.some(i => i.icon === icon);
+}
+
+// Inventar-Klick
+document.querySelectorAll('.inv-slot').forEach(slot => {
+  slot.addEventListener('click', () => {
+    const i = parseInt(slot.dataset.slot);
+    if (state.inventory[i]) {
+      state.selectedItem = state.selectedItem === i ? null : i;
+      updateInventory();
+    }
+  });
+});
+
+// ====== INTERAKTIONEN ======
+const actions = {
+  // KABINE
+  bed: async () => {
+    if (!state.flags.coinFound) {
+      await showDialog('Kapitän Salzwasser', 'Ein altes, knarzendes Bett. Ich schaue mal darunter... Da glitzert etwas!');
+      state.flags.coinFound = true;
+      document.getElementById('coin').classList.add('visible');
+    } else if (!state.flags.coinTaken) {
+      await showDialog('Kapitän Salzwasser', 'Die Münze liegt noch dort. Ich sollte sie aufheben.');
+    } else {
+      await showDialog('Kapitän Salzwasser', 'Nur Staub und ein paar Krümel hier.');
+    }
+  },
+  
+  coin: async () => {
+    if (!state.flags.coinTaken) {
+      state.flags.coinTaken = true;
+      addItem('🪙', 'Goldmünze');
+      document.getElementById('coin').style.display = 'none';
+      await showDialog('Kapitän Salzwasser', 'Eine schwere Goldmünze! Die könnte nützlich sein.');
+    }
+  },
+  
+  eye: async () => {
+    state.flags.eyeChecked = true;
+    await showDialog('Kapitän Salzwasser', 'Das Schiffsauge meines alten Schiffes. Es hat mich durch manchen Sturm getragen. Es starrt mich an, als wüsste es etwas...');
+  },
+  
+  barrel: async () => {
+    if (!state.flags.barrelChecked) {
+      state.flags.barrelChecked = true;
+      addItem('🗝️', 'Rostiger Schlüssel');
+      await showDialog('Kapitän Salzwasser', 'In dem Fass versteckt... ein rostiger Schlüssel! Der könnte zur Tür passen.');
+    } else {
+      await showDialog('Kapitän Salzwasser', 'Das Fass ist leer jetzt.');
+    }
+  },
+  
+  door: async () => {
+    state.flags.doorChecked = true;
+    if (hasItem('🗝️')) {
+      removeItem('🗝️');
+      await showDialog('Kapitän Salzwasser', 'Der Schlüssel passt! Die Tür knarzt laut auf...');
+      gotoRoom('deck');
+    } else {
+      await showDialog('Kapitän Salzwasser', 'Fest verschlossen. Ich brauche einen Schlüssel.');
+    }
+  },
+  
+  table: async () => {
+    await showDialog('Kapitän Salzwasser', 'Auf dem Tisch liegt eine verblasste Karte. Sie zeigt... nein, das ist nur eine Einkaufsliste. "Rum, Zwieback, mehr Rum."');
+  },
+  
+  rat: async () => {
+    const msgs = [
+      'Eine Ratte! Sie läuft herum, als gehöre ihr der ganze Raum.',
+      'Die Ratte scheint mich zu ignorieren. Respektlos!',
+      'Wenn Ratten ein Schiff verlassen, wird es sinken. Aber sie ist noch hier...',
+    ];
+    await showDialog('Kapitän Salzwasser', msgs[Math.floor(Math.random() * msgs.length)]);
+  },
+  
+  // DECK
+  crate: async () => {
+    if (!state.flags.crateChecked) {
+      state.flags.crateChecked = true;
+      addItem('🗡️', 'Rostiges Schwert');
+      await showDialog('Kapitän Salzwasser', 'In der Kiste liegt ein altes Schwert. Besser als nichts!');
+    } else {
+      await showDialog('Kapitän Salzwasser', 'Die Kiste ist leer.');
+    }
+  },
+  
+  // KRÄHENNEST
+  telescope: async () => {
+    if (!state.flags.telescopeUsed) {
+      state.flags.telescopeUsed = true;
+      await showDialog('Kapitän Salzwasser', 'Durch das Teleskop sehe ich... Land! Eine Insel im Osten. Dort müssen wir hin!');
+    } else {
+      await showDialog('Kapitän Salzwasser', 'Die Insel liegt immer noch da drüben. Ich sollte ein Ruderboot suchen.');
+    }
+  }
+};
+
+// Hotspots verbinden
+document.querySelectorAll('.hotspot').forEach(hotspot => {
+  hotspot.addEventListener('click', () => {
+    const action = hotspot.dataset.action;
+    if (actions[action]) actions[action]();
+  });
+});
+
+// Navigation
+document.querySelectorAll('.nav-arrow').forEach(arrow => {
+  arrow.addEventListener('click', () => {
+    const room = arrow.dataset.room;
+    if (room) gotoRoom(room);
+  });
+});
+
+// ====== RATTE BEWEGUNG ======
+let ratX = 200;
+let ratTarget = 500;
+function moveRat() {
+  if (state.currentRoom === 'cabin') {
+    if (Math.abs(ratTarget - ratX) > 5) {
+      ratX += 1.5 * Math.sign(ratTarget - ratX);
+    } else {
+      ratTarget = 150 + Math.random() * (window.innerWidth - 300);
+    }
+    document.getElementById('rat').style.left = ratX + 'px';
+  }
+  requestAnimationFrame(moveRat);
+}
+moveRat();
+
+// ====== START ======
+setTimeout(async () => {
+  if (!state.flags.introSeen) {
+    state.flags.introSeen = true;
+    await showDialog('Kapitän Salzwasser', 'Mein Kopf... Wo bin ich? Eine Schiffskabine? Ich sollte mich hier umsehen. Vielleicht finde ich einen Weg nach oben.');
+  }
+}, 800);
+
+updateInventory();
+</script>
+
+</body>
+</html>
