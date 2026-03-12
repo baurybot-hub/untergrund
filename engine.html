@@ -1,0 +1,105 @@
+<!-- FILE: engine.html - Das gemeinsame "Gehirn" -->
+<script>
+// Zentrale Engine - wird von allen Räumen geladen
+const GameEngine = {
+  // Spielstand laden
+  getState() {
+    const saved = localStorage.getItem('adventure_state');
+    return saved ? JSON.parse(saved) : {
+      inventory: [],
+      flags: {},
+      currentRoom: 'cabin'
+    };
+  },
+  
+  // Spielstand speichern
+  setState(state) {
+    localStorage.setItem('adventure_state', JSON.stringify(state));
+  },
+  
+  // Raum wechseln
+  gotoRoom(room) {
+    const state = this.getState();
+    state.currentRoom = room;
+    this.setState(state);
+    window.location.href = room + '.html';
+  },
+  
+  // Item hinzufügen
+  addItem(icon, name) {
+    const state = this.getState();
+    if (!state.inventory.find(i => i.icon === icon)) {
+      state.inventory.push({ icon, name });
+      this.setState(state);
+    }
+  },
+  
+  // Item entfernen
+  removeItem(icon) {
+    const state = this.getState();
+    state.inventory = state.inventory.filter(i => i.icon !== icon);
+    this.setState(state);
+  },
+  
+  // Item vorhanden?
+  hasItem(icon) {
+    return this.getState().inventory.some(i => i.icon === icon);
+  },
+  
+  // Flag setzen
+  setFlag(name, value = true) {
+    const state = this.getState();
+    state.flags[name] = value;
+    this.setState(state);
+  },
+  
+  // Flag lesen
+  getFlag(name) {
+    return this.getState().flags[name] || false;
+  },
+  
+  // Inventar anzeigen
+  renderInventory() {
+    const state = this.getState();
+    const slots = document.querySelectorAll('.inv-slot');
+    slots.forEach((slot, i) => {
+      slot.innerHTML = '';
+      slot.className = 'inv-slot';
+      if (state.inventory[i]) {
+        slot.innerHTML = `<span class="inv-item">${state.inventory[i].icon}</span>`;
+        slot.title = state.inventory[i].name;
+        slot.classList.add('has-item');
+      }
+    });
+  },
+  
+  // Dialog anzeigen
+  showDialog(speaker, text) {
+    return new Promise(resolve => {
+      const dialog = document.getElementById('dialog');
+      const speakerEl = document.getElementById('speaker');
+      const textEl = document.getElementById('text');
+      
+      speakerEl.textContent = speaker;
+      textEl.textContent = '';
+      dialog.classList.add('visible');
+      
+      let i = 0;
+      const type = setInterval(() => {
+        if (i < text.length) {
+          textEl.textContent += text[i];
+          i++;
+        } else {
+          clearInterval(type);
+        }
+      }, 25);
+      
+      dialog.onclick = () => {
+        dialog.classList.remove('visible');
+        dialog.onclick = null;
+        resolve();
+      };
+    });
+  }
+};
+</script>
