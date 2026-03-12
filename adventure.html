@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doktor Eule – Tief Unten 🦉</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Space+Mono:wght@400;700&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-dark: #050807;
+            --bg-room: #0a1210;
+            --green-glow: #00ff6a;
+            --green-dim: #0a3d20;
+            --water-green: #0a2f1f;
+            --lamp-yellow: #ffb700;
+            --lamp-orange: #ff6a00;
+            --text-color: #88c9a0;
+            --text-dim: #4a7a5a;
+            --ui-bg: rgba(5, 15, 10, 0.98);
+            --rust: #8b4513;
+            --concrete: #2a2a28;
+        }
+
+        body {
+            background: var(--bg-dark);
+            font-family: 'Space Mono', monospace;
+            color: var(--text-color);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Scanline effect */
+        #game-container::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.15) 2px,
+                rgba(0,0,0,0.15) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* Vignette */
+        #scene::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%);
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* ========== GAME HEADER ========== */
+        #game-header {
+            padding: 15px 20px;
+            background: linear-gradient(180deg, rgba(26,255,127,0.1) 0%, transparent 100%);
+            border-bottom: 1px solid var(--green-dim);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #game-header h1 {
+            font-family: 'VT323', monospace;
+            font-size: 1.8rem;
+            color: var(--green-glow);
+            text-shadow: 0 0 20px rgba(26,255,127,0.5);
+            letter-spacing: 3px;
+        }
+
+        #room-title {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        /* ========== MAIN GAME AREA ========== */
+        #game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ========== SCENE (Room Display) ========== */
+        #scene {
+            flex: 1;
+            position: relative;
+            background: var(--bg-room);
+            overflow: hidden;
+        }
+
+        /* Fog Effect */
+        .fog {
+            position: absolute;
+            width: 200%;
+            height: 100%;
+            top: 0;
+            left: -50%;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent,
+                rgba(26, 255, 127, 0.03) 10%,
+                transparent 20%
+            );
+            animation: fogMove 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes fogMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(50%); }
+        }
+
+        /* Water Effect */
+        .water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 25%;
+            background: linear-gradient(180deg, 
+                rgba(15, 61, 42, 0.6) 0%, 
+                rgba(15, 61, 42, 0.9) 50%,
+                rgba(10, 40, 25, 1) 100%
+            );
+            animation: waterWave 4s ease-in-out infinite;
+        }
+
+        .water::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(26, 255, 127, 0.2) 25%, 
+                transparent 50%,
+                rgba(26, 255, 127, 0.15) 75%,
+                transparent 100%
+            );
+            animation: waterSurface 3s ease-in-out infinite;
+        }
+
+        @keyframes waterWave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        @keyframes waterSurface {
+            0%, 100% { opacity: 0.5; transform: translateX(-10%); }
+            50% { opacity: 1; transform: translateX(10%); }
+        }
+
+        /* Lamp on Wall */
+        .wall-lamp {
+            position: absolute;
+            width: 20px;
+            height: 30px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .wall-lamp .lamp-body {
+            width: 100%;
+            height: 100%;
+            background: #333;
+            border-radius: 3px 3px 0 0;
+            position: relative;
+        }
+
+        .wall-lamp .lamp-bulb {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: #444;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .wall-lamp.lit .lamp-bulb {
+            background: var(--lamp-yellow);
+            box-shadow: 
+                0 0 20px var(--lamp-yellow),
+                0 0 60px rgba(255, 215, 0, 0.4),
+                0 0 100px rgba(255, 215, 0, 0.2);
+        }
+
+        .lamp-glow {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(255,215,0,0.15) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -30%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .wall-lamp.lit .lamp-glow {
+            opacity: 1;
+        }
+
+        /* Interactive Objects */
+        .interactive {
+            position: absolute;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 10;
+        }
+
+        .interactive:hover {
+            filter: brightness(1.3);
+            transform: scale(1.05);
+        }
+
+        .interactive::after {
+            content: '👁';
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .interactive:hover::after {
+            opacity: 1;
+        }
+
+        /* Doktor Eule Character */
+        #character {
+            position: absolute;
+            bottom: 28%;
+            left: 15%;
+            width: 50px;
+            height: 70px;
+            transition: left 1s ease-in-out;
+            z-index: 20;
+        }
+
+        .eule-body {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .eule-head {
+            width: 40px;
+            height: 35px;
+            background: #8B7355;
+            border-radius: 50% 50% 45% 45%;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.3);
+        }
+
+        .eule-eye {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #FFD700;
+            border-radius: 50%;
+            top: 10px;
+            box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+        }
+
+        .eule-eye.left { left: 5px; }
+        .eule-eye.right { right: 5px; }
+
+        .eule-eye::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #000;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .eule-beak {
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #FF8C00;
+        }
+
+        .eule-torso {
+            width: 35px;
+            height: 30px;
+            background: #6B5344;
+            margin: -5px auto 0;
+            border-radius: 10px 10px 20px 20px;
+            position: relative;
+        }
+
+        .eule-wing {
+            position: absolute;
+            width: 12px;
+            height: 25px;
+            background: #5a4535;
+            border-radius: 0 0 10px 10px;
+            top: 5px;
+        }
+
+        .eule-wing.left { left: -5px; transform: rotate(10deg); }
+        .eule-wing.right { right: -5px; transform: rotate(-10deg); }
+
+        /* ========== DIALOG BOX ========== */
+        #dialog-box {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 600px;
+            background: var(--ui-bg);
+            border: 1px solid var(--green-dim);
+            border-radius: 8px;
+            padding: 20px;
+            display: none;
+            z-index: 100;
+            box-shadow: 0 0 30px rgba(26, 255, 127, 0.1);
+        }
+
+        #dialog-box.active {
+            display: block;
+            animation: dialogPop 0.3s ease-out;
+        }
+
+        @keyframes dialogPop {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        #dialog-text {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        #dialog-choices {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .choice-btn {
+            background: transparent;
+            border: 1px solid var(--green-glow);
+            color: var(--green-glow);
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .choice-btn:hover {
+            background: rgba(26, 255, 127, 0.1);
+            box-shadow: 0 0 15px rgba(26, 255, 127, 0.3);
+        }
+
+        /* ========== INVENTORY ========== */
+        #inventory-bar {
+            background: var(--ui-bg);
+            border-top: 1px solid var(--green-dim);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #inventory-label {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #inventory-items {
+            display: flex;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .inv-item {
+            width: 50px;
+            height: 50px;
+            background: rgba(26, 255, 127, 0.05);
+            border: 1px solid var(--green-dim);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .inv-item:hover {
+            border-color: var(--green-glow);
+            background: rgba(26, 255, 127, 0.1);
+        }
+
+        .inv-item.selected {
+            border-color: var(--lamp-yellow);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .inv-item .tooltip {
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--ui-bg);
+            border: 1px solid var(--green-dim);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .inv-item:hover .tooltip {
+            opacity: 1;
+        }
+
+        /* ========== NAVIGATION ========== */
+        #nav-arrows {
+            position: absolute;
+            bottom: 30%;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        .nav-arrow {
+            width: 50px;
+            height: 50px;
+            background: rgba(26, 255, 127, 0.1);
+            border: 1px solid var(--green-dim);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            pointer-events: auto;
+            transition: all 0.3s;
+            opacity: 0.5;
+        }
+
+        .nav-arrow:hover {
+            opacity: 1;
+            background: rgba(26, 255, 127, 0.2);
+            box-shadow: 0 0 20px rgba(26, 255, 127, 0.3);
+        }
+
+        .nav-arrow.hidden {
+            display: none;
+        }
+
+        /* ========== OBJECT DESCRIPTION ========== */
+        #object-description {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--ui-bg);
+            border: 1px solid var(--green-dim);
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 90;
+            display: none;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        #object-description.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        /* ========== SPECIAL: UG-GATE WALL ========== */
+        .ug-gate-text {
+            font-family: 'VT323', monospace;
+            font-size: 3rem;
+            color: var(--green-glow);
+            text-shadow: 0 0 30px rgba(26, 255, 127, 0.8);
+            animation: gatePulse 2s ease-in-out infinite;
+            cursor: pointer;
+        }
+
+        @keyframes gatePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* ========== STONES ========== */
+        .stone {
+            position: absolute;
+            width: 40px;
+            height: 30px;
+            background: linear-gradient(135deg, #3a3a38 0%, #2a2a28 50%, #1a1a18 100%);
+            border-radius: 40% 50% 45% 55%;
+            box-shadow: 2px 3px 8px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stone:hover {
+            transform: scale(1.1);
+            box-shadow: 2px 3px 12px rgba(0,0,0,0.7);
+        }
+
+        .stone-1 { bottom: 28%; left: 30%; width: 35px; height: 25px; }
+        .stone-2 { bottom: 27%; left: 45%; width: 45px; height: 35px; }
+        .stone-3 { bottom: 28%; left: 60%; width: 38px; height: 28px; }
+
+        /* Dripping effect */
+        .drip {
+            position: absolute;
+            width: 3px;
+            height: 15px;
+            background: linear-gradient(180deg, transparent, var(--water-green));
+            animation: drip 3s ease-in infinite;
+        }
+
+        @keyframes drip {
+            0% { opacity: 0; transform: translateY(0); }
+            50% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(30px); }
+        }
+
+        /* ========== BUBBLES ========== */
+        .bubble {
+            position: absolute;
+            bottom: 25%;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle at 30% 30%, rgba(26, 255, 127, 0.3), rgba(26, 255, 127, 0.1));
+            border-radius: 50%;
+            animation: bubbleRise 4s ease-in infinite;
+        }
+
+        @keyframes bubbleRise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 0.5; }
+            100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+        }
+
+        /* ========== ROOM CONTENT ========== */
+        .room-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none;
+        }
+
+        .room-content.active {
+            display: block;
+        }
+
+        /* Room 1: Entry */
+        #room-1 {
+            background: linear-gradient(180deg, #0a0f0d 0%, #111a15 70%, #0f3d2a 100%);
+        }
+
+        .pipe {
+            position: absolute;
+            background: linear-gradient(90deg, #2a2a2a, #3a3a3a, #2a2a2a);
+            border-radius: 5px;
+        }
+
+        .pipe-horizontal {
+            height: 20px;
+            width: 80%;
+            top: 10%;
+            left: 10%;
+        }
+
+        .pipe-vertical {
+            width: 15px;
+            height: 40%;
+            top: 10%;
+        }
+
+        .pipe-left { left: 15%; }
+        .pipe-right { right: 15%; }
+
+        /* Dirt/Grime */
+        .grime {
+            position: absolute;
+            background: radial-gradient(ellipse, rgba(40, 30, 20, 0.5) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Manhole (Entry Point) */
+        #manhole {
+            position: absolute;
+            top: 5%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 40px;
+            background: #1a1a1a;
+            border-radius: 50%;
+            border: 3px solid #333;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        #manhole::after {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 20px;
+            background: linear-gradient(180deg, rgba(26, 255, 127, 0.2) 0%, transparent 100%);
+            border-radius: 50%;
+        }
+
+        /* Hidden Lamp */
+        #hidden-lamp {
+            position: absolute;
+            bottom: 35%;
+            right: 25%;
+            width: 30px;
+            height: 40px;
+            opacity: 0.3;
+            transition: all 0.3s;
+        }
+
+        #hidden-lamp:hover {
+            opacity: 0.8;
+        }
+
+        .lamp-icon {
+            font-size: 2rem;
+        }
+
+        /* Barrel */
+        #barrel {
+            position: absolute;
+            bottom: 26%;
+            left: 25%;
+            width: 45px;
+            height: 55px;
+            background: linear-gradient(90deg, #3d2817, #5a3d28, #3d2817);
+            border-radius: 5px;
+            border: 2px solid #2a1a0f;
+        }
+
+        #barrel::before {
+            content: '';
+            position: absolute;
+            top: 30%;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background: #222;
+        }
+
+        #barrel::after {
+            content: '';
+            position: absolute;
+            bottom: 20%;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background: #222;
+        }
+
+        /* Graffiti/Text on Wall */
+        .wall-text {
+            position: absolute;
+            font-family: 'VT323', monospace;
+            color: rgba(26, 255, 127, 0.3);
+            font-size: 1rem;
+            transform: rotate(-5deg);
+            pointer-events: none;
+        }
+
+        /* ========== PULSE EFFECT FOR FOUND ITEMS ========== */
+        .pulse-hint {
+            animation: pulseHint 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseHint {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div id="game-header">
+        <h1>🦉 DOKTOR EULE</h1>
+        <span id="room-title">Tief Unten</span>
+    </div>
+
+    <!-- GAME CONTAINER -->
+    <div id="game-container">
+        <!-- SCENE -->
+        <div id="scene">
+            <div class="fog"></div>
+
+            <!-- ROOM 1: Entry -->
+            <div id="room-1" class="room-content active">
+                <div class="pipe pipe-horizontal"></div>
+                <div class="pipe pipe-vertical pipe-left"></div>
+                <div class="pipe pipe-vertical pipe-right"></div>
+                
+                <div id="manhole" class="interactive" data-desc="Der Einstieg von oben. Zu hoch zum Zurückklettern..."></div>
+                
+                <div id="barrel" class="interactive" data-desc="Ein alter Fass. Vielleicht ist etwas Nützliches darin versteckt?"></div>
+                
+                <div id="hidden-lamp" class="interactive pulse-hint" data-item="lamp" data-desc="Eine kleine Taschenlampe! Die könnte nützlich sein...">
+                    <span class="lamp-icon">🔦</span>
+                </div>
+
+                <div class="wall-lamp" style="top: 25%; left: 70%;">
+                    <div class="lamp-body">
+                        <div class="lamp-bulb"></div>
+                    </div>
+                    <div class="lamp-glow"></div>
+                </div>
+
+                <div class="grime" style="width: 100px; height: 50px; bottom: 25%; left: 60%;"></div>
+                <div class="grime" style="width: 80px; height: 40px; bottom: 26%; left: 30%;"></div>
+
+                <div class="wall-text" style="top: 40%; left: 55%;">HELP</div>
+                <div class="wall-text" style="top: 55%; left: 75%; opacity: 0.2;">1987</div>
+
+                <div class="water"></div>
+            </div>
+
+            <!-- ROOM 5: The Wall -->
+            <div id="room-5" class="room-content">
+                <div class="pipe pipe-horizontal" style="top: 5%;"></div>
+                
+                <!-- Old brick wall -->
+                <div id="the-wall" style="position: absolute; top: 20%; left: 20%; width: 60%; height: 50%; background: linear-gradient(180deg, #3a2a1a 0%, #2a1a0a 100%); border-radius: 5px; box-shadow: inset 0 0 50px rgba(0,0,0,0.5);">
+                    <!-- Brick pattern -->
+                    <div style="position: absolute; width: 100%; height: 100%; background-image: repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(0,0,0,0.3) 20px, rgba(0,0,0,0.3) 22px), repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(0,0,0,0.2) 30px, rgba(0,0,0,0.2) 32px);"></div>
+                    
+                    <!-- UG-GATE inscription -->
+                    <div id="ug-gate" class="interactive" data-ugate="true" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); cursor: pointer;">
+                        <div style="font-family: 'VT323', monospace; font-size: 3.5rem; color: var(--green-glow); text-shadow: 0 0 30px rgba(26, 255, 127, 0.8), 0 0 60px rgba(26, 255, 127, 0.4); letter-spacing: 8px; animation: gatePulse 2s ease-in-out infinite;">UG-GATE</div>
+                        <div style="font-family: 'VT323', monospace; font-size: 1rem; color: rgba(26, 255, 127, 0.5); text-align: center; margin-top: 10px; letter-spacing: 3px;">WER SUCHT, DER FINDET</div>
+                    </div>
+                </div>
+
+                <div class="wall-lamp" style="top: 15%; left: 15%;">
+                    <div class="lamp-body">
+                        <div class="lamp-bulb"></div>
+                    </div>
+                    <div class="lamp-glow"></div>
+                </div>
+                
+                <div class="wall-lamp" style="top: 15%; right: 15%;">
+                    <div class="lamp-body">
+                        <div class="lamp-bulb"></div>
+                    </div>
+                    <div class="lamp-glow"></div>
+                </div>
+
+                <div class="water" style="height: 10%;"></div>
+            </div>
+
+            <!-- ROOM 4: The Junction -->
+            <div id="room-4" class="room-content">
+                <div class="pipe pipe-horizontal" style="top: 5%;"></div>
+                <div class="pipe pipe-horizontal" style="bottom: 30%;"></div>
+                
+                <!-- Three paths visual -->
+                <div style="position: absolute; top: 30%; left: 10%; width: 25%; height: 40%; background: linear-gradient(90deg, var(--bg-room), rgba(26, 255, 127, 0.05)); border-radius: 10px;"></div>
+                <div style="position: absolute; top: 30%; left: 40%; width: 20%; height: 40%; background: linear-gradient(90deg, rgba(26, 255, 127, 0.05), rgba(26, 255, 127, 0.1), rgba(26, 255, 127, 0.05)); border-radius: 10px;"></div>
+                <div style="position: absolute; top: 30%; right: 10%; width: 25%; height: 40%; background: linear-gradient(270deg, var(--bg-room), rgba(26, 255, 127, 0.05)); border-radius: 10px;"></div>
+
+                <!-- Code lock on wall -->
+                <div id="code-lock" class="interactive" data-desc="Ein altes Zahlenschloss an der Wand. Es hat 3 Stellen..." style="position: absolute; top: 40%; left: 50%; transform: translateX(-50%); width: 120px; height: 50px; background: #222; border: 2px solid #444; border-radius: 5px; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                    <span id="code-display" style="font-family: 'VT323', monospace; font-size: 2rem; color: var(--green-glow);">? ? ?</span>
+                </div>
+
+                <!-- Hint graffiti -->
+                <div style="position: absolute; top: 25%; left: 15%; font-family: 'VT323', monospace; color: rgba(255, 183, 0, 0.3); font-size: 0.9rem; transform: rotate(-3deg);">1</div>
+                <div style="position: absolute; top: 25%; left: 48%; font-family: 'VT323', monospace; color: rgba(255, 183, 0, 0.3); font-size: 0.9rem;">2</div>
+                <div style="position: absolute; top: 25%; right: 20%; font-family: 'VT323', monospace; color: rgba(255, 183, 0, 0.3); font-size: 0.9rem; transform: rotate(3deg);">3</div>
+
+                <div class="wall-lamp" style="top: 20%; left: 50%; transform: translateX(-50%);">
+                    <div class="lamp-body">
+                        <div class="lamp-bulb"></div>
+                    </div>
+                    <div class="lamp-glow"></div>
+                </div>
+
+                <div class="water" style="height: 10%;"></div>
+            </div>
+
+            <!-- ROOM 3: Water Chamber -->
+            <div id="room-3" class="room-content">
+                <div class="pipe pipe-horizontal" style="top: 3%;"></div>
+                
+                <!-- Big water area -->
+                <div class="water" style="height: 40%; background: linear-gradient(180deg, rgba(15, 61, 42, 0.3) 0%, rgba(15, 61, 42, 0.7) 50%, rgba(10, 40, 25, 0.9) 100%);"></div>
+                
+                <!-- Bubbles in water -->
+                <div class="bubble" style="left: 20%; animation-delay: 0s;"></div>
+                <div class="bubble" style="left: 45%; animation-delay: 1.5s;"></div>
+                <div class="bubble" style="left: 70%; animation-delay: 0.8s;"></div>
+                
+                <!-- Glowing object in water -->
+                <div id="water-object" class="interactive pulse-hint" data-item="glass-shard" data-desc="Ein glänzendes Stück Glas im Wasser! Es könnte nützlich sein..." style="position: absolute; bottom: 35%; left: 55%;">
+                    <span style="font-size: 1.8rem; filter: drop-shadow(0 0 5px rgba(255,215,0,0.5));">💎</span>
+                </div>
+
+                <!-- Drain -->
+                <div id="drain" class="interactive" data-desc="Ein rostiger Abfluss. Er ist verstopft..." style="position: absolute; bottom: 28%; left: 25%; width: 40px; height: 40px; background: #1a1a1a; border-radius: 50%; border: 3px solid #333;">
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 15px; height: 15px; background: #0a0a0a; border-radius: 50%;"></div>
+                </div>
+
+                <div class="wall-lamp" style="top: 15%; left: 80%;">
+                    <div class="lamp-body">
+                        <div class="lamp-bulb"></div>
+                    </div>
+                    <div class="lamp-glow"></div>
+                </div>
+
+                <div class="grime" style="width: 150px; height: 80px; bottom: 45%; left: 10%;"></div>
+            </div>
+
+            <!-- ROOM 2: Dark Corridor -->
+            <div id="room-2" class="room-content">
+                <div class="pipe pipe-horizontal" style="top: 5%;"></div>
+                <div class="pipe pipe-horizontal" style="top: 85%;"></div>
+                
+                <div class="wall-lamp" style="top: 20%; left: 10%;">
+                    <div class="lamp-body">
+                        <div class="lamp-bulb"></div>
+                    </div>
+                    <div class="lamp-glow"></div>
+                </div>
+                
+                <div class="wall-lamp" style="top: 20%; left: 85%;">
+                    <div class="lamp-body">
+                        <div class="lamp-bulb"></div>
+                    </div>
+                    <div class="lamp-glow"></div>
+                </div>
+
+                <!-- Mysterious wall writing -->
+                <div id="wall-writing" class="interactive" data-desc="Schrift an der Wand: 'DREI STEINE, EIN WEG. ZÄHLE WAS GLÜHT.'" style="position: absolute; top: 35%; left: 50%; transform: translateX(-50%);">
+                    <div style="font-family: 'VT323', monospace; font-size: 2rem; color: rgba(26, 255, 127, 0.4); text-shadow: 0 0 10px rgba(26, 255, 127, 0.3); letter-spacing: 3px;">DREI STEINE</div>
+                    <div style="font-family: 'VT323', monospace; font-size: 1.5rem; color: rgba(26, 255, 127, 0.25); margin-top: 5px;">EIN WEG</div>
+                </div>
+
+                <!-- Stones/Rocks -->
+                <div class="stone stone-1 interactive" data-desc="Ein Stein mit einer Kerbe. Er scheint nichts Besonderes zu sein..."></div>
+                <div class="stone stone-2 interactive pulse-hint" data-item="rusty-key" data-desc="Etwas glitzert zwischen den Steinen! Ein rostiger Schlüssel!">
+                    <span style="font-size: 1.5rem;">🔑</span>
+                </div>
+                <div class="stone stone-3 interactive" data-desc="Dieser Stein ist warm. Seltsam..."></div>
+
+                <div class="grime" style="width: 120px; height: 60px; bottom: 30%; left: 20%;"></div>
+                <div class="grime" style="width: 90px; height: 45px; bottom: 35%; right: 15%;"></div>
+
+                <div class="water" style="height: 15%;"></div>
+            </div>
+
+            <!-- Room navigation arrows -->
+            <div id="nav-arrows">
+                <div class="nav-arrow hidden" id="arrow-left">◀</div>
+                <div class="nav-arrow" id="arrow-right">▶</div>
+            </div>
+        </div>
+
+        <!-- DIALOG BOX -->
+        <div id="dialog-box">
+            <div id="dialog-text"></div>
+            <div id="dialog-choices"></div>
+        </div>
+
+        <!-- OBJECT DESCRIPTION -->
+        <div id="object-description"></div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div id="inventory-bar">
+        <span id="inventory-label">🎒 Inventar</span>
+        <div id="inventory-items"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        // GAME STATE
+        // ==========================================
+        const gameState = {
+            currentRoom: 1,
+            inventory: [],
+            flags: {
+                lampFound: false,
+                lampOn: false,
+                barrelChecked: false,
+                manholeInspected: false,
+                keyFound: false,
+                writingRead: false,
+                glassFound: false,
+                codeSolved: false,
+                codeAttempt: [],
+                ugGateFound: false
+            },
+            selectedItem: null
+        };
+
+        // ==========================================
+        // ROOM DATA
+        // ==========================================
+        const rooms = {
+            1: {
+                title: "Der Einstieg",
+                description: "Ein dunkler Schacht führt nach unten. Das Geräusch von fließendem Wasser ist zu hören...",
+                exits: { right: 2 }
+            },
+            2: {
+                title: "Der Dunkle Gang",
+                description: "Ein langer, dunkler Tunnel. Schrift an der Wand...",
+                exits: { left: 1, right: 3 },
+                requiresLamp: true
+            },
+            3: {
+                title: "Die Wasser-Kammer",
+                description: "Grünes Wasser bedeckt den Boden. Etwas glitzert darin...",
+                exits: { left: 2, right: 4 }
+            },
+            4: {
+                title: "Die Kreuzung",
+                description: "Drei Wege führen von hier aus. An der Wand sind seltsame Zeichen...",
+                exits: { left: 3 },
+                exitsWhenSolved: { left: 3, right: 5 }
+            },
+            5: {
+                title: "Die Mauer",
+                description: "Eine alte Mauer mit einer mysteriösen Inschrift...",
+                exits: { left: 4 },
+                isEnd: true
+            }
+        };
+
+        // ==========================================
+        // DOM ELEMENTS
+        // ==========================================
+        const scene = document.getElementById('scene');
+        const dialogBox = document.getElementById('dialog-box');
+        const dialogText = document.getElementById('dialog-text');
+        const dialogChoices = document.getElementById('dialog-choices');
+        const inventoryItems = document.getElementById('inventory-items');
+        const objectDescription = document.getElementById('object-description');
+        const roomTitle = document.getElementById('room-title');
+        const arrowLeft = document.getElementById('arrow-left');
+        const arrowRight = document.getElementById('arrow-right');
+
+        // ==========================================
+        // DIALOG SYSTEM
+        // ==========================================
+        function showDialog(text, choices = []) {
+            dialogText.innerHTML = text;
+            dialogChoices.innerHTML = '';
+            
+            if (choices.length === 0) {
+                choices = [{ text: 'Weiter', action: hideDialog }];
+            }
+
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choice.text;
+                btn.onclick = () => {
+                    if (choice.action) choice.action();
+                    if (!choice.keepOpen) hideDialog();
+                };
+                dialogChoices.appendChild(btn);
+            });
+
+            dialogBox.classList.add('active');
+        }
+
+        function hideDialog() {
+            dialogBox.classList.remove('active');
+        }
+
+        // ==========================================
+        // INVENTORY SYSTEM
+        // ==========================================
+        function addToInventory(itemId, emoji, name) {
+            if (gameState.inventory.find(i => i.id === itemId)) return;
+            
+            gameState.inventory.push({ id: itemId, emoji, name });
+            updateInventoryDisplay();
+        }
+
+        function updateInventoryDisplay() {
+            inventoryItems.innerHTML = '';
+            
+            gameState.inventory.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'inv-item';
+                if (gameState.selectedItem === item.id) {
+                    div.classList.add('selected');
+                }
+                div.innerHTML = `
+                    ${item.emoji}
+                    <span class="tooltip">${item.name}</span>
+                `;
+                div.onclick = () => selectItem(item.id);
+                inventoryItems.appendChild(div);
+            });
+        }
+
+        function selectItem(itemId) {
+            if (gameState.selectedItem === itemId) {
+                gameState.selectedItem = null;
+            } else {
+                gameState.selectedItem = itemId;
+            }
+            updateInventoryDisplay();
+        }
+
+        function removeFromInventory(itemId) {
+            gameState.inventory = gameState.inventory.filter(i => i.id !== itemId);
+            if (gameState.selectedItem === itemId) {
+                gameState.selectedItem = null;
+            }
+            updateInventoryDisplay();
+        }
+
+        // ==========================================
+        // ROOM NAVIGATION
+        // ==========================================
+        function goToRoom(roomNum) {
+            const room = rooms[roomNum];
+            
+            // Check if lamp is required
+            if (room.requiresLamp && !gameState.flags.lampOn) {
+                showDialog(
+                    '🦉 Es ist viel zu dunkel hier...<br><br>' +
+                    'Doktor Eule kann nichts sehen. Vielleicht sollte sie erst nach einer Lichtquelle suchen?',
+                    [{ text: '🔦 Zurück' }]
+                );
+                return;
+            }
+
+            // Hide all rooms
+            document.querySelectorAll('.room-content').forEach(r => r.classList.remove('active'));
+            
+            // Show target room
+            const targetRoom = document.getElementById(`room-${roomNum}`);
+            if (targetRoom) {
+                targetRoom.classList.add('active');
+            }
+
+            gameState.currentRoom = roomNum;
+            roomTitle.textContent = room.title;
+
+            // Update navigation arrows (check for conditional exits)
+            const exits = room.exitsWhenSolved && gameState.flags.codeSolved ? room.exitsWhenSolved : room.exits;
+            arrowLeft.classList.toggle('hidden', !exits.left);
+            arrowRight.classList.toggle('hidden', !exits.right);
+
+            // Room-specific setup
+            setupRoom(roomNum);
+        }
+
+        function setupRoom(roomNum) {
+            // Room-specific logic (currently handled in interactions)
+        }
+
+        // ==========================================
+        // OBJECT INTERACTIONS
+        // ==========================================
+        function setupInteractions() {
+            // All interactive objects
+            document.querySelectorAll('.interactive').forEach(obj => {
+                obj.addEventListener('click', (e) => {
+                    const desc = obj.dataset.desc;
+                    const item = obj.dataset.item;
+
+                    if (item === 'lamp' && !gameState.flags.lampFound) {
+                        // Found the lamp!
+                        gameState.flags.lampFound = true;
+                        addToInventory('lamp', '🔦', 'Taschenlampe');
+                        obj.style.display = 'none';
+                        showDialog(
+                            '🦉 Doktor Eule hat eine <strong>Taschenlampe</strong> gefunden!<br><br>' +
+                            'Die könnte in den dunklen Gängen sehr nützlich sein...',
+                            [{ text: '🔦 Einschalten', action: () => turnOnLamp() }]
+                        );
+                    } else if (item === 'glass-shard' && !gameState.flags.glassFound) {
+                        // Found the glass shard!
+                        gameState.flags.glassFound = true;
+                        addToInventory('glass', '💎', 'Glasscherbe');
+                        obj.style.display = 'none';
+                        showDialog(
+                            '🦉 Doktor Eule hat eine <strong>Glasscherbe</strong> gefunden!<br><br>' +
+                            'Sie glitzert im Licht der Lampe. Vielleicht kann man damit etwas anstrahlen?',
+                            [{ text: '✨ In die Tasche stecken' }]
+                        );
+                    } else if (item === 'glass-shard' && gameState.flags.glassFound) {
+                        showDialog('Hier war mal eine glänzende Glasscherbe.');
+                    } else if (item === 'rusty-key' && !gameState.flags.keyFound) {
+                        // Found the rusty key!
+                        gameState.flags.keyFound = true;
+                        addToInventory('key', '🔑', 'Rostiger Schlüssel');
+                        obj.innerHTML = '';
+                        obj.classList.remove('pulse-hint');
+                        showDialog(
+                            '🦉 Doktor Eule hat einen <strong>rostigen Schlüssel</strong> gefunden!<br><br>' +
+                            'Er sieht alt aus, aber vielleicht passt er irgendwo...',
+                            [{ text: '🤔 Wofür könnte der sein?' }]
+                        );
+                    } else if (item === 'rusty-key' && gameState.flags.keyFound) {
+                        showDialog('Hier war mal ein Schlüssel. Jetzt ist er sicher in deinem Inventar!');
+                    } else if (item === 'lamp' && gameState.flags.lampFound) {
+                        showDialog('Hier war mal eine Taschenlampe. Jetzt ist sie in deinem Inventar!');
+                    } else if (obj.id === 'wall-writing') {
+                        if (!gameState.flags.writingRead) {
+                            gameState.flags.writingRead = true;
+                            showDialog(
+                                '🦉 Doktor Eule entziffert die Schrift an der Wand:<br><br>' +
+                                '<em style="color: var(--green-glow);">"DREI STEINE, EIN WEG.<br>ZÄHLE WAS GLÜHT."</em><br><br>' +
+                                'Das klingt nach einem Rätsel... Vielleicht sollte sie die Steine untersuchen?',
+                                [{ text: '🔍 Steine betrachten' }]
+                            );
+                        } else {
+                            showDialog(
+                                'Die Schrift an der Wand:<br>' +
+                                '<em style="color: var(--green-glow);">"DREI STEINE, EIN WEG. ZÄHLE WAS GLÜHT."</em>'
+                            );
+                        }
+                    } else if (obj.id === 'barrel') {
+                        if (!gameState.flags.barrelChecked) {
+                            gameState.flags.barrelChecked = true;
+                            showDialog(
+                                'Doktor Eule schaut in das alte Fass...<br><br>' +
+                                '🪙 Es ist leer. Aber am Boden klebt ein Zettel: <em>"Folge dem Licht, um den Weg zu finden."</em>',
+                                [{ text: '🤔 Interessant...' }]
+                            );
+                        } else {
+                            showDialog('Ein leeres Fass. Der Zettel sagt: <em>"Folge dem Licht..."</em>');
+                        }
+                    } else if (obj.id === 'manhole') {
+                        if (!gameState.flags.manholeInspected) {
+                            gameState.flags.manholeInspected = true;
+                            showDialog(
+                                'Der Einstieg von oben. Das Gitter ist zu hoch zum Erreichen...<br><br>' +
+                                '🦉 <em>"Ich muss einen anderen Weg finden. Vorwärts statt zurück!"</em>'
+                            );
+                        } else {
+                            showDialog('Zu hoch. Doktor Eule muss einen anderen Weg finden.');
+                        }
+                    } else if (obj.id === 'code-lock') {
+                        if (gameState.flags.codeSolved) {
+                            showDialog('Das Schloss ist bereits geöffnet. Der Weg ist frei!');
+                        } else {
+                            showCodePuzzle();
+                        }
+                    } else if (obj.dataset.ugate) {
+                        showUGGate();
+                    } else if (desc) {
+                        showDialog(desc);
+                    }
+                });
+            });
+
+            // Navigation arrows (with conditional exit support)
+            arrowRight.addEventListener('click', () => {
+                const room = rooms[gameState.currentRoom];
+                const exits = room.exitsWhenSolved && gameState.flags.codeSolved ? room.exitsWhenSolved : room.exits;
+                if (exits.right) {
+                    goToRoom(exits.right);
+                }
+            });
+
+            arrowLeft.addEventListener('click', () => {
+                const room = rooms[gameState.currentRoom];
+                const exits = room.exitsWhenSolved && gameState.flags.codeSolved ? room.exitsWhenSolved : room.exits;
+                if (exits.left) {
+                    goToRoom(exits.left);
+                }
+            });
+        }
+
+        // ==========================================
+        // LAMP FUNCTIONALITY
+        // ==========================================
+        function turnOnLamp() {
+            gameState.flags.lampOn = true;
+            
+            // Light up the wall lamps
+            document.querySelectorAll('.wall-lamp').forEach(lamp => {
+                lamp.classList.add('lit');
+            });
+
+            showDialog(
+                '🔦 Die Taschenlampe leuchtet! Jetzt kann Doktor Eule auch in dunklere Bereiche vordringen...',
+                [{ text: '▶ Weitergehen', action: () => goToRoom(2) }]
+            );
+        }
+
+        // ==========================================
+        // UG-GATE FINALE
+        // ==========================================
+        function showUGGate() {
+            if (!gameState.flags.ugGateFound) {
+                gameState.flags.ugGateFound = true;
+                
+                showDialog(
+                    '🦉 Doktor Eule betrachtet die alte Mauer genauer...<br><br>' +
+                    'Im schwachen Licht der Lampe leuchten Buchstaben auf:<br><br>' +
+                    '<span style="font-family: VT323; font-size: 2.5rem; color: var(--green-glow); text-shadow: 0 0 20px rgba(26,255,127,0.8);">UG-GATE</span><br><br>' +
+                    '<em>"Das muss der Ausgang sein!"</em>',
+                    [
+                        {
+                            text: '🔗 UG-GATE betreten',
+                            action: () => {
+                                window.location.href = 'https://untergrund.app/Gate.html';
+                            }
+                        },
+                        {
+                            text: '📝 Code notieren',
+                            action: () => {
+                                addToInventory('gate-code', '🔑', 'UG-GATE Code');
+                                showDialog(
+                                    '🦉 Doktor Eule hat sich den Code gemerkt:<br><br>' +
+                                    '<strong style="color: var(--green-glow); font-size: 1.5rem;">UG-GATE</strong><br><br>' +
+                                    'Das wird der Schlüssel zum Untergrund sein!',
+                                    [{ text: '🔗 Zum Untergrund', action: () => window.location.href = 'https://untergrund.app/Gate.html' }]
+                                );
+                            }
+                        }
+                    ]
+                );
+            } else {
+                showDialog(
+                    'Die Mauer mit der Inschrift:<br><br>' +
+                    '<span style="font-family: VT323; font-size: 2rem; color: var(--green-glow);">UG-GATE</span><br><br>' +
+                    '🦉 <em>"Der Weg nach oben..."</em>',
+                    [
+                        { text: '🔗 UG-GATE betreten', action: () => window.location.href = 'https://untergrund.app/Gate.html' },
+                        { text: '🔍 Zurück' }
+                    ]
+                );
+            }
+        }
+
+        // ==========================================
+        // CODE PUZZLE
+        // ==========================================
+        function showCodePuzzle() {
+            const riddle = 
+                '🔐 Ein altes Zahlenschloss mit 3 Stellen...<br><br>' +
+                '<em style="color: var(--text-dim);">Hinweis von Raum 2: "ZÄHLE WAS GLÜHT"</em><br><br>' +
+                'Wie lautet der Code?';
+            
+            showDialog(riddle, [
+                { text: '1 - 2 - 3', action: () => tryCode('123') },
+                { text: '2 - 3 - 1', action: () => tryCode('231') },
+                { text: '3 - 2 - 1', action: () => tryCode('321') },
+                { text: '🔍 Nomal überlegen', keepOpen: true }
+            ]);
+        }
+
+        function tryCode(code) {
+            if (code === '321') {
+                // Correct! The hint was "count what glows" - glass shard (💎), lamps, key glow = 3, 2, 1
+                gameState.flags.codeSolved = true;
+                document.getElementById('code-display').textContent = '✓ ✓ ✓';
+                document.getElementById('code-display').style.color = 'var(--green-glow)';
+                
+                showDialog(
+                    '🔓 <strong>KLICK!</strong> Das Schloss geht auf!<br><br>' +
+                    '🦉 Doktor Eule hat den richtigen Code gefunden! Der Weg zur Mauer ist frei...',
+                    [{ text: '▶ Weiter zur Mauer', action: () => goToRoom(5) }]
+                );
+            } else {
+                showDialog(
+                    '🔒 <strong>KLACK!</strong> Falscher Code...<br><br>' +
+                    '🦉 <em>"Hmm, ich sollte nochmal über das Rätsel nachdenken..."</em><br><br>' +
+                    '<span style="color: var(--text-dim);">Tipp: Was glüht in der Kanalisation? Zähle es!</span>',
+                    [{ text: '🔄 Nochmal versuchen', action: () => showCodePuzzle() }]
+                );
+            }
+        }
+
+        // ==========================================
+        // INITIAL SETUP
+        // ==========================================
+        function init() {
+            setupInteractions();
+            updateInventoryDisplay();
+
+            // Intro dialog
+            setTimeout(() => {
+                showDialog(
+                    '🦉 <strong>Doktor Eule</strong> erwacht in einer dunklen Kanalisation...<br><br>' +
+                    '<em>"Wie bin ich hier hergekommen? Ich muss einen Weg nach oben finden!"</em><br><br>' +
+                    'Das Wasser ist grün und Nebel hängt in der Luft. Kleine Lampen an der Wand spenden schwaches Licht.',
+                    [
+                        { text: '🔍 Umsehen', action: () => {
+                            setTimeout(() => {
+                                showDialog(
+                                    '🦉 Doktor Eule mustert die Umgebung...<br><br>' +
+                                    'Ein Fass, ein Gitter oben, und irgendwo glitzert etwas im Dunkeln.<br>' +
+                                    'Vielleicht sollte sie die dunkleren Ecken genauer untersuchen?'
+                                );
+                            }, 300);
+                        }},
+                        { text: '🔦 Nach etwas Nützlichem suchen', action: () => {
+                            document.getElementById('hidden-lamp').classList.add('pulse-hint');
+                        }}
+                    ]
+                );
+            }, 1000);
+        }
+
+        // Start the game!
+        init();
+    </script>
+</body>
+</html>
