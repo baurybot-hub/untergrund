@@ -1,0 +1,825 @@
+```html
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Die Schatzsuche des Kapitän Salzwasser</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --wood-dark: #2d1810;
+    --wood-mid: #4a2c1a;
+    --wood-light: #6b3d22;
+    --gold: #d4a84b;
+    --gold-bright: #f5d76e;
+    --ocean-dark: #0a1628;
+    --ocean-mid: #162a4a;
+    --text-cream: #f5e6d3;
+    --text-dim: #a89880;
+    --shadow: rgba(0,0,0,0.6);
+  }
+
+  body {
+    background: var(--ocean-dark);
+    font-family: 'Crimson Text', Georgia, serif;
+    overflow: hidden;
+    height: 100vh;
+    cursor: default;
+  }
+
+  #game-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* === HINTERGRUND === */
+  #scene {
+    position: absolute;
+    inset: 0;
+  }
+
+  #scene canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* === RAUSCHEN-OVERLAY === */
+  .grain {
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    z-index: 1000;
+  }
+
+  /* === HOTSPOTS === */
+  .hotspot {
+    position: absolute;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+  }
+
+  .hotspot::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .hotspot:hover::after {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px rgba(212, 168, 75, 0.3);
+  }
+
+  .hotspot:hover {
+    transform: scale(1.02);
+  }
+
+  /* === RATTE === */
+  #rat {
+    position: absolute;
+    z-index: 5;
+    transition: none;
+  }
+
+  #rat svg {
+    filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
+  }
+
+  /* === CHARAKTER === */
+  #pirate {
+    position: absolute;
+    z-index: 8;
+  }
+
+  /* === INVENTAR === */
+  #inventory {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    padding: 16px 24px;
+    background: linear-gradient(180deg, rgba(45, 24, 16, 0.95) 0%, rgba(26, 14, 8, 0.98) 100%);
+    border: 2px solid var(--wood-light);
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+    z-index: 100;
+    min-height: 80px;
+    min-width: 200px;
+    backdrop-filter: blur(10px);
+  }
+
+  .inv-slot {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(145deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+    border: 1px solid var(--wood-mid);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .inv-slot:hover {
+    border-color: var(--gold);
+    background: linear-gradient(145deg, rgba(212, 168, 75, 0.1), rgba(0,0,0,0.2));
+  }
+
+  .inv-slot.active {
+    border-color: var(--gold-bright);
+    box-shadow: 0 0 15px rgba(212, 168, 75, 0.4);
+  }
+
+  .inv-item {
+    font-size: 28px;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    animation: itemGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes itemGlow {
+    0%, 100% { filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
+    50% { filter: drop-shadow(0 2px 8px rgba(212, 168, 75, 0.5)); }
+  }
+
+  /* === DIALOG-BOX === */
+  #dialog-box {
+    position: fixed;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    max-width: 700px;
+    width: 90%;
+    padding: 24px 32px;
+    background: linear-gradient(180deg, rgba(10, 22, 40, 0.95) 0%, rgba(5, 11, 20, 0.98) 100%);
+    border: 1px solid rgba(212, 168, 75, 0.3);
+    border-radius: 4px;
+    color: var(--text-cream);
+    font-size: 18px;
+    line-height: 1.6;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 150;
+    box-shadow: 0 16px 64px rgba(0,0,0,0.8);
+    text-align: center;
+  }
+
+  #dialog-box.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  #dialog-box .speaker {
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  /* === UI TOP === */
+  #ui-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    padding: 20px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, transparent 100%);
+  }
+
+  #scene-title {
+    font-family: 'Cinzel', serif;
+    font-size: 14px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  #location-name {
+    font-family: 'Cinzel', serif;
+    font-size: 24px;
+    color: var(--text-cream);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+
+  /* === CURSOR === */
+  .cursor-look {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='none' stroke='%23d4a84b' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%23d4a84b'/%3E%3C/svg%3E") 16 16, pointer;
+  }
+
+  .cursor-take {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M10 22 L10 14 C10 10 14 8 16 8 C18 8 22 10 22 14 L22 22' fill='none' stroke='%23d4a84b' stroke-width='2'/%3E%3Cpath d='M8 22 L24 22' stroke='%23d4a84b' stroke-width='2'/%3E%3C/svg%3E") 16 16, grab;
+  }
+
+  /* === LAMPEN-LICHT === */
+  .lamp-glow {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* === ANIMATIONS === */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    5% { opacity: 0.85; }
+    10% { opacity: 1; }
+    15% { opacity: 0.9; }
+    50% { opacity: 1; }
+    55% { opacity: 0.88; }
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+
+  @keyframes dust {
+    0% { transform: translateY(0) translateX(0); opacity: 0; }
+    20% { opacity: 0.6; }
+    100% { transform: translateY(-100px) translateX(30px); opacity: 0; }
+  }
+
+  .dust-particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(255, 220, 180, 0.4);
+    border-radius: 50%;
+    animation: dust 4s ease-out infinite;
+    pointer-events: none;
+    z-index: 4;
+  }
+
+  /* === SCHATTEN-GRADIENT === */
+  .vignette {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.6) 100%);
+    pointer-events: none;
+    z-index: 90;
+  }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <div class="grain"></div>
+  <div class="vignette"></div>
+  
+  <div id="scene">
+    <canvas id="scene-canvas"></canvas>
+  </div>
+
+  <div id="ui-top">
+    <div>
+      <div id="scene-title">Kapitel I</div>
+      <div id="location-name">Die Kabine</div>
+    </div>
+  </div>
+
+  <!-- Hotspots werden dynamisch erstellt -->
+  
+  <div id="inventory">
+    <div class="inv-slot" id="inv-1"></div>
+    <div class="inv-slot" id="inv-2"></div>
+    <div class="inv-slot" id="inv-3"></div>
+    <div class="inv-slot" id="inv-4"></div>
+    <div class="inv-slot" id="inv-5"></div>
+  </div>
+
+  <div id="dialog-box">
+    <div class="speaker" id="speaker-name"></div>
+    <div id="dialog-text"></div>
+  </div>
+</div>
+
+<script>
+// === GAME STATE ===
+const state = {
+  inventory: [],
+  flags: {
+    coinFound: false,
+    coinTaken: false,
+    doorChecked: false,
+    eyeChecked: false,
+    ratSeen: false
+  },
+  currentDialog: null,
+  dialogQueue: []
+};
+
+// === CANVAS SCENE ===
+const canvas = document.getElementById('scene-canvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  drawScene();
+}
+window.addEventListener('resize', resizeCanvas);
+
+function drawScene() {
+  const w = canvas.width;
+  const h = canvas.height;
+  
+  // Hintergrund - Holzkabine
+  const gradient = ctx.createLinearGradient(0, 0, 0, h);
+  gradient.addColorStop(0, '#1a0f0a');
+  gradient.addColorStop(0.3, '#2d1810');
+  gradient.addColorStop(1, '#0f0906');
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, w, h);
+
+  // Holzpaneel-Wände
+  drawWoodenWalls(w, h);
+  
+  // Holzboden
+  drawFloor(w, h);
+  
+  // Holzbalken-Decke
+  drawCeiling(w, h);
+  
+  // Luke (Lichtquelle von oben)
+  drawHatch(w, h);
+  
+  // Öllampe (rechts)
+  drawOilLamp(w, h);
+  
+  // Bett (links)
+  drawBed(w, h);
+  
+  // Tisch (Mitte)
+  drawTable(w, h);
+  
+  // Schiffsauge (an Wand)
+  drawShipEye(w, h);
+  
+  // Tür (rechts)
+  drawDoor(w, h);
+  
+  // Fass
+  drawBarrel(w, h);
+  
+  // Münze (unter Bett) - nur wenn noch nicht aufgehoben
+  if (!state.flags.coinTaken) {
+    drawCoin(w, h);
+  }
+  
+  // Staubpartikel
+  drawDust(w, h);
+  
+  // Licht-Cone von Luke
+  drawLightCone(w, h);
+}
+
+function drawWoodenWalls(w, h) {
+  // Horizontale Holzplanken
+  const plankHeight = 40;
+  for (let y = 0; y < h * 0.65; y += plankHeight) {
+    const shade = 30 + Math.sin(y * 0.1) * 10;
+    ctx.fillStyle = `rgb(${shade + 20}, ${shade + 5}, ${shade - 5})`;
+    ctx.fillRect(0, y, w, plankHeight - 2);
+    
+    // Holzmaserung
+    ctx.strokeStyle = `rgba(0, 0, 0, 0.2)`;
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(0, y + Math.random() * plankHeight);
+      ctx.lineTo(w, y + Math.random() * plankHeight);
+      ctx.stroke();
+    }
+  }
+  
+  // Vertikale Balken
+  const beamPositions = [w * 0.15, w * 0.4, w * 0.65, w * 0.85];
+  beamPositions.forEach(x => {
+    const grad = ctx.createLinearGradient(x - 15, 0, x + 15, 0);
+    grad.addColorStop(0, '#1a0f0a');
+    grad.addColorStop(0.3, '#3d2518');
+    grad.addColorStop(0.7, '#3d2518');
+    grad.addColorStop(1, '#1a0f0a');
+    ctx.fillStyle = grad;
+    ctx.fillRect(x - 12, 0, 24, h * 0.65);
+  });
+}
+
+function drawFloor(w, h) {
+  const floorY = h * 0.65;
+  const grad = ctx.createLinearGradient(0, floorY, 0, h);
+  grad.addColorStop(0, '#2d1810');
+  grad.addColorStop(1, '#1a0f0a');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, floorY, w, h - floorY);
+  
+  // Diagonale Holzbretter
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+  ctx.lineWidth = 2;
+  for (let i = -w; i < w * 2; i += 80) {
+    ctx.beginPath();
+    ctx.moveTo(i, floorY);
+    ctx.lineTo(i + w * 0.3, h);
+    ctx.stroke();
+  }
+}
+
+function drawCeiling(w, h) {
+  // Dunkler oberer Bereich
+  const grad = ctx.createLinearGradient(0, 0, 0, h * 0.15);
+  grad.addColorStop(0, '#0a0604');
+  grad.addColorStop(1, 'transparent');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, w, h * 0.15);
+}
+
+function drawHatch(w, h) {
+  const cx = w * 0.5;
+  const cy = h * 0.08;
+  const size = 80;
+  
+  // Lichtschein
+  const glow = ctx.createRadialGradient(cx, cy, 10, cx, cy + 100, 200);
+  glow.addColorStop(0, 'rgba(255, 240, 200, 0.3)');
+  glow.addColorStop(0.5, 'rgba(255, 220, 150, 0.1)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(cx - 200, cy - 50, 400, 350);
+  
+  // Luke Rahmen
+  ctx.fillStyle = '#1a0f0a';
+  ctx.fillRect(cx - size/2, cy - size/3, size, size * 0.8);
+  
+  // Himmel durch Luke
+  const skyGrad = ctx.createLinearGradient(cx - size/2, cy - size/3, cx + size/2, cy + size/3);
+  skyGrad.addColorStop(0, '#1a3a5c');
+  skyGrad.addColorStop(1, '#2a5a8c');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(cx - size/2 + 8, cy - size/3 + 8, size - 16, size * 0.8 - 16);
+  
+  // Wolke
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.arc(cx - 10, cy + 10, 15, 0, Math.PI * 2);
+  ctx.arc(cx + 10, cy + 5, 20, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawOilLamp(w, h) {
+  const x = w * 0.82;
+  const y = h * 0.35;
+  
+  // Lichtschein der Lampe
+  const glow = ctx.createRadialGradient(x, y, 5, x, y, 120);
+  glow.addColorStop(0, 'rgba(255, 180, 80, 0.4)');
+  glow.addColorStop(0.5, 'rgba(255, 150, 50, 0.1)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(x, y, 120, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Halterung
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(x - 3, y - 40, 6, 25);
+  ctx.fillRect(x - 15, y - 45, 30, 8);
+  
+  // Lampengehäuse
+  ctx.fillStyle = '#8B7355';
+  ctx.beginPath();
+  ctx.moveTo(x - 12, y - 15);
+  ctx.lineTo(x - 8, y + 15);
+  ctx.lineTo(x + 8, y + 15);
+  ctx.lineTo(x + 12, y - 15);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Glas
+  ctx.fillStyle = 'rgba(255, 200, 100, 0.6)';
+  ctx.beginPath();
+  ctx.moveTo(x - 6, y - 10);
+  ctx.lineTo(x - 4, y + 10);
+  ctx.lineTo(x + 4, y + 10);
+  ctx.lineTo(x + 6, y - 10);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Flamme
+  ctx.fillStyle = '#ffdd44';
+  ctx.beginPath();
+  ctx.ellipse(x, y - 5, 3, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Innerer Flamme
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.ellipse(x, y - 3, 1.5, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawBed(w, h) {
+  const x = w * 0.18;
+  const y = h * 0.7;
+  const bedW = 180;
+  const bedH = 80;
+  
+  // Bett-Rahmen
+  ctx.fillStyle = '#3d2518';
+  ctx.fillRect(x - bedW/2, y, bedW, bedH);
+  
+  // Bettpfosten
+  ctx.fillStyle = '#2d1810';
+  ctx.fillRect(x - bedW/2 - 8, y - 30, 12, bedH + 30);
+  ctx.fillRect(x + bedW/2 - 4, y - 30, 12, bedH + 30);
+  
+  // Matratze
+  ctx.fillStyle = '#8B7355';
+  roundRect(ctx, x - bedW/2 + 10, y + 10, bedW - 20, bedH - 30, 8);
+  ctx.fill();
+  
+  // Decke (zerwühlt)
+  ctx.fillStyle = '#6B5344';
+  ctx.beginPath();
+  ctx.moveTo(x - bedW/2 + 5, y + 15);
+  ctx.quadraticCurveTo(x, y + 5, x + bedW/2 - 5, y + 20);
+  ctx.lineTo(x + bedW/2 - 5, y + 45);
+  ctx.quadraticCurveTo(x, y + 55, x - bedW/2 + 5, y + 50);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Kopfkissen
+  ctx.fillStyle = '#a89880';
+  roundRect(ctx, x - bedW/2 + 15, y + 8, 50, 35, 6);
+  ctx.fill();
+}
+
+function drawTable(w, h) {
+  const x = w * 0.55;
+  const y = h * 0.72;
+  
+  // Tischplatte
+  ctx.fillStyle = '#4a2c1a';
+  ctx.fillRect(x - 60, y, 120, 12);
+  
+  // Tischbeine
+  ctx.fillStyle = '#3d2518';
+  ctx.fillRect(x - 55, y + 12, 8, 50);
+  ctx.fillRect(x + 47, y + 12, 8, 50);
+  
+  // Darauf: eine Karte
+  ctx.fillStyle = '#c4a87c';
+  ctx.save();
+  ctx.translate(x - 15, y - 8);
+  ctx.rotate(-0.1);
+  ctx.fillRect(0, 0, 40, 30);
+  // Karten-Linien
+  ctx.strokeStyle = '#8a7050';
+  ctx.lineWidth = 0.5;
+  for (let i = 5; i < 30; i += 5) {
+    ctx.beginPath();
+    ctx.moveTo(3, i);
+    ctx.lineTo(37, i);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function drawShipEye(w, h) {
+  const x = w * 0.35;
+  const y = h * 0.38;
+  
+  // Halterung
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath();
+  ctx.arc(x, y, 28, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Goldener Ring
+  ctx.strokeStyle = '#d4a84b';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.arc(x, y, 25, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  // Auge Hintergrund
+  ctx.fillStyle = '#f5f5f0';
+  ctx.beginPath();
+  ctx.arc(x, y, 20, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Iris
+  ctx.fillStyle = '#1a4a7a';
+  ctx.beginPath();
+  ctx.arc(x + 3, y, 12, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Pupille
+  ctx.fillStyle = '#0a0a0a';
+  ctx.beginPath();
+  ctx.arc(x + 4, y, 6, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Glanz
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.beginPath();
+  ctx.arc(x + 8, y - 4, 3, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawDoor(w, h) {
+  const x = w * 0.85;
+  const y = h * 0.4;
+  const doorW = 70;
+  const doorH = 160;
+  
+  // Tür-Rahmen
+  ctx.fillStyle = '#1a0f0a';
+  ctx.fillRect(x - doorW/2 - 5, y - 5, doorW + 10, doorH + 10);
+  
+  // Tür
+  const doorGrad = ctx.createLinearGradient(x - doorW/2, y, x + doorW/2, y);
+  doorGrad.addColorStop(0, '#3d2518');
+  doorGrad.addColorStop(0.5, '#4a2c1a');
+  doorGrad.addColorStop(1, '#3d2518');
+  ctx.fillStyle = doorGrad;
+  ctx.fillRect(x - doorW/2, y, doorW, doorH);
+  
+  // Tür-Paneele
+  ctx.strokeStyle = '#2d1810';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x - doorW/2 + 8, y + 10, doorW - 16, doorH/2 - 20);
+  ctx.strokeRect(x - doorW/2 + 8, y + doorH/2 + 5, doorW - 16, doorH/2 - 15);
+  
+  // Türklinke
+  ctx.fillStyle = '#d4a84b';
+  ctx.beginPath();
+  ctx.arc(x + doorW/4, y + doorH/2, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#b8903f';
+  ctx.beginPath();
+  ctx.arc(x + doorW/4, y + doorH/2, 3, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Schloss
+  ctx.fillStyle = '#2a2a2a';
+  ctx.fillRect(x + doorW/4 - 8, y + doorH/2 + 15, 16, 20);
+  ctx.fillStyle = '#1a1a1a';
+  ctx.beginPath();
+  ctx.arc(x + doorW/4, y + doorH/2 + 25, 4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function drawBarrel(w, h) {
+  const x = w * 0.72;
+  const y = h * 0.75;
+  
+  // Fass Körper
+  ctx.fillStyle = '#4a2c1a';
+  ctx.beginPath();
+  ctx.moveTo(x - 25, y);
+  ctx.quadraticCurveTo(x - 30, y + 30, x - 20, y + 60);
+  ctx.lineTo(x + 20, y + 60);
+  ctx.quadraticCurveTo(x + 30, y + 30, x + 25, y);
+  ctx.closePath();
+  ctx.fill();
+  
+  // Metall-Bänder
+  ctx.strokeStyle = '#2a2a2a';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(x - 28, y + 10);
+  ctx.quadraticCurveTo(x, y + 8, x + 28, y + 10);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(x - 26, y + 50);
+  ctx.quadraticCurveTo(x, y + 52, x + 26, y + 50);
+  ctx.stroke();
+}
+
+function drawCoin(w, h) {
+  const x = w * 0.22;
+  const y = h * 0.82;
+  
+  // Schatten
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x + 2, y + 3, 12, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Münze
+  const coinGrad = ctx.createRadialGradient(x - 3, y - 2, 2, x, y, 12);
+  coinGrad.addColorStop(0, '#f5d76e');
+  coinGrad.addColorStop(0.7, '#d4a84b');
+  coinGrad.addColorStop(1, '#b8903f');
+  ctx.fillStyle = coinGrad;
+  ctx.beginPath();
+  ctx.ellipse(x, y, 12, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // Münze-Kante
+  ctx.strokeStyle = '#c49a3f';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(x, y, 12, 8, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  // Schrift auf Münze (mini)
+  ctx.fillStyle = '#b8903f';
+  ctx.font = '6px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('$', x, y + 2);
+}
+
+function drawDust(w, h) {
+  ctx.fillStyle = 'rgba(255, 220, 180, 0.3)';
+  for (let i = 0; i < 20; i++) {
+    const x = (Math.sin(Date.now() * 0.001 + i * 50) * 0.5 + 0.5) * w;
+    const y = (Math.cos(Date.now() * 0.0007 + i * 30) * 0.5 + 0.5) * h * 0.5;
+    const size = 1 + Math.random() * 2;
+    ctx.beginPath();
+    ctx.arc(x, y, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function drawLightCone(w, h) {
+  const cx = w * 0.5;
+  const cy = h * 0.08;
+  
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  
+  const grad = ctx.createLinearGradient(cx, cy, cx, h * 0.6);
+  grad.addColorStop(0, 'rgba(255, 240, 200, 0.15)');
+  grad.addColorStop(1, 'transparent');
+  
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(cx - 30, cy);
+  ctx.lineTo(cx - 150, h * 0.6);
+  ctx.lineTo(cx + 150, h * 0.6);
+  ctx.lineTo(cx + 30, cy);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.restore();
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+// === RATTE ===
+const rat = {
+  x: 0,
+  y: 0,
+  targetX: 0,
+  speed: 1.5,
+  direction: 1,
+  moving: false
+};
+
+function initRat() {
+  const w = canvas.width;
+  const h = canvas.height;
+  rat.x = w * 0.4;
+  rat.y = h * 0.85;
+  rat.targetX = w * 0.6;
+  rat.moving = true;
+}
+
+function updateRat() {
+  if (!rat.moving) return;
+  
+ 
