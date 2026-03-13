@@ -437,13 +437,16 @@
         return;
       }
 
+      // Case-insensitive Code-Check
+      const codeUpper = code.toUpperCase();
+
       // SALZWASSER öffnet das Piraten-Spiel
-      if (code === 'SALZWASSER') {
+      if (codeUpper === 'SALZWASSER') {
         window.location.href = 'spiel.html';
         return;
       }
 
-      if (code !== 'UG-GATE') {
+      if (codeUpper !== 'UG-GATE') {
         setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
         phase1Content.style.display = 'none';
         phase2Content.style.display = 'none';
