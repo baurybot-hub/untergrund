@@ -437,6 +437,12 @@
         return;
       }
 
+      // SALZWASSER öffnet das Piraten-Spiel
+      if (code === 'SALZWASSER') {
+        window.location.href = 'spiel.html';
+        return;
+      }
+
       if (code !== 'UG-GATE') {
         setGateStatus('Code ungültig. Versuch es nochmal.', 'error');
         phase1Content.style.display = 'none';
